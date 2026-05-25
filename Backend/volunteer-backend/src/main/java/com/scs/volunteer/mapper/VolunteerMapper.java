@@ -49,12 +49,13 @@ public class VolunteerMapper {
                   and (? is null or p.major_class like concat('%',?,'%'))
                   and (? is null or p.skill_tags like concat('%',?,'%'))
                   and (? is null or u.name like concat('%',?,'%') or u.nickname like concat('%',?,'%') or p.major_class like concat('%',?,'%') or p.skill_tags like concat('%',?,'%'))
-                order by """ + orderBy;
+                order by 
+                """ + orderBy;
         return jdbcTemplate.query(sql, new BeanPropertyRowMapper<>(VolunteerVO.class),
                 emptyToNull(college), emptyToNull(college),
                 emptyToNull(majorClass), emptyToNull(majorClass),
                 emptyToNull(skillTag), emptyToNull(skillTag),
-                emptyToNull(keyword), emptyToNull(keyword), emptyToNull(keyword), emptyToNull(keyword), emptyToNull(keyword), emptyToNull(keyword));
+                emptyToNull(keyword), emptyToNull(keyword), emptyToNull(keyword), emptyToNull(keyword), emptyToNull(keyword));
     }
 
     public Optional<VolunteerVO> findByUserId(Long userId) {

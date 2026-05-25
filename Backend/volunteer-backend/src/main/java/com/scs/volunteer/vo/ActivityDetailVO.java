@@ -9,6 +9,8 @@ public class ActivityDetailVO {
     private String coverImageUrl;
     private String category;
     private String location;
+    private Double latitude;
+    private Double longitude;
     private LocalDateTime startTime;
     private LocalDateTime endTime;
     private LocalDateTime signupDeadline;
@@ -23,6 +25,7 @@ public class ActivityDetailVO {
     private Double serviceHours;
     private String reviewMethod;
     private String status;
+    private Long createdBy;
     private String signupStatus;
 
     public Long getId() { return id; }
@@ -37,6 +40,10 @@ public class ActivityDetailVO {
     public void setCategory(String category) { this.category = category; }
     public String getLocation() { return location; }
     public void setLocation(String location) { this.location = location; }
+    public Double getLatitude() { return latitude; }
+    public void setLatitude(Double latitude) { this.latitude = latitude; }
+    public Double getLongitude() { return longitude; }
+    public void setLongitude(Double longitude) { this.longitude = longitude; }
     public LocalDateTime getStartTime() { return startTime; }
     public void setStartTime(LocalDateTime startTime) { this.startTime = startTime; }
     public LocalDateTime getEndTime() { return endTime; }
@@ -65,6 +72,8 @@ public class ActivityDetailVO {
     public void setReviewMethod(String reviewMethod) { this.reviewMethod = reviewMethod; }
     public String getStatus() { return status; }
     public void setStatus(String status) { this.status = status; }
+    public Long getCreatedBy() { return createdBy; }
+    public void setCreatedBy(Long createdBy) { this.createdBy = createdBy; }
     public String getSignupStatus() { return signupStatus; }
     public void setSignupStatus(String signupStatus) { this.signupStatus = signupStatus; }
 }

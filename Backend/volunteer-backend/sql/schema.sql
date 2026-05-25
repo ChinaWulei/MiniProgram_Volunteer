@@ -4,10 +4,13 @@ create database if not exists volunteer_service default character set utf8mb4 co
 use volunteer_service;
 
 drop table if exists service_record;
+drop table if exists activity_checkin;
 drop table if exists registration;
 drop table if exists chat_message;
 drop table if exists chat_conversation;
 drop table if exists notification;
+drop table if exists activity_news_image;
+drop table if exists activity_news;
 drop table if exists activity;
 drop table if exists volunteer_profile;
 drop table if exists user;
@@ -45,6 +48,8 @@ create table activity (
     cover_image_url varchar(500),
     category varchar(50) not null,
     location varchar(120) not null,
+    latitude decimal(10,6),
+    longitude decimal(10,6),
     start_time datetime not null,
     end_time datetime not null,
     signup_deadline datetime,
@@ -59,11 +64,37 @@ create table activity (
     review_method varchar(50) not null default '人工审核',
     status varchar(20) not null default '报名中' comment '报名中/已满员/已结束',
     created_by bigint,
+    finished_at datetime,
     published_at datetime,
     created_at datetime not null default current_timestamp,
     updated_at datetime not null default current_timestamp on update current_timestamp,
     constraint fk_activity_creator foreign key(created_by) references user(id)
 ) comment='志愿活动表';
+
+create table activity_news (
+    id bigint primary key auto_increment,
+    activity_id bigint not null,
+    title varchar(160) not null,
+    content text,
+    result_summary varchar(500),
+    status varchar(20) not null default 'DRAFT',
+    read_count int not null default 0,
+    created_by bigint not null,
+    published_at datetime,
+    created_at datetime not null default current_timestamp,
+    updated_at datetime not null default current_timestamp on update current_timestamp,
+    constraint fk_news_activity foreign key(activity_id) references activity(id) on delete cascade,
+    constraint fk_news_creator foreign key(created_by) references user(id)
+) comment='活动新闻帖子';
+
+create table activity_news_image (
+    id bigint primary key auto_increment,
+    news_id bigint not null,
+    image_url varchar(500) not null,
+    sort_order int not null default 0,
+    created_at datetime not null default current_timestamp,
+    constraint fk_news_image_news foreign key(news_id) references activity_news(id) on delete cascade
+) comment='活动新闻图片';
 
 create table registration (
     id bigint primary key auto_increment,
@@ -88,6 +119,27 @@ create table service_record (
     constraint fk_record_user foreign key(user_id) references user(id) on delete cascade,
     constraint fk_record_activity foreign key(activity_id) references activity(id) on delete cascade
 ) comment='志愿服务记录表';
+
+create table activity_checkin (
+    id bigint primary key auto_increment,
+    activity_id bigint not null,
+    user_id bigint not null,
+    status varchar(30) not null comment 'CHECKED_IN/LATE_CHECKED_IN/MANUAL_CHECKED_IN/ABSENT',
+    checkin_time datetime,
+    method varchar(30),
+    latitude decimal(10,6),
+    longitude decimal(10,6),
+    distance_meters decimal(10,2),
+    manual_admin_id bigint,
+    manual_time datetime,
+    manual_reason varchar(255),
+    created_at datetime not null default current_timestamp,
+    updated_at datetime not null default current_timestamp on update current_timestamp,
+    unique key uk_activity_checkin_user(activity_id, user_id),
+    constraint fk_checkin_activity foreign key(activity_id) references activity(id) on delete cascade,
+    constraint fk_checkin_user foreign key(user_id) references user(id) on delete cascade,
+    constraint fk_checkin_admin foreign key(manual_admin_id) references user(id)
+) comment='活动签到与补签记录';
 
 create table chat_conversation (
     id bigint primary key auto_increment,
@@ -126,6 +178,8 @@ create table notification (
     type varchar(40) not null,
     title varchar(120) not null,
     content varchar(500),
+    target_type varchar(40),
+    target_id bigint,
     read_at datetime,
     created_at datetime not null default current_timestamp,
     constraint fk_notice_user foreign key(user_id) references user(id) on delete cascade

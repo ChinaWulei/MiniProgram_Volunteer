@@ -43,29 +43,31 @@ public class ActivityMapper {
         KeyHolder keyHolder = new GeneratedKeyHolder();
         jdbcTemplate.update(con -> {
             PreparedStatement ps = con.prepareStatement("""
-                    insert into activity(name,cover_image_url,category,location,start_time,end_time,signup_deadline,
+                    insert into activity(name,cover_image_url,category,location,latitude,longitude,start_time,end_time,signup_deadline,
                     recruit_number,registered_number,skill_requirements,description,signup_requirement,contact_name,
                     contact_phone,service_hours,review_method,status,created_by,published_at)
-                    values(?,?,?,?,?,?,?,?,0,?,?,?,?,?,?,?,?,?,?)
+                    values(?,?,?,?,?,?,?,?,?,?,0,?,?,?,?,?,?,?,?,?,?)
                     """, Statement.RETURN_GENERATED_KEYS);
             ps.setString(1, a.getName());
             ps.setString(2, a.getCoverImageUrl());
             ps.setString(3, a.getCategory());
             ps.setString(4, a.getLocation());
-            ps.setObject(5, a.getStartTime());
-            ps.setObject(6, a.getEndTime());
-            ps.setObject(7, a.getSignupDeadline());
-            ps.setInt(8, a.getRecruitNumber());
-            ps.setString(9, a.getSkillRequirements());
-            ps.setString(10, a.getDescription());
-            ps.setString(11, a.getSignupRequirement());
-            ps.setString(12, a.getContactName());
-            ps.setString(13, a.getContactPhone());
-            ps.setObject(14, a.getServiceHours());
-            ps.setString(15, a.getReviewMethod());
-            ps.setString(16, a.getStatus());
-            ps.setLong(17, a.getCreatedBy());
-            ps.setObject(18, a.getPublishedAt());
+            ps.setObject(5, a.getLatitude());
+            ps.setObject(6, a.getLongitude());
+            ps.setObject(7, a.getStartTime());
+            ps.setObject(8, a.getEndTime());
+            ps.setObject(9, a.getSignupDeadline());
+            ps.setInt(10, a.getRecruitNumber());
+            ps.setString(11, a.getSkillRequirements());
+            ps.setString(12, a.getDescription());
+            ps.setString(13, a.getSignupRequirement());
+            ps.setString(14, a.getContactName());
+            ps.setString(15, a.getContactPhone());
+            ps.setObject(16, a.getServiceHours());
+            ps.setString(17, a.getReviewMethod());
+            ps.setString(18, a.getStatus());
+            ps.setLong(19, a.getCreatedBy());
+            ps.setObject(20, a.getPublishedAt());
             return ps;
         }, keyHolder);
         return keyHolder.getKey().longValue();
@@ -73,10 +75,10 @@ public class ActivityMapper {
 
     public void update(Long id, Activity a) {
         jdbcTemplate.update("""
-                update activity set name=?,cover_image_url=?,category=?,location=?,start_time=?,end_time=?,signup_deadline=?,recruit_number=?,
+                update activity set name=?,cover_image_url=?,category=?,location=?,latitude=?,longitude=?,start_time=?,end_time=?,signup_deadline=?,recruit_number=?,
                 skill_requirements=?,description=?,signup_requirement=?,contact_name=?,contact_phone=?,
                 service_hours=?,review_method=?,status=?,published_at=? where id=?
-                """, a.getName(), a.getCoverImageUrl(), a.getCategory(), a.getLocation(), a.getStartTime(), a.getEndTime(),
+                """, a.getName(), a.getCoverImageUrl(), a.getCategory(), a.getLocation(), a.getLatitude(), a.getLongitude(), a.getStartTime(), a.getEndTime(),
                 a.getSignupDeadline(), a.getRecruitNumber(), a.getSkillRequirements(), a.getDescription(), a.getSignupRequirement(),
                 a.getContactName(), a.getContactPhone(), a.getServiceHours(), a.getReviewMethod(), a.getStatus(), a.getPublishedAt(), id);
     }
@@ -86,12 +88,16 @@ public class ActivityMapper {
     }
 
     public void updateStatus(Long id, String status) {
-        jdbcTemplate.update("update activity set status=? where id=?", status, id);
+        jdbcTemplate.update("update activity set status=?, finished_at=if(?='已结束', now(), finished_at) where id=?", status, status, id);
     }
 
     public int participantCount(Long id) {
         Integer count = jdbcTemplate.queryForObject("select count(*) from registration where activity_id=? and status in ('已通过','已完成')", Integer.class, id);
         return count == null ? 0 : count;
+    }
+
+    public List<Long> participantUserIds(Long id) {
+        return jdbcTemplate.queryForList("select user_id from registration where activity_id=? and status in ('已通过','已完成')", Long.class, id);
     }
 
     public void increaseRegistered(Long id) {

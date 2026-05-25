@@ -4,7 +4,9 @@ import com.scs.volunteer.common.ApiResponse;
 import com.scs.volunteer.common.BizException;
 import com.scs.volunteer.common.CurrentUser;
 import com.scs.volunteer.dto.ActivityDTO;
+import com.scs.volunteer.dto.ManualCheckinRequest;
 import com.scs.volunteer.service.ActivityService;
+import com.scs.volunteer.service.CheckinService;
 import com.scs.volunteer.service.S3StorageService;
 import com.scs.volunteer.service.StatisticsService;
 import jakarta.servlet.http.HttpServletRequest;
@@ -26,11 +28,13 @@ public class AdminController extends BaseController {
     private final StatisticsService statisticsService;
     private final ActivityService activityService;
     private final S3StorageService s3StorageService;
+    private final CheckinService checkinService;
 
-    public AdminController(StatisticsService statisticsService, ActivityService activityService, S3StorageService s3StorageService) {
+    public AdminController(StatisticsService statisticsService, ActivityService activityService, S3StorageService s3StorageService, CheckinService checkinService) {
         this.statisticsService = statisticsService;
         this.activityService = activityService;
         this.s3StorageService = s3StorageService;
+        this.checkinService = checkinService;
     }
 
     @GetMapping("/statistics")
@@ -65,6 +69,27 @@ public class AdminController extends BaseController {
     @GetMapping("/activities/{id}/summary")
     public ApiResponse<Map<String, String>> activitySummary(HttpServletRequest request, @PathVariable Long id) {
         return ApiResponse.ok(Map.of("summary", activityService.summary(id, currentUser(request))));
+    }
+
+    @GetMapping("/activities/{id}/checkin/statistics")
+    public ApiResponse<Map<String, Object>> checkinStatistics(HttpServletRequest request, @PathVariable Long id) {
+        return ApiResponse.ok(checkinService.activityStatistics(id, currentUser(request)));
+    }
+
+    @GetMapping("/activities/{id}/checkin/list")
+    public ApiResponse<java.util.List<Map<String, Object>>> checkinList(HttpServletRequest request, @PathVariable Long id, String status, String keyword) {
+        return ApiResponse.ok(checkinService.activityList(id, status, keyword, currentUser(request)));
+    }
+
+    @PostMapping("/activities/{id}/checkin/manual")
+    public ApiResponse<Void> manualCheckin(HttpServletRequest request, @PathVariable Long id, @RequestBody ManualCheckinRequest body) {
+        checkinService.manual(id, body, currentUser(request));
+        return ApiResponse.ok(null);
+    }
+
+    @GetMapping("/volunteers/{userId}/checkin/statistics")
+    public ApiResponse<Map<String, Object>> volunteerCheckinStatistics(HttpServletRequest request, @PathVariable Long userId) {
+        return ApiResponse.ok(checkinService.volunteerStatistics(userId, currentUser(request)));
     }
 
     private void requireAdmin(CurrentUser user) {

@@ -53,6 +53,12 @@ public class S3StorageService {
         return upload(file, key, ACTIVITY_COVER_MAX_SIZE, "活动封面");
     }
 
+    public String uploadActivityNewsImage(MultipartFile file) {
+        String extension = extension(file.getOriginalFilename());
+        String key = "activity/news/" + System.currentTimeMillis() + "-" + UUID.randomUUID() + "." + extension;
+        return upload(file, key, ACTIVITY_COVER_MAX_SIZE, "活动新闻图片");
+    }
+
     private String upload(MultipartFile file, String key, long maxSize, String label) {
         validate(file, maxSize, label);
         checkConfig();

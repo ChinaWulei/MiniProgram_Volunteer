@@ -48,6 +48,8 @@ public class ActivityServiceImpl implements ActivityService {
         vo.setCoverImageUrl(activity.getCoverImageUrl());
         vo.setCategory(activity.getCategory());
         vo.setLocation(activity.getLocation());
+        vo.setLatitude(activity.getLatitude());
+        vo.setLongitude(activity.getLongitude());
         vo.setStartTime(activity.getStartTime());
         vo.setEndTime(activity.getEndTime());
         vo.setSignupDeadline(activity.getSignupDeadline());
@@ -62,6 +64,7 @@ public class ActivityServiceImpl implements ActivityService {
         vo.setServiceHours(activity.getServiceHours() == null ? calcHours(activity) : activity.getServiceHours());
         vo.setReviewMethod(activity.getReviewMethod());
         vo.setStatus(activity.getStatus());
+        vo.setCreatedBy(activity.getCreatedBy());
         vo.setSignupStatus(currentUser == null ? null : registrationMapper.findStatus(id, currentUser.getId()));
         return vo;
     }
@@ -127,6 +130,8 @@ public class ActivityServiceImpl implements ActivityService {
         a.setCoverImageUrl(dto.getCoverImageUrl());
         a.setCategory(dto.getCategory());
         a.setLocation(dto.getLocation());
+        a.setLatitude(dto.getLatitude());
+        a.setLongitude(dto.getLongitude());
         a.setStartTime(startTime);
         a.setEndTime(endTime);
         a.setSignupDeadline(dto.getSignupDeadline() == null || dto.getSignupDeadline().isBlank() ? null : parseDateTime(dto.getSignupDeadline(), "报名截止时间"));

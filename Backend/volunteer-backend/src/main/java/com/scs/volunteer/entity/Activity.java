@@ -8,6 +8,8 @@ public class Activity {
     private String coverImageUrl;
     private String category;
     private String location;
+    private Double latitude;
+    private Double longitude;
     private LocalDateTime startTime;
     private LocalDateTime endTime;
     private LocalDateTime signupDeadline;
@@ -22,6 +24,7 @@ public class Activity {
     private String reviewMethod;
     private String status;
     private Long createdBy;
+    private LocalDateTime finishedAt;
     private LocalDateTime publishedAt;
 
     public Long getId() { return id; }
@@ -34,6 +37,10 @@ public class Activity {
     public void setCategory(String category) { this.category = category; }
     public String getLocation() { return location; }
     public void setLocation(String location) { this.location = location; }
+    public Double getLatitude() { return latitude; }
+    public void setLatitude(Double latitude) { this.latitude = latitude; }
+    public Double getLongitude() { return longitude; }
+    public void setLongitude(Double longitude) { this.longitude = longitude; }
     public LocalDateTime getStartTime() { return startTime; }
     public void setStartTime(LocalDateTime startTime) { this.startTime = startTime; }
     public LocalDateTime getEndTime() { return endTime; }
@@ -62,6 +69,8 @@ public class Activity {
     public void setStatus(String status) { this.status = status; }
     public Long getCreatedBy() { return createdBy; }
     public void setCreatedBy(Long createdBy) { this.createdBy = createdBy; }
+    public LocalDateTime getFinishedAt() { return finishedAt; }
+    public void setFinishedAt(LocalDateTime finishedAt) { this.finishedAt = finishedAt; }
     public LocalDateTime getPublishedAt() { return publishedAt; }
     public void setPublishedAt(LocalDateTime publishedAt) { this.publishedAt = publishedAt; }
 }

@@ -59,6 +59,31 @@ public class RegistrationMapper {
                 """);
     }
 
+    public List<Map<String, Object>> adminList(String keyword, String status, Long activityId) {
+        String k = keyword == null || keyword.isBlank() ? null : keyword;
+        return jdbcTemplate.queryForList("""
+                select r.id,r.activity_id,r.user_id,r.status,r.review_remark,r.created_at,
+                       u.name as userName,u.nickname,u.identity_no as identityNo,u.avatar_url as avatarUrl,
+                       p.college,p.major_class as majorClass,
+                       a.name as activityName,a.category,a.location,a.start_time as startTime,a.end_time as endTime
+                from registration r
+                join user u on r.user_id=u.id
+                left join volunteer_profile p on p.user_id=u.id
+                join activity a on r.activity_id=a.id
+                where (? is null or r.status=?)
+                  and (? is null or r.activity_id=?)
+                  and (? is null or u.name like concat('%',?,'%') or u.nickname like concat('%',?,'%')
+                       or u.identity_no like concat('%',?,'%') or a.name like concat('%',?,'%')
+                       or a.category like concat('%',?,'%') or a.location like concat('%',?,'%'))
+                order by r.created_at desc
+                """, n(status), n(status), activityId, activityId,
+                k, k, k, k, k, k, k, k, k);
+    }
+
+    public List<Map<String, Object>> byActivity(Long activityId) {
+        return adminList(null, null, activityId);
+    }
+
     public Map<String, Object> findMap(Long id) {
         return jdbcTemplate.queryForMap("select * from registration where id=?", id);
     }
@@ -69,5 +94,9 @@ public class RegistrationMapper {
 
     public void delete(Long id) {
         jdbcTemplate.update("delete from registration where id=?", id);
+    }
+
+    private String n(String value) {
+        return value == null || value.isBlank() ? null : value;
     }
 }

@@ -59,6 +59,14 @@ public class RegistrationServiceImpl implements RegistrationService {
     }
 
     @Override
+    public List<Map<String, Object>> adminList(String keyword, String status, Long activityId, CurrentUser currentUser) {
+        if (currentUser == null || !"ADMIN".equals(currentUser.getRole())) {
+            throw new BizException("仅管理员可查看报名列表");
+        }
+        return registrationMapper.adminList(keyword, status, activityId);
+    }
+
+    @Override
     public void review(Long id, ReviewDTO dto, CurrentUser currentUser) {
         if (currentUser == null || !"ADMIN".equals(currentUser.getRole())) {
             throw new BizException("仅管理员可审核");

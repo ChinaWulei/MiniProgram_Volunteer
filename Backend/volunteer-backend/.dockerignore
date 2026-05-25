@@ -1,0 +1,8 @@
+.idea/
+my-plugin1/
+.git/
+.gitignore
+*.iml
+
+target/*
+!target/volunteer-backend-*.jar

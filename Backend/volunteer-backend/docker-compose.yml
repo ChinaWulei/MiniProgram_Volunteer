@@ -1,0 +1,22 @@
+services:
+  app:
+    build: .
+    image: volunteer-backend:1.0.0
+    container_name: volunteer-backend
+    environment:
+      SPRING_DATASOURCE_URL: ${SPRING_DATASOURCE_URL}
+      SPRING_DATASOURCE_USERNAME: ${SPRING_DATASOURCE_USERNAME}
+      SPRING_DATASOURCE_PASSWORD: ${SPRING_DATASOURCE_PASSWORD}
+      AWS_S3_BUCKET: miniprogram-images
+      AWS_S3_REGION: eu-north-1
+      AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID}
+      AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY}
+
+      AI_PROVIDER: ${AI_PROVIDER}
+      AI_API_KEY: ${AI_API_KEY}
+      AI_MODEL: ${AI_MODEL}
+      AI_BASE_URL: ${AI_BASE_URL}
+
+      TZ: Asia/Shanghai
+    ports:
+      - "8080:8080"

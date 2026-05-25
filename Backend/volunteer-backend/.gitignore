@@ -1,0 +1,9 @@
+<<<<<<< HEAD
+target/
+.idea/
+*.iml
+logs/
+.env
+=======
+
+>>>>>>> 5d3183f6b1310d14a9177b5d1145b34da1a408db

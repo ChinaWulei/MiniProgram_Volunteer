@@ -14,4 +14,6 @@ public interface ActivityService {
     Long create(ActivityDTO dto, CurrentUser currentUser);
     void update(Long id, ActivityDTO dto, CurrentUser currentUser);
     void delete(Long id, CurrentUser currentUser);
+    void finish(Long id, CurrentUser currentUser);
+    String summary(Long id, CurrentUser currentUser);
 }

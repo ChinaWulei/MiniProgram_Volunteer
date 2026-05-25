@@ -1,5 +1,8 @@
 package com.scs.volunteer.vo;
 
+import java.util.List;
+import java.util.Map;
+
 public class VolunteerVO {
     private Long userId;
     private String name;
@@ -19,6 +22,7 @@ public class VolunteerVO {
     private String volunteerLevel;
     private Integer volunteerPoints;
     private String badges;
+    private List<Map<String, Object>> historyActivities;
 
     public Long getUserId() { return userId; }
     public void setUserId(Long userId) { this.userId = userId; }
@@ -56,4 +60,6 @@ public class VolunteerVO {
     public void setVolunteerPoints(Integer volunteerPoints) { this.volunteerPoints = volunteerPoints; }
     public String getBadges() { return badges; }
     public void setBadges(String badges) { this.badges = badges; }
+    public List<Map<String, Object>> getHistoryActivities() { return historyActivities; }
+    public void setHistoryActivities(List<Map<String, Object>> historyActivities) { this.historyActivities = historyActivities; }
 }

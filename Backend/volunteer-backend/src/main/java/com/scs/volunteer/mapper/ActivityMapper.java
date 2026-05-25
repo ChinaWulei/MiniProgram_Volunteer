@@ -85,6 +85,15 @@ public class ActivityMapper {
         jdbcTemplate.update("delete from activity where id=?", id);
     }
 
+    public void updateStatus(Long id, String status) {
+        jdbcTemplate.update("update activity set status=? where id=?", status, id);
+    }
+
+    public int participantCount(Long id) {
+        Integer count = jdbcTemplate.queryForObject("select count(*) from registration where activity_id=? and status in ('已通过','已完成')", Integer.class, id);
+        return count == null ? 0 : count;
+    }
+
     public void increaseRegistered(Long id) {
         jdbcTemplate.update("update activity set registered_number=registered_number+1, status=if(registered_number+1>=recruit_number,'已满员',status) where id=?", id);
     }

@@ -23,6 +23,8 @@ public class VolunteerServiceImpl implements VolunteerService {
 
     @Override
     public VolunteerVO detail(Long userId) {
-        return volunteerMapper.findByUserId(userId).orElseThrow(() -> new BizException("志愿者不存在"));
+        VolunteerVO vo = volunteerMapper.findByUserId(userId).orElseThrow(() -> new BizException("志愿者不存在"));
+        vo.setHistoryActivities(volunteerMapper.historyActivities(userId));
+        return vo;
     }
 }

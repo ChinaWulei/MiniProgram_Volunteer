@@ -87,6 +87,28 @@ public class ActivityServiceImpl implements ActivityService {
         activityMapper.delete(id);
     }
 
+    @Override
+    public void finish(Long id, CurrentUser currentUser) {
+        requireAdmin(currentUser);
+        detail(id);
+        activityMapper.updateStatus(id, "已结束");
+    }
+
+    @Override
+    public String summary(Long id, CurrentUser currentUser) {
+        requireAdmin(currentUser);
+        Activity activity = detail(id);
+        int participants = activityMapper.participantCount(id);
+        double hours = activity.getServiceHours() == null ? calcHours(activity) : activity.getServiceHours();
+        double totalHours = Math.round(participants * hours * 10.0) / 10.0;
+        String time = FORM_FORMAT.format(activity.getStartTime());
+        return "【数计学院志愿服务】" + activity.getName() + "圆满结束\n\n"
+                + time + "，" + activity.getName() + "在" + activity.getLocation() + "顺利开展。活动围绕"
+                + activity.getCategory() + "服务需求，组织学院志愿者参与现场保障、秩序维护、咨询引导与协同服务。\n\n"
+                + "本次活动共有" + participants + "名志愿者参与，累计贡献服务时长约" + totalHours + "小时。志愿者们分工明确、响应及时，以认真负责的态度保障了活动有序推进，展现了数计学院青年志愿者良好的服务意识与专业素养。\n\n"
+                + "通过本次志愿服务，活动现场运行效率得到提升，参与师生获得了更顺畅的服务体验，也进一步凝聚了学院内部志愿服务力量。后续，学院将继续完善志愿服务组织机制，鼓励更多同学在实践中成长、在服务中贡献力量。";
+    }
+
     private Activity toEntity(ActivityDTO dto) {
         validate(dto);
         Activity a = new Activity();
@@ -96,6 +118,9 @@ public class ActivityServiceImpl implements ActivityService {
         LocalDateTime endTime = dto.getEndTime() == null || dto.getEndTime().isBlank()
                 ? startTime.plusMinutes(Math.round((serviceHours == null ? 1D : serviceHours) * 60))
                 : parseDateTime(dto.getEndTime(), "结束时间");
+        if (serviceHours == null || serviceHours <= 0) {
+            serviceHours = Math.max(1.0, Duration.between(startTime, endTime).toMinutes() / 60.0);
+        }
         String status = first(dto.getStatus(), "已发布");
 
         a.setName(name);
@@ -126,7 +151,7 @@ public class ActivityServiceImpl implements ActivityService {
         if (blank(dto.getLocation())) throw new BizException("活动地点不能为空");
         Integer count = dto.getRecruitNumber() == null ? dto.getRecruitCount() : dto.getRecruitNumber();
         if (count == null || count <= 0) throw new BizException("招募人数必须大于 0");
-        if (dto.getServiceHours() == null || dto.getServiceHours() <= 0) throw new BizException("服务时长必须大于 0");
+        if ((dto.getServiceHours() == null || dto.getServiceHours() <= 0) && blank(dto.getEndTime())) throw new BizException("服务时长必须大于 0");
     }
 
     private LocalDateTime parseDateTime(String value, String label) {

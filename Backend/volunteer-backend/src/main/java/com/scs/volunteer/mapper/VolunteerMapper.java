@@ -7,6 +7,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 @Repository
@@ -76,6 +77,16 @@ public class VolunteerMapper {
                 from user u join volunteer_profile p on u.id=p.user_id where u.id=?
                 """, new BeanPropertyRowMapper<>(VolunteerVO.class), userId);
         return list.stream().findFirst();
+    }
+
+    public List<Map<String, Object>> historyActivities(Long userId) {
+        return jdbcTemplate.queryForList("""
+                select a.id,a.name,a.cover_image_url,a.category,a.location,a.start_time,a.end_time,
+                       a.service_hours,r.status,r.created_at
+                from registration r join activity a on r.activity_id=a.id
+                where r.user_id=?
+                order by r.created_at desc
+                """, userId);
     }
 
     public void addService(Long userId, double hours) {

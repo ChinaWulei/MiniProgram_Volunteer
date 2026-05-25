@@ -11,4 +11,5 @@ public interface RegistrationService {
     void register(RegistrationDTO dto, CurrentUser currentUser);
     List<Map<String, Object>> my(CurrentUser currentUser);
     void review(Long id, ReviewDTO dto, CurrentUser currentUser);
+    void cancel(Long id, ReviewDTO dto, CurrentUser currentUser);
 }

@@ -6,6 +6,7 @@ import com.scs.volunteer.dto.RegistrationDTO;
 import com.scs.volunteer.dto.ReviewDTO;
 import com.scs.volunteer.entity.Activity;
 import com.scs.volunteer.mapper.ActivityMapper;
+import com.scs.volunteer.mapper.NotificationMapper;
 import com.scs.volunteer.mapper.RegistrationMapper;
 import com.scs.volunteer.mapper.ServiceRecordMapper;
 import com.scs.volunteer.mapper.VolunteerMapper;
@@ -22,12 +23,14 @@ public class RegistrationServiceImpl implements RegistrationService {
     private final ActivityMapper activityMapper;
     private final VolunteerMapper volunteerMapper;
     private final ServiceRecordMapper serviceRecordMapper;
+    private final NotificationMapper notificationMapper;
 
-    public RegistrationServiceImpl(RegistrationMapper registrationMapper, ActivityMapper activityMapper, VolunteerMapper volunteerMapper, ServiceRecordMapper serviceRecordMapper) {
+    public RegistrationServiceImpl(RegistrationMapper registrationMapper, ActivityMapper activityMapper, VolunteerMapper volunteerMapper, ServiceRecordMapper serviceRecordMapper, NotificationMapper notificationMapper) {
         this.registrationMapper = registrationMapper;
         this.activityMapper = activityMapper;
         this.volunteerMapper = volunteerMapper;
         this.serviceRecordMapper = serviceRecordMapper;
+        this.notificationMapper = notificationMapper;
     }
 
     @Override
@@ -45,7 +48,8 @@ public class RegistrationServiceImpl implements RegistrationService {
         if (registrationMapper.exists(dto.getActivityId(), currentUser.getId())) {
             throw new BizException("不能重复报名");
         }
-        registrationMapper.insert(dto.getActivityId(), currentUser.getId());
+        String signupStatus = "自动通过".equals(activity.getReviewMethod()) ? "已通过" : "待审核";
+        registrationMapper.insert(dto.getActivityId(), currentUser.getId(), signupStatus);
         activityMapper.increaseRegistered(dto.getActivityId());
     }
 
@@ -71,5 +75,23 @@ public class RegistrationServiceImpl implements RegistrationService {
             volunteerMapper.addService(userId, hours);
             serviceRecordMapper.insert(userId, activityId, hours, "管理员确认完成");
         }
+    }
+
+    @Override
+    public void cancel(Long id, ReviewDTO dto, CurrentUser currentUser) {
+        if (currentUser == null || !"ADMIN".equals(currentUser.getRole())) {
+            throw new BizException("仅管理员可取消报名");
+        }
+        String reason = dto == null ? "" : (dto.getReason() == null ? dto.getReviewRemark() : dto.getReason());
+        if (reason == null || reason.isBlank()) throw new BizException("请填写取消原因");
+        Map<String, Object> reg = registrationMapper.findMap(id);
+        Long userId = ((Number) reg.get("user_id")).longValue();
+        Long activityId = ((Number) reg.get("activity_id")).longValue();
+        Activity activity = activityMapper.findById(activityId).orElseThrow(() -> new BizException("活动不存在"));
+        registrationMapper.delete(id);
+        activityMapper.decreaseRegistered(activityId);
+        notificationMapper.insert(userId, "REGISTRATION_CANCELLED", "报名已取消",
+                "你报名的《" + activity.getName() + "》已由管理员取消。原因：" + reason,
+                "ACTIVITY", activityId);
     }
 }

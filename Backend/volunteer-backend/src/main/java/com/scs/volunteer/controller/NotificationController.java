@@ -21,4 +21,9 @@ public class NotificationController extends BaseController {
     public ApiResponse<List<Map<String, Object>>> list(HttpServletRequest request) {
         return ApiResponse.ok(notificationMapper.list(currentUser(request).getId()));
     }
+
+    @GetMapping("/api/notifications/unread-count")
+    public ApiResponse<Map<String, Integer>> unreadCount(HttpServletRequest request) {
+        return ApiResponse.ok(Map.of("unreadCount", notificationMapper.unreadCount(currentUser(request).getId())));
+    }
 }

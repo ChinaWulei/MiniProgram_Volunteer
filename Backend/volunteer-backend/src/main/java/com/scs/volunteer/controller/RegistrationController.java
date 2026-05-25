@@ -35,4 +35,10 @@ public class RegistrationController extends BaseController {
         registrationService.review(id, dto, currentUser(request));
         return ApiResponse.ok(null);
     }
+
+    @PostMapping("/{id}/cancel")
+    public ApiResponse<Void> cancel(@PathVariable Long id, @RequestBody ReviewDTO dto, HttpServletRequest request) {
+        registrationService.cancel(id, dto, currentUser(request));
+        return ApiResponse.ok(null);
+    }
 }

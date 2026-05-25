@@ -66,7 +66,7 @@ public class CheckinMapper {
 
     public List<Map<String, Object>> list(Long activityId, String status, String keyword) {
         return jdbcTemplate.queryForList("""
-                select u.id as userId,u.name,u.nickname,u.avatar_url as avatarUrl,u.identity_no as identityNo,
+                select r.id as registrationId,u.id as userId,u.name,u.nickname,u.avatar_url as avatarUrl,u.identity_no as identityNo,
                        p.college,p.major_class as majorClass,
                        coalesce(c.status, if(now() > a.end_time, 'ABSENT', 'NOT_CHECKED_IN')) as status,
                        c.checkin_time as checkinTime,c.method,c.manual_reason as manualReason

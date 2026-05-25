@@ -26,8 +26,8 @@ public class RegistrationMapper {
         return list.stream().findFirst().orElse(null);
     }
 
-    public void insert(Long activityId, Long userId) {
-        jdbcTemplate.update("insert into registration(activity_id,user_id,status) values(?,?,'待审核')", activityId, userId);
+    public void insert(Long activityId, Long userId, String status) {
+        jdbcTemplate.update("insert into registration(activity_id,user_id,status) values(?,?,?)", activityId, userId, status);
     }
 
     public List<Map<String, Object>> my(Long userId) {
@@ -65,5 +65,9 @@ public class RegistrationMapper {
 
     public void review(Long id, String status, String remark) {
         jdbcTemplate.update("update registration set status=?,review_remark=? where id=?", status, remark, id);
+    }
+
+    public void delete(Long id) {
+        jdbcTemplate.update("delete from registration where id=?", id);
     }
 }

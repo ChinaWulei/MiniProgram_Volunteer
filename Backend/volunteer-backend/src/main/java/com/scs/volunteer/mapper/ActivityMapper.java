@@ -104,6 +104,10 @@ public class ActivityMapper {
         jdbcTemplate.update("update activity set registered_number=registered_number+1, status=if(registered_number+1>=recruit_number,'已满员',status) where id=?", id);
     }
 
+    public void decreaseRegistered(Long id) {
+        jdbcTemplate.update("update activity set registered_number=greatest(registered_number-1,0), status=if(status='已满员','已发布',status) where id=?", id);
+    }
+
     public void finishExpired() {
         jdbcTemplate.update("update activity set status='已结束' where end_time<? and status in ('报名中','已发布')", LocalDateTime.now());
     }

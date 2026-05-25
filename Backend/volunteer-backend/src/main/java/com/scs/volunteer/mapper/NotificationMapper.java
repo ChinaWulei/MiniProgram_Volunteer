@@ -27,4 +27,9 @@ public class NotificationMapper {
                 from notification where user_id=? order by created_at desc limit 50
                 """, userId);
     }
+
+    public int unreadCount(Long userId) {
+        Integer count = jdbcTemplate.queryForObject("select count(*) from notification where user_id=? and read_at is null", Integer.class, userId);
+        return count == null ? 0 : count;
+    }
 }

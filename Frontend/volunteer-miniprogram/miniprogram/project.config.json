@@ -11,13 +11,9 @@
       "disablePlugins": [],
       "outputPath": ""
     },
-    "useCompilerPlugins": [
-      "typescript",
-      "sass"
-    ],
+    "useCompilerPlugins": false,
     "minifyWXML": true
   },
-  "miniprogramRoot": "volunteer-miniprogram/miniprogram/",
   "compileType": "miniprogram",
   "simulatorPluginLibVersion": {},
   "packOptions": {

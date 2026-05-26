@@ -72,7 +72,7 @@ public class ChatMapper {
 
     public List<ChatMessageVO> messages(Long conversationId) {
         return jdbcTemplate.query("""
-                select m.id,m.conversation_id,m.sender_id,m.receiver_id,m.type,m.content,m.activity_id,
+                select m.id,m.conversation_id,m.sender_id,m.receiver_id,m.type,m.content,m.activity_id,m.image_url,
                        m.invite_status,m.created_at,
                        a.name as activity_name,
                        concat(date_format(a.start_time,'%m-%d %H:%i'),' 至 ',date_format(a.end_time,'%m-%d %H:%i')) as activity_time,
@@ -89,8 +89,8 @@ public class ChatMapper {
         KeyHolder keyHolder = new GeneratedKeyHolder();
         jdbcTemplate.update(con -> {
             PreparedStatement ps = con.prepareStatement("""
-                    insert into chat_message(conversation_id,sender_id,receiver_id,type,content,activity_id,invite_status)
-                    values(?,?,?,?,?,?,?)
+                    insert into chat_message(conversation_id,sender_id,receiver_id,type,content,activity_id,image_url,invite_status)
+                    values(?,?,?,?,?,?,?,?)
                     """, Statement.RETURN_GENERATED_KEYS);
             ps.setLong(1, conversationId);
             ps.setLong(2, senderId);
@@ -98,10 +98,11 @@ public class ChatMapper {
             ps.setString(4, type);
             ps.setString(5, content);
             if (activityId == null) ps.setObject(6, null); else ps.setLong(6, activityId);
-            ps.setString(7, inviteStatus);
+            ps.setString(7, "IMAGE".equals(type) ? content : null);
+            ps.setString(8, inviteStatus);
             return ps;
         }, keyHolder);
-        String summary = "ACTIVITY_INVITE".equals(type) ? "[活动邀请]" : content;
+        String summary = "ACTIVITY_INVITE".equals(type) ? "[activity invite]" : ("ACTIVITY_CARD".equals(type) ? "[activity card]" : ("IMAGE".equals(type) ? "[image]" : content));
         jdbcTemplate.update("update chat_conversation set last_message=?,last_message_at=?,updated_at=? where id=?",
                 summary, LocalDateTime.now(), LocalDateTime.now(), conversationId);
         return findMessage(keyHolder.getKey().longValue()).orElseThrow();
@@ -109,7 +110,7 @@ public class ChatMapper {
 
     public Optional<ChatMessageVO> findMessage(Long messageId) {
         List<ChatMessageVO> list = jdbcTemplate.query("""
-                select m.id,m.conversation_id,m.sender_id,m.receiver_id,m.type,m.content,m.activity_id,
+                select m.id,m.conversation_id,m.sender_id,m.receiver_id,m.type,m.content,m.activity_id,m.image_url,
                        m.invite_status,m.created_at,
                        a.name as activity_name,
                        concat(date_format(a.start_time,'%m-%d %H:%i'),' 至 ',date_format(a.end_time,'%m-%d %H:%i')) as activity_time,

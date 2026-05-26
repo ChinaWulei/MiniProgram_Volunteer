@@ -11,6 +11,10 @@ Page({
     showCancel: false,
     cancelItem: null,
     cancelReason: '',
+    profile: null,
+    evaluationScore: 5,
+    evaluationContent: '',
+    evaluationTargetUserId: null,
     isAdmin: false,
     buttonText: '立即报名',
     buttonDisabled: false
@@ -19,6 +23,7 @@ Page({
     const user = app.globalData.user || wx.getStorageSync('user')
     this.setData({ id: options.activityId || options.id, isAdmin: user && user.role === 'ADMIN' })
     this.load()
+    if (user && user.role !== 'ADMIN') this.loadProfile()
   },
   load() {
     wx.showLoading({ title: '加载中' })
@@ -26,7 +31,10 @@ Page({
       .then(activity => {
         activity.startTimeText = this.formatTime(activity.startTime)
         activity.endTimeText = this.formatTime(activity.endTime)
+        activity.signupStartTimeText = this.formatTime(activity.signupStartTime)
         activity.signupDeadlineText = this.formatTime(activity.signupDeadline)
+        activity.checkinStartTimeText = this.formatTime(activity.checkinStartTime)
+        activity.checkinEndTimeText = this.formatTime(activity.checkinEndTime)
         this.setData({ activity, skills: this.splitTags(activity.skillRequirements) })
         this.refreshButton(activity)
         if (!this.data.isAdmin) this.loadCheckinStatus()
@@ -47,6 +55,11 @@ Page({
       })
       .catch(() => {})
   },
+  loadProfile() {
+    request({ url: '/api/user/profile', silent: true })
+      .then(profile => this.setData({ profile }))
+      .catch(() => {})
+  },
   formatTime(value) {
     return value ? String(value).replace('T', ' ').slice(0, 16) : ''
   },
@@ -61,8 +74,15 @@ Page({
   refreshButton(activity) {
     let buttonText = '立即报名'
     let buttonDisabled = false
+    const now = new Date()
     if (activity.status === '已结束') {
       buttonText = '活动已结束'
+      buttonDisabled = true
+    } else if (activity.signupStartTime && new Date(String(activity.signupStartTime).replace(/-/g, '/')) > now) {
+      buttonText = '报名未开始'
+      buttonDisabled = true
+    } else if (activity.signupDeadline && new Date(String(activity.signupDeadline).replace(/-/g, '/')) < now) {
+      buttonText = '报名已截止'
       buttonDisabled = true
     } else if (activity.status === '已满员' || activity.remainingNumber <= 0) {
       buttonText = '名额已满'
@@ -78,14 +98,30 @@ Page({
   },
   join() {
     if (this.data.buttonDisabled) return
-    wx.showLoading({ title: '报名中' })
-    request({ url: `/api/activity/${this.data.id}/signup`, method: 'POST' })
-      .then(() => {
-        wx.showToast({ title: '报名成功' })
-        this.load()
+    const credit = this.data.profile && this.data.profile.creditScore
+    if (credit !== undefined && credit < 70) {
+      wx.showModal({ title: '信用分受限', content: '当前信用分低于70分，暂不能报名，请联系管理员处理。', showCancel: false })
+      return
+    }
+    const submit = () => {
+      wx.showLoading({ title: '报名中' })
+      request({ url: `/api/activity/${this.data.id}/signup`, method: 'POST' })
+        .then(() => {
+          wx.showToast({ title: '报名成功' })
+          this.load()
+        })
+        .catch(() => {})
+        .finally(() => wx.hideLoading())
+    }
+    if (credit !== undefined && credit < 80) {
+      wx.showModal({
+        title: '信用分提醒',
+        content: `当前信用分 ${credit}，请确认能够按时参加并完成签到。`,
+        success: res => { if (res.confirm) submit() }
       })
-      .catch(() => {})
-      .finally(() => wx.hideLoading())
+      return
+    }
+    submit()
   },
   contactAdmin() {
     const adminId = this.data.activity && this.data.activity.createdBy
@@ -143,5 +179,32 @@ Page({
       this.closeCancel()
       this.load()
     }).catch(() => {})
+  },
+  setEvalScore(e) {
+    this.setData({ evaluationScore: Number(e.detail.value) + 1 })
+  },
+  inputEvaluation(e) {
+    this.setData({ evaluationContent: e.detail.value })
+  },
+  pickEvaluationVolunteer(e) {
+    this.setData({ evaluationTargetUserId: e.currentTarget.dataset.userid })
+  },
+  submitEvaluation() {
+    const data = {
+      targetType: this.data.isAdmin ? 'VOLUNTEER' : 'ACTIVITY',
+      targetUserId: this.data.isAdmin ? this.data.evaluationTargetUserId : null,
+      score: this.data.evaluationScore,
+      content: this.data.evaluationContent
+    }
+    if (this.data.isAdmin && !data.targetUserId) {
+      wx.showToast({ title: '请选择志愿者', icon: 'none' })
+      return
+    }
+    request({ url: `/api/activities/${this.data.id}/evaluations`, method: 'POST', data })
+      .then(() => {
+        wx.showToast({ title: '评价成功' })
+        this.setData({ evaluationContent: '', evaluationScore: 5, evaluationTargetUserId: null })
+      })
+      .catch(() => {})
   }
 })

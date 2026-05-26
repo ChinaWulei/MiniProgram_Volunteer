@@ -13,7 +13,10 @@ public class ActivityDetailVO {
     private Double longitude;
     private LocalDateTime startTime;
     private LocalDateTime endTime;
+    private LocalDateTime signupStartTime;
     private LocalDateTime signupDeadline;
+    private LocalDateTime checkinStartTime;
+    private LocalDateTime checkinEndTime;
     private Integer recruitNumber;
     private Integer registeredNumber;
     private Integer remainingNumber;
@@ -48,8 +51,14 @@ public class ActivityDetailVO {
     public void setStartTime(LocalDateTime startTime) { this.startTime = startTime; }
     public LocalDateTime getEndTime() { return endTime; }
     public void setEndTime(LocalDateTime endTime) { this.endTime = endTime; }
+    public LocalDateTime getSignupStartTime() { return signupStartTime; }
+    public void setSignupStartTime(LocalDateTime signupStartTime) { this.signupStartTime = signupStartTime; }
     public LocalDateTime getSignupDeadline() { return signupDeadline; }
     public void setSignupDeadline(LocalDateTime signupDeadline) { this.signupDeadline = signupDeadline; }
+    public LocalDateTime getCheckinStartTime() { return checkinStartTime; }
+    public void setCheckinStartTime(LocalDateTime checkinStartTime) { this.checkinStartTime = checkinStartTime; }
+    public LocalDateTime getCheckinEndTime() { return checkinEndTime; }
+    public void setCheckinEndTime(LocalDateTime checkinEndTime) { this.checkinEndTime = checkinEndTime; }
     public Integer getRecruitNumber() { return recruitNumber; }
     public void setRecruitNumber(Integer recruitNumber) { this.recruitNumber = recruitNumber; }
     public Integer getRegisteredNumber() { return registeredNumber; }

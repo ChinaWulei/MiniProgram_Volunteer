@@ -32,6 +32,19 @@
   </view>
 
   <view class="section">
+    <view class="section-title">信用档案</view>
+    <view class="info-row"><text>信用分</text><text>{{profile.creditScore || 100}} 分 · {{profile.creditLevel || '优秀'}}</text></view>
+    <view class="credit-record" wx:for="{{profile.creditRecords}}" wx:key="id">
+      <view>
+        <view class="credit-reason">{{item.reason}}</view>
+        <view class="credit-time">{{item.createdText}}</view>
+      </view>
+      <view class="credit-change {{item.changeValue < 0 ? 'minus' : 'plus'}}">{{item.changeText}}</view>
+    </view>
+    <view wx:if="{{!profile.creditRecords || profile.creditRecords.length === 0}}" class="empty-badge">暂无扣分记录</view>
+  </view>
+
+  <view class="section">
     <view class="section-title">勋章墙</view>
     <view class="badge-grid" wx:if="{{profile.badges && profile.badges.length}}">
       <view class="badge" wx:for="{{profile.badges}}" wx:key="*this">

@@ -147,6 +147,11 @@
 .reg-cancel { width: 150rpx; height: 54rpx; line-height: 54rpx; margin: 12rpx 0 0 auto; padding: 0; border-radius: 14rpx; color: #dc2626; background: #fee2e2; font-size: 22rpx; }
 .reg-cancel::after { border: 0; }
 .empty-reg { margin-top: 14rpx; color: #667085; font-size: 24rpx; text-align: center; }
+.eval-users { display: flex; flex-wrap: wrap; gap: 12rpx; margin-bottom: 16rpx; }
+.eval-user { width: auto; height: 58rpx; line-height: 58rpx; margin: 0; padding: 0 18rpx; border-radius: 14rpx; color: #0f766e; background: #eefaf7; font-size: 23rpx; }
+.eval-user.active { color: #fff; background: #0f766e; }
+.eval-user::after { border: 0; }
+.eval-textarea { width: 100%; min-height: 140rpx; padding: 16rpx; box-sizing: border-box; border-radius: 14rpx; background: #f8fbfb; font-size: 26rpx; }
 .mask { position: fixed; left: 0; right: 0; top: 0; bottom: 0; z-index: 40; background: rgba(0,0,0,.35); }
 .cancel-panel { position: fixed; left: 24rpx; right: 24rpx; bottom: 32rpx; z-index: 41; padding: 24rpx; border-radius: 20rpx; background: #fff; }
 .panel-title { color: #172033; font-size: 30rpx; font-weight: 800; }

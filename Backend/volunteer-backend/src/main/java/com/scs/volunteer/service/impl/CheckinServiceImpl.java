@@ -36,12 +36,14 @@ public class CheckinServiceImpl implements CheckinService {
         if (!checkinMapper.approved(activity.getId(), currentUser.getId())) throw new BizException("仅审核通过的志愿者可签到");
         if (checkinMapper.find(activity.getId(), currentUser.getId()).isPresent()) throw new BizException("不能重复签到");
         LocalDateTime now = LocalDateTime.now();
-        if (now.isBefore(activity.getStartTime())) throw new BizException("活动未开始，暂不能签到");
-        if (now.isAfter(activity.getEndTime())) throw new BizException("活动已结束，不能自主签到");
+        LocalDateTime checkinStart = activity.getCheckinStartTime() == null ? activity.getStartTime() : activity.getCheckinStartTime();
+        LocalDateTime checkinEnd = activity.getCheckinEndTime() == null ? activity.getEndTime() : activity.getCheckinEndTime();
+        if (now.isBefore(checkinStart)) throw new BizException("签到尚未开始");
+        if (now.isAfter(checkinEnd)) throw new BizException("签到已结束，请联系管理员补签");
         if (activity.getLatitude() == null || activity.getLongitude() == null) throw new BizException("活动未配置签到坐标");
         double distance = distanceMeters(activity.getLatitude(), activity.getLongitude(), request.getLatitude(), request.getLongitude());
         if (distance > MAX_DISTANCE_METERS) throw new BizException("未到达活动地点，无法签到");
-        String status = now.isAfter(activity.getStartTime().plusMinutes(30)) ? "LATE_CHECKED_IN" : "CHECKED_IN";
+        String status = now.isAfter(checkinStart.plusMinutes(30)) ? "LATE_CHECKED_IN" : "CHECKED_IN";
         checkinMapper.insertLocation(activity.getId(), currentUser.getId(), status, now, request.getLatitude(), request.getLongitude(), distance);
         return status(activity.getId(), currentUser);
     }

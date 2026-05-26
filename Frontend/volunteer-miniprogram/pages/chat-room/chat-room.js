@@ -1,5 +1,5 @@
 const app = getApp()
-const { request } = require('../../utils/request')
+const { request, uploadFile } = require('../../utils/request')
 
 function formatTime(value) {
   if (!value) return ''
@@ -14,6 +14,8 @@ Page({
     currentUserId: null,
     messages: [],
     inputValue: '',
+    activityList: [],
+    showActivityPicker: false,
     scrollIntoView: '',
     socketOpen: false
   },
@@ -22,6 +24,7 @@ Page({
     this.setData({ conversationId: Number(options.conversationId), peerId: Number(options.peerId), peerName: decodeURIComponent(options.peerName || '学院同学'), currentUserId: user.id })
     wx.setNavigationBarTitle({ title: this.data.peerName })
     this.loadMessages()
+    this.loadActivities()
     this.connectSocket()
   },
   onUnload() {
@@ -63,6 +66,54 @@ Page({
         this.loadMessages()
       })
       .catch(() => {})
+  },
+  chooseImages() {
+    const sendFiles = files => {
+      files.forEach(file => {
+        const path = file.tempFilePath || file.path
+        uploadFile({ url: '/api/chat/images', filePath: path, name: 'file' })
+          .then(data => request({
+            url: '/api/chat/messages',
+            method: 'POST',
+            data: { conversationId: this.data.conversationId, type: 'IMAGE', imageUrl: data.imageUrl || data.url }
+          }))
+          .then(() => this.loadMessages())
+          .catch(() => {})
+      })
+    }
+    if (wx.chooseMedia) {
+      wx.chooseMedia({
+        count: 9,
+        mediaType: ['image'],
+        sourceType: ['album', 'camera'],
+        success: res => sendFiles(res.tempFiles || [])
+      })
+    } else {
+      wx.chooseImage({
+        count: 9,
+        sourceType: ['album', 'camera'],
+        success: res => sendFiles((res.tempFilePaths || []).map(path => ({ tempFilePath: path })))
+      })
+    }
+  },
+  loadActivities() {
+    request({ url: '/api/activities', data: { status: '报名中' }, silent: true })
+      .then(list => this.setData({ activityList: (list || []).slice(0, 12) }))
+      .catch(() => {})
+  },
+  toggleActivityPicker() {
+    this.setData({ showActivityPicker: !this.data.showActivityPicker })
+  },
+  sendActivityCard(e) {
+    const activityId = e.currentTarget.dataset.id
+    request({
+      url: '/api/chat/messages',
+      method: 'POST',
+      data: { conversationId: this.data.conversationId, activityId, content: '推荐你看看这个志愿活动' }
+    }).then(() => {
+      this.setData({ showActivityPicker: false })
+      this.loadMessages()
+    }).catch(() => {})
   },
   replyInvite(e) {
     const id = e.currentTarget.dataset.id

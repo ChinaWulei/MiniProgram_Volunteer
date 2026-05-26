@@ -20,6 +20,10 @@ Page({
     request({ url: '/api/user/profile' })
       .then(profile => {
         const selectedSkills = this.splitTags(profile.skillTags)
+        profile.creditRecords = (profile.creditRecords || []).map(item => Object.assign({}, item, {
+          changeText: item.changeValue > 0 ? `+${item.changeValue}` : String(item.changeValue),
+          createdText: this.formatTime(item.createdAt || item.created_at)
+        }))
         this.setData({
           profile,
           form: Object.assign({}, profile),
@@ -36,6 +40,9 @@ Page({
   },
   splitTags(tags) {
     return (tags || '').split(',').map(item => item.trim()).filter(Boolean)
+  },
+  formatTime(value) {
+    return value ? String(value).replace('T', ' ').slice(0, 16) : ''
   },
   buildSkillOptions(selectedSkills) {
     return skillNames.map(name => ({ name, selected: selectedSkills.indexOf(name) >= 0 }))

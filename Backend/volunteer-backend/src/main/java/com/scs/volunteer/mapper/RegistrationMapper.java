@@ -19,6 +19,18 @@ public class RegistrationMapper {
         return count != null && count > 0;
     }
 
+    public boolean hasTimeConflict(Long userId, Long activityId, java.time.LocalDateTime startTime, java.time.LocalDateTime endTime) {
+        Integer count = jdbcTemplate.queryForObject("""
+                select count(*)
+                from registration r join activity a on r.activity_id=a.id
+                where r.user_id=?
+                  and r.activity_id<>?
+                  and a.start_time < ?
+                  and a.end_time > ?
+                """, Integer.class, userId, activityId, endTime, startTime);
+        return count != null && count > 0;
+    }
+
     public String findStatus(Long activityId, Long userId) {
         List<String> list = jdbcTemplate.queryForList(
                 "select status from registration where activity_id=? and user_id=?",

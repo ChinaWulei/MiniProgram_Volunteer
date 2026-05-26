@@ -4,7 +4,7 @@
 .hero-title { margin-top: 8rpx; font-size: 38rpx; font-weight: 800; }
 .hero-btn { width: 150rpx; height: 62rpx; line-height: 62rpx; margin: 0; padding: 0; border-radius: 31rpx; color: #0f766e; background: #fff; font-size: 24rpx; }
 .stats-grid, .action-grid { display: grid; grid-template-columns: repeat(2,1fr); gap: 14rpx; margin-top: 18rpx; }
-.stat-card, .panel, .review-card { background: #fff; border-radius: 18rpx; box-shadow: 0 8rpx 24rpx rgba(16,24,40,.06); }
+.stat-card, .panel, .chart-panel, .review-card { background: #fff; border-radius: 18rpx; box-shadow: 0 8rpx 24rpx rgba(16,24,40,.06); }
 .stat-card { padding: 22rpx; }
 .stat-card.urgent { border-left: 6rpx solid #ef4444; }
 .stat-num { color: #0f766e; font-size: 40rpx; font-weight: 800; }
@@ -16,8 +16,34 @@ button::after { border: 0; }
 .rank-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14rpx; margin-top: 18rpx; }
 .panel { margin-top: 18rpx; padding: 22rpx; }
 .rank-grid .panel { margin-top: 0; }
+.chart-panel { margin-top: 18rpx; padding: 22rpx; }
+.chart-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14rpx; margin-top: 18rpx; }
+.chart-grid .chart-panel { margin-top: 0; }
 .panel-title { color: #172033; font-size: 30rpx; font-weight: 800; margin-bottom: 14rpx; }
+.trend-chart { height: 210rpx; display: flex; align-items: flex-end; gap: 12rpx; padding-top: 10rpx; }
+.trend-bar { flex: 1; min-width: 0; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; height: 100%; }
+.trend-value { height: 28rpx; color: #0f766e; font-size: 20rpx; font-weight: 800; }
+.trend-stick { width: 22rpx; min-height: 8rpx; border-radius: 12rpx 12rpx 4rpx 4rpx; background: linear-gradient(180deg,#14b8a6,#0f766e); }
+.trend-label { margin-top: 8rpx; color: #667085; font-size: 19rpx; transform: scale(.92); }
+.bar-row { display: grid; grid-template-columns: 110rpx 1fr 44rpx; gap: 10rpx; align-items: center; padding: 10rpx 0; }
+.bar-name { color: #344054; font-size: 22rpx; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
+.bar-track { height: 16rpx; overflow: hidden; border-radius: 999rpx; background: #eef2f7; }
+.bar-fill { height: 100%; border-radius: 999rpx; }
+.skill-fill { background: linear-gradient(90deg,#0f766e,#22c55e); }
+.rate-fill { background: linear-gradient(90deg,#2563eb,#06b6d4); }
+.hour-fill { background: linear-gradient(90deg,#f59e0b,#ef4444); }
+.bar-num { color: #0f766e; font-size: 22rpx; font-weight: 800; text-align: right; }
+.rate-row { padding: 10rpx 0; }
+.rate-head { display: flex; justify-content: space-between; gap: 12rpx; margin-bottom: 8rpx; }
+.rate-name { flex: 1; min-width: 0; color: #344054; font-size: 22rpx; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
+.rate-num { color: #2563eb; font-size: 22rpx; font-weight: 800; }
 .rank-row, .row { display: flex; align-items: center; justify-content: space-between; gap: 12rpx; padding: 10rpx 0; }
+.chart-rank { align-items: flex-start; }
+.rank-main { flex: 1; min-width: 0; }
+.rank-main .bar-track { margin-top: 8rpx; }
 .rank-name { flex: 1; min-width: 0; color: #172033; font-size: 24rpx; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
 .rank-value, .tag { flex: 0 0 auto; padding: 6rpx 12rpx; border-radius: 999rpx; color: #0f766e; background: #e6fffb; font-size: 22rpx; }
 .review-card { padding: 18rpx; margin-top: 14rpx; }
+.rule-row { display: grid; grid-template-columns: 1fr 120rpx 110rpx; gap: 12rpx; align-items: center; padding: 12rpx 0; border-bottom: 1rpx solid #edf2f7; }
+.rule-name, .rule-score { height: 62rpx; padding: 0 14rpx; border-radius: 12rpx; background: #f8fafc; font-size: 24rpx; box-sizing: border-box; }
+.mini-btn { height: 62rpx; line-height: 62rpx; font-size: 23rpx; }

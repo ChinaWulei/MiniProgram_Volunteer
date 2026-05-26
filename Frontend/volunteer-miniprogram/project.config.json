@@ -20,7 +20,7 @@
     "localPlugins": false,
     "disableUseStrict": false,
     "useCompilerPlugins": false,
-    "condition": false,
+    "condition": true,
     "swc": false,
     "disableSWC": true,
     "babelSetting": {
@@ -29,11 +29,14 @@
       "outputPath": ""
     }
   },
-  "simulatorPluginLibVersion": {},
+  "simulatorPluginLibVersion": {
+    "wxext14566970e7e9f62": "2.27.3"
+  },
   "packOptions": {
     "ignore": [],
     "include": []
   },
   "editorSetting": {},
-  "libVersion": "3.16.1"
+  "libVersion": "3.16.1",
+  "projectArchitecture": "multiPlatform"
 }

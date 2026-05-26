@@ -5,8 +5,9 @@
       <view class="bubble-wrap">
         <view class="time">{{item.timeText}}</view>
         <view wx:if="{{item.type === 'TEXT'}}" class="bubble {{item.isMine ? 'mine' : 'peer'}}">{{item.content}}</view>
+        <image wx:elif="{{item.type === 'IMAGE'}}" class="chat-image" src="{{item.imageUrl || item.content}}" mode="widthFix"></image>
         <view wx:elif="{{item.type === 'ACTIVITY_INVITE' || item.type === 'ACTIVITY_CARD'}}" class="invite-card">
-          <view class="invite-label">活动邀请</view>
+          <view class="invite-label">{{item.type === 'ACTIVITY_INVITE' ? '活动邀请' : '活动卡片'}}</view>
           <view class="invite-title">{{item.activityName}}</view>
           <view class="invite-meta">{{item.activityTime}}</view>
           <view class="invite-meta">{{item.location}} · 剩余 {{item.remainingSlots}} 个名额</view>
@@ -21,7 +22,17 @@
       </view>
     </view>
   </scroll-view>
+
+  <view wx:if="{{showActivityPicker}}" class="activity-picker">
+    <view class="activity-option" wx:for="{{activityList}}" wx:key="id" bindtap="sendActivityCard" data-id="{{item.id}}">
+      <view class="activity-option-title">{{item.name}}</view>
+      <view class="activity-option-meta">{{item.location}}</view>
+    </view>
+  </view>
+
   <view class="input-bar">
+    <button class="tool-btn" bindtap="chooseImages">图片</button>
+    <button class="tool-btn" bindtap="toggleActivityPicker">活动</button>
     <input class="chat-input" placeholder="输入消息" value="{{inputValue}}" bindinput="input" confirm-type="send" bindconfirm="send" adjust-position="{{true}}" hold-keyboard="{{true}}" />
     <button class="send-btn" bindtap="send">发送</button>
   </view>

@@ -43,10 +43,10 @@ public class ActivityMapper {
         KeyHolder keyHolder = new GeneratedKeyHolder();
         jdbcTemplate.update(con -> {
             PreparedStatement ps = con.prepareStatement("""
-                    insert into activity(name,cover_image_url,category,location,latitude,longitude,start_time,end_time,signup_deadline,
+                    insert into activity(name,cover_image_url,category,location,latitude,longitude,start_time,end_time,signup_start_time,signup_deadline,checkin_start_time,checkin_end_time,
                     recruit_number,registered_number,skill_requirements,description,signup_requirement,contact_name,
                     contact_phone,service_hours,review_method,status,created_by,published_at)
-                    values(?,?,?,?,?,?,?,?,?,?,0,?,?,?,?,?,?,?,?,?,?)
+                    values(?,?,?,?,?,?,?,?,?,?,?,?,?,0,?,?,?,?,?,?,?,?,?,?)
                     """, Statement.RETURN_GENERATED_KEYS);
             ps.setString(1, a.getName());
             ps.setString(2, a.getCoverImageUrl());
@@ -56,18 +56,21 @@ public class ActivityMapper {
             ps.setObject(6, a.getLongitude());
             ps.setObject(7, a.getStartTime());
             ps.setObject(8, a.getEndTime());
-            ps.setObject(9, a.getSignupDeadline());
-            ps.setInt(10, a.getRecruitNumber());
-            ps.setString(11, a.getSkillRequirements());
-            ps.setString(12, a.getDescription());
-            ps.setString(13, a.getSignupRequirement());
-            ps.setString(14, a.getContactName());
-            ps.setString(15, a.getContactPhone());
-            ps.setObject(16, a.getServiceHours());
-            ps.setString(17, a.getReviewMethod());
-            ps.setString(18, a.getStatus());
-            ps.setLong(19, a.getCreatedBy());
-            ps.setObject(20, a.getPublishedAt());
+            ps.setObject(9, a.getSignupStartTime());
+            ps.setObject(10, a.getSignupDeadline());
+            ps.setObject(11, a.getCheckinStartTime());
+            ps.setObject(12, a.getCheckinEndTime());
+            ps.setInt(13, a.getRecruitNumber());
+            ps.setString(14, a.getSkillRequirements());
+            ps.setString(15, a.getDescription());
+            ps.setString(16, a.getSignupRequirement());
+            ps.setString(17, a.getContactName());
+            ps.setString(18, a.getContactPhone());
+            ps.setObject(19, a.getServiceHours());
+            ps.setString(20, a.getReviewMethod());
+            ps.setString(21, a.getStatus());
+            ps.setLong(22, a.getCreatedBy());
+            ps.setObject(23, a.getPublishedAt());
             return ps;
         }, keyHolder);
         return keyHolder.getKey().longValue();
@@ -75,11 +78,12 @@ public class ActivityMapper {
 
     public void update(Long id, Activity a) {
         jdbcTemplate.update("""
-                update activity set name=?,cover_image_url=?,category=?,location=?,latitude=?,longitude=?,start_time=?,end_time=?,signup_deadline=?,recruit_number=?,
+                update activity set name=?,cover_image_url=?,category=?,location=?,latitude=?,longitude=?,start_time=?,end_time=?,
+                signup_start_time=?,signup_deadline=?,checkin_start_time=?,checkin_end_time=?,recruit_number=?,
                 skill_requirements=?,description=?,signup_requirement=?,contact_name=?,contact_phone=?,
                 service_hours=?,review_method=?,status=?,published_at=? where id=?
                 """, a.getName(), a.getCoverImageUrl(), a.getCategory(), a.getLocation(), a.getLatitude(), a.getLongitude(), a.getStartTime(), a.getEndTime(),
-                a.getSignupDeadline(), a.getRecruitNumber(), a.getSkillRequirements(), a.getDescription(), a.getSignupRequirement(),
+                a.getSignupStartTime(), a.getSignupDeadline(), a.getCheckinStartTime(), a.getCheckinEndTime(), a.getRecruitNumber(), a.getSkillRequirements(), a.getDescription(), a.getSignupRequirement(),
                 a.getContactName(), a.getContactPhone(), a.getServiceHours(), a.getReviewMethod(), a.getStatus(), a.getPublishedAt(), id);
     }
 
@@ -123,6 +127,17 @@ public class ActivityMapper {
                 order by start_time asc
                 limit 50
                 """, new BeanPropertyRowMapper<>(AiActivityCandidateVO.class), LocalDateTime.now());
+    }
+
+    public List<Activity> openActivities() {
+        return jdbcTemplate.query("""
+                select * from activity
+                where end_time > ?
+                  and status in ('报名中','已发布')
+                  and registered_number < recruit_number
+                order by start_time asc
+                limit 50
+                """, new BeanPropertyRowMapper<>(Activity.class), LocalDateTime.now());
     }
 
     private String n(String value) {

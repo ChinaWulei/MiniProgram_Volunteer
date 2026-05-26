@@ -16,6 +16,7 @@
   <view class="detail-section">
     <view class="section-title">活动信息</view>
     <view class="info-line"><text>活动时间</text><text>{{activity.startTimeText}} 至 {{activity.endTimeText}}</text></view>
+    <view class="info-line"><text>报名开始</text><text>{{activity.signupStartTimeText || '发布后即可报名'}}</text></view>
     <view class="info-line"><text>报名截止</text><text>{{activity.signupDeadlineText || '以活动通知为准'}}</text></view>
     <view class="info-line"><text>活动地点</text><text>{{activity.location}}</text></view>
     <view class="info-line"><text>活动类型</text><text>{{activity.category}}</text></view>
@@ -25,7 +26,7 @@
   <view wx:if="{{!isAdmin && activity.signupStatus === '已通过'}}" class="detail-section checkin-section">
     <view class="section-title">活动签到</view>
     <view class="info-line"><text>签到地点</text><text>{{activity.location}}</text></view>
-    <view class="info-line"><text>活动时间</text><text>{{activity.startTimeText}} 至 {{activity.endTimeText}}</text></view>
+    <view class="info-line"><text>签到时段</text><text>{{activity.checkinStartTimeText || activity.startTimeText}} 至 {{activity.checkinEndTimeText || activity.endTimeText}}</text></view>
     <view class="info-line"><text>签到状态</text><text class="checkin-tag {{checkin.status}}">{{checkin.statusText || '未签到'}}</text></view>
     <view class="info-line"><text>签到时间</text><text>{{checkin.checkinTime || '-'}}</text></view>
     <view class="info-line"><text>签到方式</text><text>{{checkin.method || '-'}}</text></view>
@@ -69,6 +70,16 @@
       </view>
     </view>
     <view wx:if="{{registrations.length === 0}}" class="empty-reg">暂无报名人员</view>
+  </view>
+
+  <view wx:if="{{activity.status === '已结束' || activity.status === '宸茬粨鏉?'}}" class="detail-section">
+    <view class="section-title">{{isAdmin ? '评价志愿者' : '评价活动'}}</view>
+    <view wx:if="{{isAdmin}}" class="eval-users">
+      <button wx:for="{{registrations}}" wx:key="id" class="eval-user {{evaluationTargetUserId == item.userId ? 'active' : ''}}" data-userid="{{item.userId}}" bindtap="pickEvaluationVolunteer">{{item.userText}}</button>
+    </view>
+    <slider min="1" max="5" step="1" value="{{evaluationScore}}" show-value bindchange="setEvalScore"></slider>
+    <textarea class="eval-textarea" placeholder="{{isAdmin ? '填写对该志愿者的表现评价' : '填写对活动组织和负责人的评价'}}" value="{{evaluationContent}}" bindinput="inputEvaluation"></textarea>
+    <button class="checkin-btn" bindtap="submitEvaluation">提交评价</button>
   </view>
 
   <view wx:if="{{showCancel}}" class="mask" bindtap="closeCancel"></view>

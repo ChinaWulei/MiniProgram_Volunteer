@@ -7,10 +7,12 @@ import com.scs.volunteer.dto.ConversationRequest;
 import com.scs.volunteer.dto.InviteReplyRequest;
 import com.scs.volunteer.dto.MessageRequest;
 import com.scs.volunteer.service.ChatService;
+import com.scs.volunteer.service.S3StorageService;
 import com.scs.volunteer.vo.ChatConversationVO;
 import com.scs.volunteer.vo.ChatMessageVO;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 import java.util.Map;
@@ -19,9 +21,11 @@ import java.util.Map;
 @RequestMapping("/api/chat")
 public class ChatController extends BaseController {
     private final ChatService chatService;
+    private final S3StorageService s3StorageService;
 
-    public ChatController(ChatService chatService) {
+    public ChatController(ChatService chatService, S3StorageService s3StorageService) {
         this.chatService = chatService;
+        this.s3StorageService = s3StorageService;
     }
 
     @GetMapping("/conversations")
@@ -42,6 +46,13 @@ public class ChatController extends BaseController {
     @PostMapping("/messages")
     public ApiResponse<ChatMessageVO> send(HttpServletRequest request, @RequestBody MessageRequest body) {
         return ApiResponse.ok(chatService.sendMessage(currentUser(request).getId(), body));
+    }
+
+    @PostMapping("/images")
+    public ApiResponse<Map<String, String>> image(HttpServletRequest request, @RequestParam("file") MultipartFile file) {
+        currentUser(request);
+        String url = s3StorageService.uploadActivityNewsImage(file);
+        return ApiResponse.ok(Map.of("url", url, "imageUrl", url));
     }
 
     @PostMapping("/activity-invite")

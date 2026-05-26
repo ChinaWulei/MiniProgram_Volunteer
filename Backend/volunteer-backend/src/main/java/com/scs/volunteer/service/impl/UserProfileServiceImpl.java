@@ -2,6 +2,7 @@ package com.scs.volunteer.service.impl;
 
 import com.scs.volunteer.common.BizException;
 import com.scs.volunteer.dto.UserProfileDTO;
+import com.scs.volunteer.mapper.CreditMapper;
 import com.scs.volunteer.mapper.UserMapper;
 import com.scs.volunteer.service.S3StorageService;
 import com.scs.volunteer.service.UserProfileService;
@@ -16,10 +17,12 @@ import java.util.List;
 public class UserProfileServiceImpl implements UserProfileService {
     private final UserMapper userMapper;
     private final S3StorageService s3StorageService;
+    private final CreditMapper creditMapper;
 
-    public UserProfileServiceImpl(UserMapper userMapper, S3StorageService s3StorageService) {
+    public UserProfileServiceImpl(UserMapper userMapper, S3StorageService s3StorageService, CreditMapper creditMapper) {
         this.userMapper = userMapper;
         this.s3StorageService = s3StorageService;
+        this.creditMapper = creditMapper;
     }
 
     @Override
@@ -49,6 +52,8 @@ public class UserProfileServiceImpl implements UserProfileService {
         profile.setTotalHours(hours);
         profile.setServiceCount(serviceCount);
         profile.setCreditScore(creditScore);
+        profile.setCreditLevel(creditLevel(creditScore));
+        profile.setCreditRecords(creditMapper.records(profile.getUserId()));
 
         profile.setVolunteerPoints((int) Math.floor(hours * 10));
         profile.setCampusRank(campusRank);
@@ -77,6 +82,13 @@ public class UserProfileServiceImpl implements UserProfileService {
             badges.add("优秀志愿者");
         }
         profile.setBadges(badges);
+    }
+
+    private String creditLevel(int score) {
+        if (score >= 90) return "优秀";
+        if (score >= 80) return "良好";
+        if (score >= 70) return "关注";
+        return "受限";
     }
 
     private void setLevel(UserProfileVO profile, String level, String name, double minHours, Double nextHours, int progress) {

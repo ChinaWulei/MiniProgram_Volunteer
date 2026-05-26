@@ -24,6 +24,11 @@ public class ActivityController extends BaseController {
         return ApiResponse.ok(activityService.list(category, status, keyword));
     }
 
+    @GetMapping("/recommend")
+    public ApiResponse<List<Activity>> recommend(HttpServletRequest request) {
+        return ApiResponse.ok(activityService.recommend(currentUser(request)));
+    }
+
     @GetMapping("/{id}")
     public ApiResponse<Activity> detail(@PathVariable Long id) {
         return ApiResponse.ok(activityService.detail(id));

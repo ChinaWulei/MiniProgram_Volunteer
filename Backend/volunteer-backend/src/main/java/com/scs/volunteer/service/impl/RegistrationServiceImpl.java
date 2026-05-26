@@ -6,6 +6,7 @@ import com.scs.volunteer.dto.RegistrationDTO;
 import com.scs.volunteer.dto.ReviewDTO;
 import com.scs.volunteer.entity.Activity;
 import com.scs.volunteer.mapper.ActivityMapper;
+import com.scs.volunteer.mapper.CreditMapper;
 import com.scs.volunteer.mapper.NotificationMapper;
 import com.scs.volunteer.mapper.RegistrationMapper;
 import com.scs.volunteer.mapper.ServiceRecordMapper;
@@ -24,13 +25,15 @@ public class RegistrationServiceImpl implements RegistrationService {
     private final VolunteerMapper volunteerMapper;
     private final ServiceRecordMapper serviceRecordMapper;
     private final NotificationMapper notificationMapper;
+    private final CreditMapper creditMapper;
 
-    public RegistrationServiceImpl(RegistrationMapper registrationMapper, ActivityMapper activityMapper, VolunteerMapper volunteerMapper, ServiceRecordMapper serviceRecordMapper, NotificationMapper notificationMapper) {
+    public RegistrationServiceImpl(RegistrationMapper registrationMapper, ActivityMapper activityMapper, VolunteerMapper volunteerMapper, ServiceRecordMapper serviceRecordMapper, NotificationMapper notificationMapper, CreditMapper creditMapper) {
         this.registrationMapper = registrationMapper;
         this.activityMapper = activityMapper;
         this.volunteerMapper = volunteerMapper;
         this.serviceRecordMapper = serviceRecordMapper;
         this.notificationMapper = notificationMapper;
+        this.creditMapper = creditMapper;
     }
 
     @Override
@@ -47,6 +50,19 @@ public class RegistrationServiceImpl implements RegistrationService {
         }
         if (registrationMapper.exists(dto.getActivityId(), currentUser.getId())) {
             throw new BizException("不能重复报名");
+        }
+        if (creditMapper.score(currentUser.getId()) < 70) {
+            throw new BizException("信用分低于70分，暂不能报名，请联系管理员处理");
+        }
+        java.time.LocalDateTime now = java.time.LocalDateTime.now();
+        if (activity.getSignupStartTime() != null && now.isBefore(activity.getSignupStartTime())) {
+            throw new BizException("报名尚未开始");
+        }
+        if (activity.getSignupDeadline() != null && now.isAfter(activity.getSignupDeadline())) {
+            throw new BizException("报名已截止");
+        }
+        if (registrationMapper.hasTimeConflict(currentUser.getId(), activity.getId(), activity.getStartTime(), activity.getEndTime())) {
+            throw new BizException("该时间段已报名其他活动，请确认时间安排");
         }
         String signupStatus = "自动通过".equals(activity.getReviewMethod()) ? "已通过" : "待审核";
         registrationMapper.insert(dto.getActivityId(), currentUser.getId(), signupStatus);

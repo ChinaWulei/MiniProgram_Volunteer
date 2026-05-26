@@ -19,6 +19,15 @@
         <view class="picker-field small">{{activityClock || '选择时间'}}</view>
       </picker>
     </view>
+    <view class="field-title">报名开始时间</view>
+    <view class="picker-row">
+      <picker mode="date" value="{{signupStartDate}}" bindchange="pickSignupStartDate">
+        <view class="picker-field small">{{signupStartDate || '选择日期'}}</view>
+      </picker>
+      <picker mode="time" value="{{signupStartClock}}" bindchange="pickSignupStartClock">
+        <view class="picker-field small">{{signupStartClock || '选择时间'}}</view>
+      </picker>
+    </view>
     <view class="field-title">报名截止时间</view>
     <view class="picker-row">
       <picker mode="date" value="{{deadlineDate}}" bindchange="pickDeadlineDate">
@@ -26,6 +35,23 @@
       </picker>
       <picker mode="time" value="{{deadlineClock}}" bindchange="pickDeadlineClock">
         <view class="picker-field small">{{deadlineClock || '选择时间'}}</view>
+      </picker>
+    </view>
+    <view class="field-title">签到有效时段</view>
+    <view class="picker-row">
+      <picker mode="date" value="{{checkinStartDate}}" bindchange="pickCheckinStartDate">
+        <view class="picker-field small">{{checkinStartDate || '开始日期'}}</view>
+      </picker>
+      <picker mode="time" value="{{checkinStartClock}}" bindchange="pickCheckinStartClock">
+        <view class="picker-field small">{{checkinStartClock || '开始时间'}}</view>
+      </picker>
+    </view>
+    <view class="picker-row">
+      <picker mode="date" value="{{checkinEndDate}}" bindchange="pickCheckinEndDate">
+        <view class="picker-field small">{{checkinEndDate || '结束日期'}}</view>
+      </picker>
+      <picker mode="time" value="{{checkinEndClock}}" bindchange="pickCheckinEndClock">
+        <view class="picker-field small">{{checkinEndClock || '结束时间'}}</view>
       </picker>
     </view>
     <view class="field-title">活动地点与签到位置</view>

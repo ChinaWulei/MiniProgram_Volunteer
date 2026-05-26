@@ -59,10 +59,20 @@ public class ChatServiceImpl implements ChatService {
             ensureParticipant(userId, conversationId);
             receiverId = chatMapper.peerId(conversationId, userId);
         }
+        String type = request.getType() == null ? "" : request.getType().trim().toUpperCase();
         String content = request.getContent() == null ? "" : request.getContent().trim();
+        if ("IMAGE".equals(type)) {
+            content = request.getImageUrl() == null ? content : request.getImageUrl().trim();
+            if (content.isBlank()) throw new BizException("图片不能为空");
+        } else if (request.getActivityId() != null) {
+            type = "ACTIVITY_CARD";
+            activityMapper.findById(request.getActivityId()).orElseThrow(() -> new BizException("活动不存在"));
+        } else {
+            type = "TEXT";
+        }
         if (content.isBlank() && request.getActivityId() == null) throw new BizException("消息内容不能为空");
         ChatMessageVO message = chatMapper.insertMessage(conversationId, userId, receiverId,
-                request.getActivityId() == null ? "TEXT" : "ACTIVITY_CARD", content, request.getActivityId(), null);
+                type, content, request.getActivityId(), null);
         webSocketHandler.pushToUser(receiverId, "message", message);
         return message;
     }

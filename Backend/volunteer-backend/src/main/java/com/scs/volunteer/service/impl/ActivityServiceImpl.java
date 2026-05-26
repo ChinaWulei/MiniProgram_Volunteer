@@ -6,8 +6,10 @@ import com.scs.volunteer.dto.ActivityDTO;
 import com.scs.volunteer.entity.Activity;
 import com.scs.volunteer.mapper.ActivityMapper;
 import com.scs.volunteer.mapper.RegistrationMapper;
+import com.scs.volunteer.mapper.VolunteerMapper;
 import com.scs.volunteer.service.ActivityService;
 import com.scs.volunteer.vo.ActivityDetailVO;
+import com.scs.volunteer.vo.VolunteerVO;
 import org.springframework.stereotype.Service;
 
 import java.time.Duration;
@@ -20,16 +22,30 @@ public class ActivityServiceImpl implements ActivityService {
     private static final DateTimeFormatter FORM_FORMAT = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
     private final ActivityMapper activityMapper;
     private final RegistrationMapper registrationMapper;
+    private final VolunteerMapper volunteerMapper;
 
-    public ActivityServiceImpl(ActivityMapper activityMapper, RegistrationMapper registrationMapper) {
+    public ActivityServiceImpl(ActivityMapper activityMapper, RegistrationMapper registrationMapper, VolunteerMapper volunteerMapper) {
         this.activityMapper = activityMapper;
         this.registrationMapper = registrationMapper;
+        this.volunteerMapper = volunteerMapper;
     }
 
     @Override
     public List<Activity> list(String category, String status, String keyword) {
         activityMapper.finishExpired();
         return activityMapper.search(category, status, keyword);
+    }
+
+    @Override
+    public List<Activity> recommend(CurrentUser currentUser) {
+        if (currentUser == null || !"VOLUNTEER".equals(currentUser.getRole())) {
+            return list(null, null, null).stream().limit(4).toList();
+        }
+        VolunteerVO profile = volunteerMapper.findByUserId(currentUser.getId()).orElse(null);
+        return activityMapper.openActivities().stream()
+                .sorted((a, b) -> Double.compare(score(b, profile), score(a, profile)))
+                .limit(6)
+                .toList();
     }
 
     @Override
@@ -52,7 +68,10 @@ public class ActivityServiceImpl implements ActivityService {
         vo.setLongitude(activity.getLongitude());
         vo.setStartTime(activity.getStartTime());
         vo.setEndTime(activity.getEndTime());
+        vo.setSignupStartTime(activity.getSignupStartTime());
         vo.setSignupDeadline(activity.getSignupDeadline());
+        vo.setCheckinStartTime(activity.getCheckinStartTime());
+        vo.setCheckinEndTime(activity.getCheckinEndTime());
         vo.setRecruitNumber(activity.getRecruitNumber());
         vo.setRegisteredNumber(activity.getRegisteredNumber());
         vo.setRemainingNumber(Math.max(0, activity.getRecruitNumber() - activity.getRegisteredNumber()));
@@ -134,7 +153,10 @@ public class ActivityServiceImpl implements ActivityService {
         a.setLongitude(dto.getLongitude());
         a.setStartTime(startTime);
         a.setEndTime(endTime);
+        a.setSignupStartTime(blank(dto.getSignupStartTime()) ? null : parseDateTime(dto.getSignupStartTime(), "报名开始时间"));
         a.setSignupDeadline(dto.getSignupDeadline() == null || dto.getSignupDeadline().isBlank() ? null : parseDateTime(dto.getSignupDeadline(), "报名截止时间"));
+        a.setCheckinStartTime(blank(dto.getCheckinStartTime()) ? startTime : parseDateTime(dto.getCheckinStartTime(), "签到开始时间"));
+        a.setCheckinEndTime(blank(dto.getCheckinEndTime()) ? endTime : parseDateTime(dto.getCheckinEndTime(), "签到结束时间"));
         a.setRecruitNumber(dto.getRecruitNumber() == null ? dto.getRecruitCount() : dto.getRecruitNumber());
         a.setSkillRequirements(dto.getSkillRequirements() == null && dto.getRequiredSkills() != null ? String.join(",", dto.getRequiredSkills()) : dto.getSkillRequirements());
         a.setDescription(dto.getDescription());
@@ -188,6 +210,33 @@ public class ActivityServiceImpl implements ActivityService {
 
     private double calcHours(Activity activity) {
         return Math.max(1.0, Duration.between(activity.getStartTime(), activity.getEndTime()).toMinutes() / 60.0);
+    }
+
+    private double score(Activity activity, VolunteerVO volunteer) {
+        if (volunteer == null) return activity.getRegisteredNumber() == null ? 0 : activity.getRegisteredNumber();
+        double skill = overlap(activity.getSkillRequirements(), volunteer.getSkillTags());
+        double time = volunteer.getAvailableTime() != null && timeMatched(activity, volunteer.getAvailableTime()) ? 1 : 0;
+        double credit = Math.min(100, volunteer.getCreditScore() == null ? 80 : volunteer.getCreditScore()) / 100.0;
+        return skill * 60 + time * 20 + credit * 20;
+    }
+
+    private double overlap(String required, String owned) {
+        java.util.Set<String> req = split(required);
+        java.util.Set<String> own = split(owned);
+        if (req.isEmpty()) return 0.5;
+        long hit = req.stream().filter(own::contains).count();
+        return (double) hit / req.size();
+    }
+
+    private java.util.Set<String> split(String tags) {
+        if (tags == null || tags.isBlank()) return java.util.Set.of();
+        return java.util.Arrays.stream(tags.split("[,;|\\s]+")).filter(s -> !s.isBlank()).collect(java.util.stream.Collectors.toSet());
+    }
+
+    private boolean timeMatched(Activity activity, String availableTime) {
+        String text = availableTime.toLowerCase();
+        int hour = activity.getStartTime().getHour();
+        return text.contains("全天") || (hour < 12 && text.contains("上午")) || (hour >= 12 && hour < 18 && text.contains("下午")) || (hour >= 18 && text.contains("晚上"));
     }
 
     private void requireAdmin(CurrentUser user) {

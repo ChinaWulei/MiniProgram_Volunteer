@@ -9,6 +9,7 @@
 .bubble { padding: 18rpx 22rpx; border-radius: 16rpx; font-size: 28rpx; line-height: 1.55; word-break: break-word; }
 .bubble.mine { color: #fff; background: #0f766e; }
 .bubble.peer { color: #172033; background: #fff; box-shadow: 0 8rpx 20rpx rgba(16,24,40,.05); }
+.chat-image { width: 360rpx; max-height: 520rpx; border-radius: 14rpx; background: #e5e7eb; }
 .invite-card { width: 520rpx; padding: 20rpx; border-radius: 16rpx; background: #fff; box-shadow: 0 8rpx 20rpx rgba(16,24,40,.06); border-left: 6rpx solid #14b8a6; box-sizing: border-box; }
 .invite-label { color: #0f766e; font-size: 22rpx; font-weight: 700; }
 .invite-title { margin-top: 8rpx; color: #172033; font-size: 29rpx; font-weight: 800; }
@@ -19,6 +20,12 @@
 .invite-actions .accept, .detail-btn { color: #fff; background: #0f766e; }
 .detail-btn { width: 100%; margin-top: 14rpx; }
 .invite-actions button::after, .detail-btn::after, .send-btn::after { border: 0; }
+.activity-picker { flex: 0 0 auto; max-height: 360rpx; padding: 16rpx 22rpx; background: #fff; border-top: 1rpx solid #e5e7eb; box-sizing: border-box; overflow: auto; }
+.activity-option { padding: 16rpx 0; border-bottom: 1rpx solid #eef2f7; }
+.activity-option-title { color: #172033; font-size: 26rpx; font-weight: 700; }
+.activity-option-meta { margin-top: 6rpx; color: #667085; font-size: 22rpx; }
 .input-bar { flex: 0 0 auto; display: flex; gap: 14rpx; align-items: center; padding: 18rpx 22rpx calc(28rpx + env(safe-area-inset-bottom)); background: #fff; box-shadow: 0 -8rpx 20rpx rgba(16,24,40,.06); box-sizing: border-box; }
+.tool-btn { flex: 0 0 72rpx; width: 72rpx; height: 64rpx; line-height: 64rpx; margin: 0; padding: 0; border-radius: 32rpx; color: #0f766e; background: #eefaf7; font-size: 22rpx; }
+.tool-btn::after { border: 0; }
 .chat-input { flex: 1; width: 0; min-width: 0; height: 76rpx; margin: 0; padding: 0 24rpx; border-radius: 38rpx; background: #f2f4f7; border: 0; box-sizing: border-box; font-size: 28rpx; }
 .send-btn { flex: 0 0 112rpx; width: 112rpx; height: 76rpx; line-height: 76rpx; margin: 0; padding: 0; border-radius: 38rpx; background: #0f766e; color: #fff; font-size: 26rpx; font-weight: 800; }

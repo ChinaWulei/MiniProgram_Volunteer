@@ -4,11 +4,13 @@ import com.scs.volunteer.common.ApiResponse;
 import com.scs.volunteer.common.BizException;
 import com.scs.volunteer.common.CurrentUser;
 import com.scs.volunteer.dto.ActivityDTO;
+import com.scs.volunteer.dto.CreditRuleDTO;
 import com.scs.volunteer.dto.ManualCheckinRequest;
 import com.scs.volunteer.service.ActivityService;
 import com.scs.volunteer.service.CheckinService;
 import com.scs.volunteer.service.S3StorageService;
 import com.scs.volunteer.service.StatisticsService;
+import com.scs.volunteer.mapper.CreditMapper;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -29,17 +31,35 @@ public class AdminController extends BaseController {
     private final ActivityService activityService;
     private final S3StorageService s3StorageService;
     private final CheckinService checkinService;
+    private final CreditMapper creditMapper;
 
-    public AdminController(StatisticsService statisticsService, ActivityService activityService, S3StorageService s3StorageService, CheckinService checkinService) {
+    public AdminController(StatisticsService statisticsService, ActivityService activityService, S3StorageService s3StorageService, CheckinService checkinService, CreditMapper creditMapper) {
         this.statisticsService = statisticsService;
         this.activityService = activityService;
         this.s3StorageService = s3StorageService;
         this.checkinService = checkinService;
+        this.creditMapper = creditMapper;
     }
 
     @GetMapping("/statistics")
     public ApiResponse<Map<String, Object>> statistics(HttpServletRequest request) {
         return ApiResponse.ok(statisticsService.overview(currentUser(request)));
+    }
+
+    @GetMapping("/credit-rules")
+    public ApiResponse<java.util.List<Map<String, Object>>> creditRules(HttpServletRequest request) {
+        requireAdmin(currentUser(request));
+        return ApiResponse.ok(creditMapper.rules());
+    }
+
+    @PostMapping("/credit-rules")
+    public ApiResponse<Void> saveCreditRule(HttpServletRequest request, @RequestBody CreditRuleDTO dto) {
+        requireAdmin(currentUser(request));
+        if (dto == null || dto.getCode() == null || dto.getName() == null || dto.getChangeValue() == null) {
+            throw new BizException("信用规则信息不完整");
+        }
+        creditMapper.saveRule(dto.getCode(), dto.getName(), dto.getChangeValue(), dto.getEnabled() == null || dto.getEnabled());
+        return ApiResponse.ok(null);
     }
 
     @PostMapping("/activity/image")

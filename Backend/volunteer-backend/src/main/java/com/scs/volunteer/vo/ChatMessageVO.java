@@ -10,6 +10,7 @@ public class ChatMessageVO {
     private String type;
     private String content;
     private Long activityId;
+    private String imageUrl;
     private String activityName;
     private String activityTime;
     private String location;
@@ -31,6 +32,8 @@ public class ChatMessageVO {
     public void setContent(String content) { this.content = content; }
     public Long getActivityId() { return activityId; }
     public void setActivityId(Long activityId) { this.activityId = activityId; }
+    public String getImageUrl() { return imageUrl; }
+    public void setImageUrl(String imageUrl) { this.imageUrl = imageUrl; }
     public String getActivityName() { return activityName; }
     public void setActivityName(String activityName) { this.activityName = activityName; }
     public String getActivityTime() { return activityTime; }

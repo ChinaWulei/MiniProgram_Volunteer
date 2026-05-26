@@ -16,6 +16,8 @@ public class UserProfileVO {
     private String bio;
     private Double totalHours;
     private Integer creditScore;
+    private String creditLevel;
+    private List<java.util.Map<String, Object>> creditRecords;
     private Integer serviceCount;
     private Integer volunteerPoints;
     private String volunteerLevel;
@@ -53,6 +55,10 @@ public class UserProfileVO {
     public void setTotalHours(Double totalHours) { this.totalHours = totalHours; }
     public Integer getCreditScore() { return creditScore; }
     public void setCreditScore(Integer creditScore) { this.creditScore = creditScore; }
+    public String getCreditLevel() { return creditLevel; }
+    public void setCreditLevel(String creditLevel) { this.creditLevel = creditLevel; }
+    public List<java.util.Map<String, Object>> getCreditRecords() { return creditRecords; }
+    public void setCreditRecords(List<java.util.Map<String, Object>> creditRecords) { this.creditRecords = creditRecords; }
     public Integer getServiceCount() { return serviceCount; }
     public void setServiceCount(Integer serviceCount) { this.serviceCount = serviceCount; }
     public Integer getVolunteerPoints() { return volunteerPoints; }

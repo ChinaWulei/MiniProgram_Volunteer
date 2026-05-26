@@ -31,8 +31,14 @@ Page({
     },
     activityDate: '',
     activityClock: '',
+    signupStartDate: '',
+    signupStartClock: '',
     deadlineDate: '',
     deadlineClock: '',
+    checkinStartDate: '',
+    checkinStartClock: '',
+    checkinEndDate: '',
+    checkinEndClock: '',
     auditModes: ['管理员审核', '自动通过'],
     statuses: ['已发布', '草稿', '已结束', '已取消'],
     skillOptions: skillNames.map(name => ({ name, selected: false })),
@@ -56,14 +62,23 @@ Page({
           skillOptions,
           activityDate: datePart(String(activity.startTime || '').replace('T', ' ')),
           activityClock: timePart(String(activity.startTime || '').replace('T', ' ')),
+          signupStartDate: datePart(String(activity.signupStartTime || '').replace('T', ' ')),
+          signupStartClock: timePart(String(activity.signupStartTime || '').replace('T', ' ')),
           deadlineDate: datePart(String(activity.signupDeadline || '').replace('T', ' ')),
           deadlineClock: timePart(String(activity.signupDeadline || '').replace('T', ' ')),
+          checkinStartDate: datePart(String(activity.checkinStartTime || '').replace('T', ' ')),
+          checkinStartClock: timePart(String(activity.checkinStartTime || '').replace('T', ' ')),
+          checkinEndDate: datePart(String(activity.checkinEndTime || '').replace('T', ' ')),
+          checkinEndClock: timePart(String(activity.checkinEndTime || '').replace('T', ' ')),
           form: {
             title: activity.name,
             coverImageUrl: activity.coverImageUrl,
             category: activity.category,
             activityTime: String(activity.startTime || '').replace('T', ' ').slice(0, 16),
+            signupStartTime: String(activity.signupStartTime || '').replace('T', ' ').slice(0, 16),
             signupDeadline: String(activity.signupDeadline || '').replace('T', ' ').slice(0, 16),
+            checkinStartTime: String(activity.checkinStartTime || '').replace('T', ' ').slice(0, 16),
+            checkinEndTime: String(activity.checkinEndTime || '').replace('T', ' ').slice(0, 16),
             location: activity.location,
             locationAddress: activity.location,
             latitude: activity.latitude,
@@ -113,6 +128,14 @@ Page({
     const activityClock = e.detail.value
     this.setData({ activityClock, 'form.activityTime': combineDateTime(this.data.activityDate, activityClock) })
   },
+  pickSignupStartDate(e) {
+    const signupStartDate = e.detail.value
+    this.setData({ signupStartDate, 'form.signupStartTime': combineDateTime(signupStartDate, this.data.signupStartClock) })
+  },
+  pickSignupStartClock(e) {
+    const signupStartClock = e.detail.value
+    this.setData({ signupStartClock, 'form.signupStartTime': combineDateTime(this.data.signupStartDate, signupStartClock) })
+  },
   pickDeadlineDate(e) {
     const deadlineDate = e.detail.value
     this.setData({ deadlineDate, 'form.signupDeadline': combineDateTime(deadlineDate, this.data.deadlineClock) })
@@ -120,6 +143,22 @@ Page({
   pickDeadlineClock(e) {
     const deadlineClock = e.detail.value
     this.setData({ deadlineClock, 'form.signupDeadline': combineDateTime(this.data.deadlineDate, deadlineClock) })
+  },
+  pickCheckinStartDate(e) {
+    const checkinStartDate = e.detail.value
+    this.setData({ checkinStartDate, 'form.checkinStartTime': combineDateTime(checkinStartDate, this.data.checkinStartClock) })
+  },
+  pickCheckinStartClock(e) {
+    const checkinStartClock = e.detail.value
+    this.setData({ checkinStartClock, 'form.checkinStartTime': combineDateTime(this.data.checkinStartDate, checkinStartClock) })
+  },
+  pickCheckinEndDate(e) {
+    const checkinEndDate = e.detail.value
+    this.setData({ checkinEndDate, 'form.checkinEndTime': combineDateTime(checkinEndDate, this.data.checkinEndClock) })
+  },
+  pickCheckinEndClock(e) {
+    const checkinEndClock = e.detail.value
+    this.setData({ checkinEndClock, 'form.checkinEndTime': combineDateTime(this.data.checkinEndDate, checkinEndClock) })
   },
   pickAudit(e) {
     this.setData({ 'form.auditMode': this.data.auditModes[e.detail.value] })

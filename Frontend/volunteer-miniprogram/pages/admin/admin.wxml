@@ -21,11 +21,46 @@
     <button class="ghost-btn" bindtap="volunteers">志愿者库</button>
   </view>
 
+  <view class="chart-panel">
+    <view class="panel-title">活动发布趋势</view>
+    <view class="trend-chart">
+      <view class="trend-bar" wx:for="{{stats.activityTrend}}" wx:key="label">
+        <view class="trend-value">{{item.count}}</view>
+        <view class="trend-stick" style="height: {{item.height}}rpx;"></view>
+        <view class="trend-label">{{item.label}}</view>
+      </view>
+    </view>
+  </view>
+
+  <view class="chart-grid">
+    <view class="chart-panel">
+      <view class="panel-title">各技能志愿者分布</view>
+      <view class="bar-row" wx:for="{{stats.skillStats}}" wx:key="skill">
+        <view class="bar-name">{{item.skill}}</view>
+        <view class="bar-track"><view class="bar-fill skill-fill" style="width: {{item.percent}}%;"></view></view>
+        <view class="bar-num">{{item.count}}</view>
+      </view>
+    </view>
+    <view class="chart-panel">
+      <view class="panel-title">签到率统计</view>
+      <view class="rate-row" wx:for="{{stats.checkinStats}}" wx:key="id">
+        <view class="rate-head">
+          <view class="rate-name">{{item.name}}</view>
+          <view class="rate-num">{{item.rate}}%</view>
+        </view>
+        <view class="bar-track"><view class="bar-fill rate-fill" style="width: {{item.rate}}%;"></view></view>
+      </view>
+    </view>
+  </view>
+
   <view class="rank-grid">
     <view class="panel">
       <view class="panel-title">服务时长排行</view>
-      <view class="rank-row" wx:for="{{stats.hoursRank}}" wx:key="userId" bindtap="goVolunteer" data-id="{{item.userId}}">
-        <view class="rank-name">{{index + 1}}. {{item.name}}</view>
+      <view class="rank-row chart-rank" wx:for="{{stats.hoursRank}}" wx:key="userId" bindtap="goVolunteer" data-id="{{item.userId}}">
+        <view class="rank-main">
+          <view class="rank-name">{{index + 1}}. {{item.name}}</view>
+          <view class="bar-track"><view class="bar-fill hour-fill" style="width: {{item.percent}}%;"></view></view>
+        </view>
         <view class="rank-value">{{item.totalHours}}h</view>
       </view>
     </view>
@@ -42,6 +77,15 @@
     <view class="panel-title">活动类别统计</view>
     <view class="row" wx:for="{{stats.categoryStats}}" wx:key="category">
       <view class="muted">{{item.category}}</view><view class="tag">{{item.count}}</view>
+    </view>
+  </view>
+
+  <view class="panel">
+    <view class="panel-title">信用分规则配置</view>
+    <view class="rule-row" wx:for="{{creditRules}}" wx:key="id">
+      <input class="rule-name" value="{{item.name}}" data-index="{{index}}" data-key="name" bindinput="inputRule" />
+      <input class="rule-score" type="number" value="{{item.changeValue}}" data-index="{{index}}" data-key="changeValue" bindinput="inputRule" />
+      <button class="ghost-btn mini-btn" data-index="{{index}}" bindtap="saveRule">保存</button>
     </view>
   </view>
 

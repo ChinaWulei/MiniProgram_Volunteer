@@ -190,6 +190,12 @@
   font-size: 26rpx;
   text-align: center;
 }
+.credit-record { display: flex; justify-content: space-between; gap: 18rpx; align-items: center; padding: 18rpx 0; border-bottom: 1rpx solid #edf2f7; }
+.credit-reason { color: #172033; font-size: 26rpx; font-weight: 700; }
+.credit-time { margin-top: 6rpx; color: #98a2b3; font-size: 22rpx; }
+.credit-change { flex: 0 0 auto; font-size: 28rpx; font-weight: 900; }
+.credit-change.plus { color: #15803d; }
+.credit-change.minus { color: #dc2626; }
 .info-row {
   display: flex;
   justify-content: space-between;

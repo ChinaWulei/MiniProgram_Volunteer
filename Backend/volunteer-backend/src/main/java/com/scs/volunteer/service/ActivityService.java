@@ -9,6 +9,7 @@ import java.util.List;
 
 public interface ActivityService {
     List<Activity> list(String category, String status, String keyword);
+    List<Activity> recommend(CurrentUser currentUser);
     Activity detail(Long id);
     ActivityDetailVO detail(Long id, CurrentUser currentUser);
     Long create(ActivityDTO dto, CurrentUser currentUser);

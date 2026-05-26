@@ -11,7 +11,10 @@ public class ActivityDTO {
     private String startTime;
     private String endTime;
     private String activityTime;
+    private String signupStartTime;
     private String signupDeadline;
+    private String checkinStartTime;
+    private String checkinEndTime;
     private Integer recruitNumber;
     private Integer recruitCount;
     private String skillRequirements;
@@ -46,8 +49,14 @@ public class ActivityDTO {
     public void setEndTime(String endTime) { this.endTime = endTime; }
     public String getActivityTime() { return activityTime; }
     public void setActivityTime(String activityTime) { this.activityTime = activityTime; }
+    public String getSignupStartTime() { return signupStartTime; }
+    public void setSignupStartTime(String signupStartTime) { this.signupStartTime = signupStartTime; }
     public String getSignupDeadline() { return signupDeadline; }
     public void setSignupDeadline(String signupDeadline) { this.signupDeadline = signupDeadline; }
+    public String getCheckinStartTime() { return checkinStartTime; }
+    public void setCheckinStartTime(String checkinStartTime) { this.checkinStartTime = checkinStartTime; }
+    public String getCheckinEndTime() { return checkinEndTime; }
+    public void setCheckinEndTime(String checkinEndTime) { this.checkinEndTime = checkinEndTime; }
     public Integer getRecruitNumber() { return recruitNumber; }
     public void setRecruitNumber(Integer recruitNumber) { this.recruitNumber = recruitNumber; }
     public Integer getRecruitCount() { return recruitCount; }

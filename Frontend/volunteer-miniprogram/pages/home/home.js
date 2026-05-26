@@ -105,7 +105,20 @@ Page({
         recommendedActivities: this.getRecommendedActivities(activities),
         stats: this.getStats(activities)
       })
+      this.loadRecommendedActivities()
     })
+  },
+  loadRecommendedActivities() {
+    const token = app.globalData.token || wx.getStorageSync('token')
+    if (!token || this.data.isAdmin) return
+    request({ url: '/api/activities/recommend', silent: true })
+      .then(list => {
+        const recommendedActivities = (list || []).map(item => Object.assign(normalizeActivity(item), {
+          reason: '技能与时间匹配'
+        }))
+        if (recommendedActivities.length) this.setData({ recommendedActivities })
+      })
+      .catch(() => {})
   },
   loadUnreadCount() {
     const token = app.globalData.token || wx.getStorageSync('token')

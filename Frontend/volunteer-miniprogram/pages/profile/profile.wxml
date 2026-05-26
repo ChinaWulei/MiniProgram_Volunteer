@@ -1,0 +1,77 @@
+<view class="profile-page">
+  <view class="profile-header">
+    <view class="avatar-wrap" bindtap="chooseAvatar">
+      <image wx:if="{{profile.avatarUrl}}" class="avatar" src="{{profile.avatarUrl}}" mode="aspectFill"></image>
+      <view wx:else class="avatar default-avatar">{{avatarText}}</view>
+      <view class="avatar-tip">更换</view>
+    </view>
+    <view class="profile-main">
+      <view class="nickname">{{profile.nickname || profile.name || '未登录'}}</view>
+      <view class="meta">编号 {{profile.volunteerNo || '-'}}</view>
+      <view class="meta">{{profile.college || '数计学院'}} · {{profile.majorClass || '未填写专业班级'}}</view>
+    </view>
+  </view>
+
+  <view class="growth-card">
+    <view class="level-row">
+      <view>
+        <view class="level">{{profile.volunteerLevel || 'Lv1'}} {{profile.levelName || '新星志愿者'}}</view>
+        <view class="level-sub" wx:if="{{profile.nextLevelHours}}">距离下一等级还需 {{profile.nextLevelRemainingHours}} 小时</view>
+        <view class="level-sub" wx:else>已达到最高等级</view>
+      </view>
+      <view class="points">{{profile.volunteerPoints || 0}} 积分</view>
+    </view>
+    <view class="progress-track">
+      <view class="progress-fill" style="width: {{profile.levelProgress || 0}}%;"></view>
+    </view>
+    <view class="stat-grid">
+      <view class="stat-item"><view class="stat-num">{{profile.totalHours || 0}}</view><view class="stat-label">服务时长</view></view>
+      <view class="stat-item"><view class="stat-num">{{profile.volunteerPoints || 0}}</view><view class="stat-label">志愿积分</view></view>
+      <view class="stat-item"><view class="stat-num">{{profile.campusRank || '-'}}</view><view class="stat-label">校园排名</view></view>
+    </view>
+  </view>
+
+  <view class="section">
+    <view class="section-title">勋章墙</view>
+    <view class="badge-grid" wx:if="{{profile.badges && profile.badges.length}}">
+      <view class="badge" wx:for="{{profile.badges}}" wx:key="*this">
+        <view class="badge-icon">✓</view>
+        <view class="badge-name">{{item}}</view>
+      </view>
+    </view>
+    <view class="empty-badge" wx:else>完成报名和服务后会点亮勋章</view>
+  </view>
+
+  <view class="section">
+    <view class="section-title">基础资料</view>
+    <view wx:if="{{!editing}}">
+      <view class="info-row"><text>昵称</text><text>{{profile.nickname || '-'}}</text></view>
+      <view class="info-row"><text>学院</text><text>{{profile.college || '-'}}</text></view>
+      <view class="info-row"><text>专业班级</text><text>{{profile.majorClass || '-'}}</text></view>
+      <view class="info-row"><text>手机号</text><text>{{profile.phone || '-'}}</text></view>
+      <view class="info-row column"><text>技能标签</text><view><text class="tag" wx:for="{{selectedSkills}}" wx:key="*this">{{item}}</text></view></view>
+      <view class="info-row column"><text>可服务时间</text><text>{{profile.availableTime || '-'}}</text></view>
+      <view class="info-row column"><text>个人简介</text><text>{{profile.bio || '-'}}</text></view>
+    </view>
+
+    <view wx:else>
+      <input placeholder="昵称" value="{{form.nickname}}" data-key="nickname" bindinput="input" />
+      <input placeholder="学院" value="{{form.college}}" data-key="college" bindinput="input" />
+      <input placeholder="专业班级" value="{{form.majorClass}}" data-key="majorClass" bindinput="input" />
+      <input placeholder="手机号" value="{{form.phone}}" data-key="phone" bindinput="input" />
+      <view class="skill-grid">
+        <view wx:for="{{skillOptions}}" wx:key="name" class="skill {{item.selected ? 'active' : ''}}" data-skill="{{item.name}}" bindtap="toggleSkill">{{item.name}}</view>
+      </view>
+      <textarea placeholder="可服务时间" value="{{form.availableTime}}" data-key="availableTime" bindinput="input"></textarea>
+      <textarea placeholder="个人简介" value="{{form.bio}}" data-key="bio" bindinput="input"></textarea>
+    </view>
+  </view>
+
+  <view class="actions">
+    <button wx:if="{{!editing}}" class="ghost-btn" bindtap="myRegs">我的报名</button>
+    <button wx:if="{{!editing}}" class="primary-btn" bindtap="startEdit">编辑资料</button>
+    <button wx:if="{{editing}}" class="ghost-btn" bindtap="cancelEdit">取消</button>
+    <button wx:if="{{editing}}" class="primary-btn" bindtap="saveProfile">保存资料</button>
+  </view>
+  <button class="logout-btn" bindtap="logout">退出登录</button>
+</view>

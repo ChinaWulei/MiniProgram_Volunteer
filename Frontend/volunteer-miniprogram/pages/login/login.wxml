@@ -1,0 +1,21 @@
+<view class="page">
+  <view class="card">
+    <view class="title">{{mode === 'login' ? '账号登录' : '志愿者注册'}}</view>
+    <input placeholder="账号/学号/工号" value="{{form.username}}" data-k="username" bindinput="input" />
+    <input placeholder="密码" password value="{{form.password}}" data-k="password" bindinput="input" />
+    <block wx:if="{{mode === 'register'}}">
+      <input placeholder="姓名" value="{{form.name}}" data-k="name" bindinput="input" />
+      <input placeholder="学号/工号" value="{{form.identityNo}}" data-k="identityNo" bindinput="input" />
+      <input placeholder="手机号" value="{{form.phone}}" data-k="phone" bindinput="input" />
+      <input placeholder="学院" value="{{form.college}}" data-k="college" bindinput="input" />
+      <input placeholder="专业班级" value="{{form.majorClass}}" data-k="majorClass" bindinput="input" />
+      <input placeholder="技能标签，如 摄影,编程,讲解" value="{{form.skillTags}}" data-k="skillTags" bindinput="input" />
+      <input placeholder="可服务时间，如 周末全天" value="{{form.availableTime}}" data-k="availableTime" bindinput="input" />
+    </block>
+    <button class="primary-btn" bindtap="submit">{{mode === 'login' ? '登录' : '注册并登录'}}</button>
+    <button class="ghost-btn" bindtap="toggle">{{mode === 'login' ? '注册志愿者账号' : '返回登录'}}</button>
+  </view>
+  <view class="card">
+    <view class="muted">测试账号：admin / 123456；20240001 / 123456</view>
+  </view>
+</view>

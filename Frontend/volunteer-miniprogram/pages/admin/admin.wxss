@@ -1,0 +1,23 @@
+.admin-page { min-height: 100vh; padding: 24rpx; background: #f5f7fb; box-sizing: border-box; }
+.dash-hero { display: flex; align-items: center; justify-content: space-between; padding: 30rpx; border-radius: 20rpx; color: #fff; background: linear-gradient(135deg,#0f766e,#14b8a6); box-shadow: 0 14rpx 32rpx rgba(15,118,110,.22); }
+.hero-kicker { font-size: 22rpx; opacity: .9; }
+.hero-title { margin-top: 8rpx; font-size: 38rpx; font-weight: 800; }
+.hero-btn { width: 150rpx; height: 62rpx; line-height: 62rpx; margin: 0; padding: 0; border-radius: 31rpx; color: #0f766e; background: #fff; font-size: 24rpx; }
+.stats-grid, .action-grid { display: grid; grid-template-columns: repeat(2,1fr); gap: 14rpx; margin-top: 18rpx; }
+.stat-card, .panel, .review-card { background: #fff; border-radius: 18rpx; box-shadow: 0 8rpx 24rpx rgba(16,24,40,.06); }
+.stat-card { padding: 22rpx; }
+.stat-card.urgent { border-left: 6rpx solid #ef4444; }
+.stat-num { color: #0f766e; font-size: 40rpx; font-weight: 800; }
+.stat-label, .muted { margin-top: 8rpx; color: #667085; font-size: 24rpx; line-height: 1.45; }
+.primary-btn, .ghost-btn { height: 72rpx; line-height: 72rpx; margin: 0; border-radius: 16rpx; font-size: 26rpx; }
+.primary-btn { background: #0f766e; color: #fff; }
+.ghost-btn { background: #eefaf7; color: #0f766e; }
+button::after { border: 0; }
+.rank-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14rpx; margin-top: 18rpx; }
+.panel { margin-top: 18rpx; padding: 22rpx; }
+.rank-grid .panel { margin-top: 0; }
+.panel-title { color: #172033; font-size: 30rpx; font-weight: 800; margin-bottom: 14rpx; }
+.rank-row, .row { display: flex; align-items: center; justify-content: space-between; gap: 12rpx; padding: 10rpx 0; }
+.rank-name { flex: 1; min-width: 0; color: #172033; font-size: 24rpx; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
+.rank-value, .tag { flex: 0 0 auto; padding: 6rpx 12rpx; border-radius: 999rpx; color: #0f766e; background: #e6fffb; font-size: 22rpx; }
+.review-card { padding: 18rpx; margin-top: 14rpx; }

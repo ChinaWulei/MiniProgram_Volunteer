@@ -1,0 +1,32 @@
+<view class="chat-page">
+  <scroll-view class="chat-list" scroll-y scroll-with-animation scroll-into-view="{{scrollIntoView}}">
+    <view class="quick-row">
+      <view class="quick-chip" bindtap="quickAsk" data-key="weekend">周末活动</view>
+      <view class="quick-chip" bindtap="quickAsk" data-key="photo">摄影志愿</view>
+      <view class="quick-chip" bindtap="quickAsk" data-key="points">提升积分</view>
+    </view>
+
+    <view wx:for="{{messages}}" wx:key="id" id="{{item.id}}" class="message-row {{item.role === 'user' ? 'right' : 'left'}}">
+      <view class="avatar {{item.role === 'user' ? 'user-avatar' : 'ai-avatar'}}">{{item.role === 'user' ? '我' : 'AI'}}</view>
+      <view class="bubble-wrap">
+        <view class="bubble {{item.role === 'user' ? 'user-bubble' : 'ai-bubble'}}">
+          <text>{{item.content}}</text>
+          <view wx:if="{{item.loading}}" class="loading-dot">...</view>
+        </view>
+        <view wx:if="{{item.activities && item.activities.length}}" class="activity-list">
+          <view class="activity-card" wx:for="{{item.activities}}" wx:for-item="activity" wx:key="id" bindtap="goDetail" data-id="{{activity.id}}">
+            <view class="activity-title">{{activity.title}}</view>
+            <view class="activity-meta">{{activity.time}} · {{activity.location}}</view>
+            <view class="activity-meta">剩余 {{activity.remainingSlots}} 个名额</view>
+            <view class="activity-reason">{{activity.reason}}</view>
+          </view>
+        </view>
+      </view>
+    </view>
+  </scroll-view>
+
+  <view class="input-bar">
+    <input class="chat-input" placeholder="问问 AI 志愿助手" value="{{inputValue}}" bindinput="input" confirm-type="send" bindconfirm="send" cursor-spacing="24" adjust-position="{{true}}" hold-keyboard="{{true}}" />
+    <button class="send-btn {{sending ? 'disabled' : ''}}" disabled="{{sending}}" bindtap="send">{{sending ? '发送中' : '发送'}}</button>
+  </view>
+</view>

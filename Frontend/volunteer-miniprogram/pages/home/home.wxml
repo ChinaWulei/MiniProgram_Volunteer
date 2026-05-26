@@ -1,0 +1,137 @@
+<view class="page">
+  <view class="hero">
+    <view class="hero-kicker">数计学院</view>
+    <view class="hero-title">志愿者服务平台</view>
+    <view class="hero-sub">活动统筹、在线报名、人才库检索与智能匹配一体化管理</view>
+  </view>
+
+  <view class="tab-bar">
+    <button class="tab-btn {{activeTab === 'hall' ? 'active' : ''}}" bindtap="goActivities">活动大厅</button>
+    <button class="tab-btn" bindtap="goVolunteers">志愿者库</button>
+    <button class="tab-btn message-tab" bindtap="goMessages">
+      消息
+      <view wx:if="{{unreadCount > 0}}" class="red-dot"></view>
+    </button>
+    <button class="tab-btn" bindtap="goMineOrManage">{{isAdmin ? '我的发布' : '我的报名'}}</button>
+    <button class="tab-btn" bindtap="goProfile">个人中心</button>
+  </view>
+
+  <view wx:if="{{!showActivityHall}}">
+    <view class="section-head news-head">
+      <view>
+        <view class="section-title">活动风采</view>
+        <view class="section-sub">查看学院志愿服务新闻与活动回顾</view>
+      </view>
+      <button class="text-btn" bindtap="goNews">更多</button>
+    </view>
+
+    <view wx:if="{{isAdmin}}" class="admin-shortcuts">
+      <button class="admin-action primary" bindtap="goActivityPublish">发布活动</button>
+      <button class="admin-action" bindtap="goActivityManage">活动管理</button>
+      <button class="admin-action" bindtap="goAdmin">管理后台</button>
+    </view>
+
+    <view class="ops-panel">
+      <view class="panel-head">
+        <view>
+          <view class="section-title">{{isAdmin ? '管理数据概览' : '服务数据概览'}}</view>
+          <view class="section-sub">{{isAdmin ? '实时关注活动、报名与志愿服务数据' : '实时关注报名、签到与成长积分'}}</view>
+        </view>
+        <button wx:if="{{isAdmin}}" class="admin-link" bindtap="goAdmin">管理</button>
+      </view>
+      <view class="stats-grid">
+        <view class="stat-card" wx:for="{{stats}}" wx:key="label">
+          <view class="stat-icon">{{item.icon}}</view>
+          <view class="stat-value">{{item.value}}</view>
+          <view class="stat-label">{{item.label}}</view>
+        </view>
+      </view>
+    </view>
+
+    <view class="section-head">
+      <view>
+        <view class="section-title">推荐活动</view>
+        <view class="section-sub">即将截止与热门活动优先展示</view>
+      </view>
+      <button class="text-btn" bindtap="goActivities">查看全部</button>
+    </view>
+
+    <view class="activity-card recommended" wx:for="{{recommendedActivities}}" wx:key="id" bindtap="goDetail" data-id="{{item.id}}">
+      <image wx:if="{{item.coverImageUrl}}" class="activity-cover" src="{{item.coverImageUrl}}" mode="aspectFill"></image>
+      <view class="activity-top">
+        <view class="activity-title">{{item.name}}</view>
+        <view class="status-tag {{item.statusClass}}">{{item.status}}</view>
+      </view>
+      <view class="activity-meta">{{item.startTimeText}} 至 {{item.endTimeText}}</view>
+      <view class="activity-meta">{{item.location}}</view>
+      <view class="activity-bottom">
+        <view class="quota">剩余 {{item.remainingSlots}} 个名额</view>
+        <view class="reason">{{item.reason}}</view>
+      </view>
+    </view>
+
+    <view class="empty-card" wx:if="{{recommendedActivities.length === 0}}">
+      <view class="empty-title">暂无推荐活动</view>
+      <view class="empty-sub">活动发布后会在这里展示即将截止与热门项目</view>
+    </view>
+
+    <view class="login-card" wx:if="{{!user}}">
+      <view>
+        <view class="login-title">登录后解锁完整服务</view>
+        <view class="section-sub">报名活动、查看签到状态与积分成长</view>
+      </view>
+      <button class="primary-btn mini" bindtap="goLogin">登录 / 注册</button>
+    </view>
+  </view>
+
+  <view wx:else>
+    <view class="filter-panel">
+      <input placeholder="搜索活动关键词" value="{{keyword}}" bindinput="setKeyword" confirm-type="search" bindconfirm="loadActivities" />
+      <view class="filter-row">
+        <picker mode="selector" range="{{categories}}" bindchange="pickCategory">
+          <view class="filter-chip">类别：{{category || '全部'}}</view>
+        </picker>
+        <picker mode="selector" range="{{statuses}}" bindchange="pickStatus">
+          <view class="filter-chip">状态：{{status || '全部'}}</view>
+        </picker>
+        <button class="filter-btn" bindtap="loadActivities">筛选</button>
+      </view>
+    </view>
+
+    <view class="section-head compact">
+      <view>
+        <view class="section-title">活动大厅</view>
+        <view class="section-sub">共 {{activityList.length}} 个活动</view>
+      </view>
+    </view>
+
+    <view class="activity-card hall-card" wx:for="{{activityList}}" wx:key="id" bindtap="goDetail" data-id="{{item.id}}">
+      <image wx:if="{{item.coverImageUrl}}" class="activity-cover" src="{{item.coverImageUrl}}" mode="aspectFill"></image>
+      <view class="activity-top">
+        <view class="activity-title">{{item.name}}</view>
+        <view class="status-tag {{item.statusClass}}">{{item.status}}</view>
+      </view>
+      <view class="activity-meta">{{item.startTimeText}} 至 {{item.endTimeText}}</view>
+      <view class="activity-meta">{{item.location}}</view>
+      <view class="activity-bottom">
+        <view class="quota">剩余 {{item.remainingSlots}} 个名额</view>
+        <view class="reason">{{item.reason}}</view>
+      </view>
+    </view>
+
+    <view class="empty-card" wx:if="{{activityList.length === 0}}">
+      <view class="empty-title">暂无匹配活动</view>
+      <view class="empty-sub">调整关键词、类别或状态后再试</view>
+    </view>
+  </view>
+  <button class="ai-float" bindtap="goAi">
+    <view class="robot-icon">
+      <view class="robot-antenna"></view>
+      <view class="robot-head">
+        <view class="robot-eye"></view>
+        <view class="robot-eye"></view>
+      </view>
+      <view class="robot-mouth"></view>
+    </view>
+  </button>
+</view>

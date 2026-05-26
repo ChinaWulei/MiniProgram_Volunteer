@@ -1,0 +1,86 @@
+<view class="detail-page">
+  <view class="archive-hero">
+    <view class="avatar-wrap">
+      <image wx:if="{{profile.avatarUrl}}" class="avatar" src="{{profile.avatarUrl}}" mode="aspectFill"></image>
+      <view wx:else class="avatar">{{profile.avatarText}}</view>
+    </view>
+    <view class="hero-main">
+      <view class="name">{{profile.displayName}}</view>
+      <view class="no">志愿者编号 {{profile.identityNo || profile.userId}}</view>
+      <view class="school">{{profile.college}} · {{profile.majorClass}}</view>
+    </view>
+  </view>
+
+  <view class="metrics">
+    <view><text>{{profile.totalHours || 0}}</text><text>累计小时</text></view>
+    <view><text>{{profile.volunteerPoints || profile.creditScore || 0}}</text><text>志愿积分</text></view>
+    <view><text>{{profile.serviceCount || 0}}</text><text>服务次数</text></view>
+  </view>
+
+  <view class="section">
+    <view class="section-title">人才画像</view>
+    <view class="level">{{profile.volunteerLevel}}</view>
+    <view class="tags"><text class="tag" wx:for="{{skills}}" wx:key="*this">{{item}}</text></view>
+    <view class="line"><text>可服务时间</text><text>{{profile.availableTime || '-'}}</text></view>
+    <view class="bio">{{profile.bio || '这位同学暂未填写个人简介。'}}</view>
+  </view>
+
+  <view class="section">
+    <view class="section-title">勋章墙</view>
+    <view wx:if="{{badges.length}}" class="badges">
+      <view class="badge" wx:for="{{badges}}" wx:key="*this">✓ {{item}}</view>
+    </view>
+    <view wx:else class="muted">继续参与学院志愿服务后会点亮勋章</view>
+  </view>
+
+  <view wx:if="{{isAdmin && checkinStats}}" class="section">
+    <view class="section-title">签到可信度</view>
+    <view class="trust-grid">
+      <view><text>{{checkinStats.successRate || 0}}%</text><text>签到成功率</text></view>
+      <view><text>{{checkinStats.normalCount || 0}}</text><text>正常签到</text></view>
+      <view><text>{{checkinStats.manualCount || 0}}</text><text>补签次数</text></view>
+      <view><text>{{checkinStats.absentCount || 0}}</text><text>未签到</text></view>
+    </view>
+    <view class="recent-checkin" wx:for="{{checkinStats.recentRecords}}" wx:key="activityId">
+      <view class="recent-title">{{item.activityName}}</view>
+      <view class="recent-meta">{{item.status}} · {{item.checkinTime || '-'}}</view>
+    </view>
+  </view>
+
+  <view class="section">
+    <view class="section-title">历史参与活动</view>
+    <view wx:if="{{historyActivities.length}}">
+      <view class="history-card" wx:for="{{historyActivities}}" wx:key="id" bindtap="goActivity" data-id="{{item.id}}">
+        <image wx:if="{{item.coverImageUrl}}" class="history-cover" src="{{item.coverImageUrl}}" mode="aspectFill"></image>
+        <view class="history-main">
+          <view class="history-title">{{item.name}}</view>
+          <view class="history-meta">{{item.category}} · {{item.location}}</view>
+          <view class="history-meta">{{item.startTime}} 至 {{item.endTime}}</view>
+          <view class="history-bottom">
+            <view class="history-hours">{{item.serviceHours || 0}} 小时</view>
+            <view class="history-status">{{item.status}}</view>
+          </view>
+        </view>
+      </view>
+    </view>
+    <view wx:else class="history">暂无活动记录</view>
+  </view>
+
+  <view class="bottom-actions">
+    <button class="ghost-btn" bindtap="startChat">发起私聊</button>
+    <button wx:if="{{isAdmin}}" class="primary-btn" bindtap="openInvite">邀请参加活动</button>
+  </view>
+
+  <view wx:if="{{showInvite}}" class="mask" bindtap="closeInvite"></view>
+  <view wx:if="{{showInvite}}" class="invite-panel">
+    <view class="panel-title">定向邀请</view>
+    <picker mode="selector" range="{{activityNames}}" value="{{activityIndex}}" bindchange="pickActivity">
+      <view class="picker-field">{{activityNames[activityIndex] || '选择活动'}}</view>
+    </picker>
+    <textarea placeholder="输入邀请理由" value="{{inviteReason}}" bindinput="inputReason"></textarea>
+    <view class="panel-actions">
+      <button class="ghost-btn" bindtap="closeInvite">取消</button>
+      <button class="primary-btn" bindtap="sendInvite">发送邀请</button>
+    </view>
+  </view>
+</view>

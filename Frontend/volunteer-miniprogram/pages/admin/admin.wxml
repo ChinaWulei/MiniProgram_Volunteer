@@ -1,0 +1,59 @@
+<view class="admin-page">
+  <view class="dash-hero">
+    <view>
+      <view class="hero-kicker">管理员 Dashboard</view>
+      <view class="hero-title">数计志愿服务管理</view>
+    </view>
+    <button class="hero-btn" bindtap="create">发布活动</button>
+  </view>
+
+  <view class="stats-grid">
+    <view class="stat-card"><view class="stat-num">{{stats.activityTotal || 0}}</view><view class="stat-label">活动总数</view></view>
+    <view class="stat-card"><view class="stat-num">{{stats.volunteerTotal || 0}}</view><view class="stat-label">志愿者人数</view></view>
+    <view class="stat-card"><view class="stat-num">{{stats.totalHours || 0}}</view><view class="stat-label">总服务时长</view></view>
+    <view class="stat-card urgent"><view class="stat-num">{{stats.pendingRegistrationTotal || 0}}</view><view class="stat-label">待审核报名</view></view>
+  </view>
+
+  <view class="action-grid">
+    <button class="primary-btn" bindtap="create">发布活动</button>
+    <button class="ghost-btn" bindtap="manageActivities">编辑/结束活动</button>
+    <button class="ghost-btn" bindtap="reviewList">审核报名</button>
+    <button class="ghost-btn" bindtap="volunteers">志愿者库</button>
+  </view>
+
+  <view class="rank-grid">
+    <view class="panel">
+      <view class="panel-title">服务时长排行</view>
+      <view class="rank-row" wx:for="{{stats.hoursRank}}" wx:key="userId" bindtap="goVolunteer" data-id="{{item.userId}}">
+        <view class="rank-name">{{index + 1}}. {{item.name}}</view>
+        <view class="rank-value">{{item.totalHours}}h</view>
+      </view>
+    </view>
+    <view class="panel">
+      <view class="panel-title">积分排行</view>
+      <view class="rank-row" wx:for="{{stats.pointsRank}}" wx:key="userId" bindtap="goVolunteer" data-id="{{item.userId}}">
+        <view class="rank-name">{{index + 1}}. {{item.name}}</view>
+        <view class="rank-value">{{item.creditScore}}</view>
+      </view>
+    </view>
+  </view>
+
+  <view class="panel">
+    <view class="panel-title">活动类别统计</view>
+    <view class="row" wx:for="{{stats.categoryStats}}" wx:key="category">
+      <view class="muted">{{item.category}}</view><view class="tag">{{item.count}}</view>
+    </view>
+  </view>
+
+  <view class="panel">
+    <view class="panel-title">最近报名</view>
+    <view wx:for="{{stats.recentRegistrations}}" wx:key="id" class="review-card">
+      <view class="muted">{{item.user_name}} 报名 {{item.activity_name}} · {{item.status}}</view>
+      <view class="row">
+        <button size="mini" class="ghost-btn" data-id="{{item.id}}" data-status="已通过" bindtap="review">通过</button>
+        <button size="mini" class="ghost-btn" data-id="{{item.id}}" data-status="已拒绝" bindtap="review">拒绝</button>
+        <button size="mini" class="primary-btn" data-id="{{item.id}}" data-status="已完成" bindtap="review">完成</button>
+      </view>
+    </view>
+  </view>
+</view>

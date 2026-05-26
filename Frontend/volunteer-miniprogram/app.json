@@ -1,0 +1,43 @@
+{
+  "pages": [
+    "pages/home/home",
+    "pages/login/login",
+    "pages/activities/activities",
+    "pages/activity-detail/activity-detail",
+    "pages/my-registrations/my-registrations",
+    "pages/volunteers/volunteers",
+    "pages/match/match",
+    "pages/admin/admin",
+    "pages/admin/activity-manage/activity-manage",
+    "pages/admin/activity-publish/activity-publish",
+    "pages/admin/activity-checkin/activity-checkin",
+    "pages/admin/activity-news-edit/activity-news-edit",
+    "pages/admin/registration-review/registration-review",
+    "pages/activity-form/activity-form",
+    "pages/profile/profile",
+    "pages/volunteer-library/volunteer-library",
+    "pages/volunteer-detail/volunteer-detail",
+    "pages/message-center/message-center",
+    "pages/chat-room/chat-room",
+    "pages/activity-news/activity-news",
+    "pages/activity-news-detail/activity-news-detail",
+    "pages/ai-chat/ai-chat"
+  ],
+  "window": {
+    "navigationBarTitleText": "数计志愿服务",
+    "navigationBarBackgroundColor": "#0f766e",
+    "navigationBarTextStyle": "white",
+    "backgroundColor": "#f6f8fb"
+  },
+  "permission": {
+    "scope.userLocation": {
+      "desc": "用于选择活动签到地点和志愿者定位签到"
+    }
+  },
+  "requiredPrivateInfos": [
+    "getLocation",
+    "chooseLocation"
+  ],
+  "style": "v2",
+  "sitemapLocation": "sitemap.json"
+}

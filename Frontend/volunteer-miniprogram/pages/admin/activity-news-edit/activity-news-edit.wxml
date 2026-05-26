@@ -1,0 +1,23 @@
+<view class="edit-page">
+  <view class="editor-card">
+    <input class="title-input" placeholder="帖子标题" value="{{form.title}}" data-key="title" bindinput="input" />
+    <button class="ai-btn" loading="{{generating}}" bindtap="generate">AI生成活动总结</button>
+    <textarea class="content-input" placeholder="正文内容" value="{{form.content}}" data-key="content" bindinput="input"></textarea>
+  </view>
+
+  <view class="image-section">
+    <view class="section-title">活动图片</view>
+    <view class="image-grid">
+      <view class="image-item" wx:for="{{form.imageUrls}}" wx:key="*this">
+        <image src="{{item}}" mode="aspectFill" data-url="{{item}}" bindtap="preview"></image>
+        <view class="remove" data-index="{{index}}" bindtap="removeImage">×</view>
+      </view>
+      <view class="add-image" bindtap="chooseImages">+</view>
+    </view>
+  </view>
+
+  <view class="bottom-actions">
+    <button class="ghost" bindtap="saveDraft">保存草稿</button>
+    <button class="primary" bindtap="publish">发布帖子</button>
+  </view>
+</view>

@@ -1,0 +1,10 @@
+<view class="page">
+  <view class="card registration-card" wx:for="{{list}}" wx:key="id" bindtap="goDetail" data-id="{{item.activity_id}}">
+    <view class="row"><view class="title">{{item.activity_name}}</view><view class="tag">{{item.status}}</view></view>
+    <view class="muted">{{item.category}} · {{item.location}}</view>
+    <view class="muted">{{item.start_time}} 至 {{item.end_time}}</view>
+    <view class="muted" wx:if="{{item.service_hours}}">服务时长：{{item.service_hours}} 小时</view>
+    <view class="muted" wx:if="{{item.review_remark}}">审核意见：{{item.review_remark}}</view>
+  </view>
+  <view class="card muted" wx:if="{{list.length === 0}}">暂无报名记录</view>
+</view>

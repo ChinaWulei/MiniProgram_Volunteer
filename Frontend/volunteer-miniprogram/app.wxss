@@ -1,0 +1,99 @@
+page {
+  background: #f5f7fb;
+  color: #172033;
+  font-family: -apple-system, BlinkMacSystemFont, "Helvetica Neue", Arial, sans-serif;
+}
+.page { padding: 24rpx; }
+.hero {
+  padding: 34rpx 28rpx;
+  border-radius: 16rpx;
+  color: #fff;
+  background: linear-gradient(135deg, #0f766e, #2563eb);
+  margin-bottom: 24rpx;
+}
+.hero-title { font-size: 42rpx; font-weight: 700; }
+.hero-sub { margin-top: 12rpx; font-size: 26rpx; opacity: .9; line-height: 1.5; }
+.card {
+  background: #fff;
+  border-radius: 14rpx;
+  padding: 24rpx;
+  margin-bottom: 20rpx;
+  box-shadow: 0 8rpx 24rpx rgba(16, 24, 40, .06);
+}
+.row { display: flex; align-items: center; justify-content: space-between; gap: 16rpx; }
+.grid { display: grid; grid-template-columns: 1fr 1fr; gap: 18rpx; }
+.title { font-size: 32rpx; font-weight: 700; }
+.muted { color: #667085; font-size: 24rpx; line-height: 1.5; }
+.tag { display: inline-block; padding: 6rpx 14rpx; border-radius: 999rpx; background: #e6fffb; color: #0f766e; font-size: 22rpx; margin: 8rpx 8rpx 0 0; }
+.tag,
+.status,
+.status-tag,
+.status-pill,
+.filter-chip,
+.quick-chip,
+.level,
+.badge,
+.skill,
+.reason,
+.checkin-tag,
+.history-status,
+.reg-status,
+.rank-value,
+.notice-type,
+.unread,
+.filter-chip,
+.activity-reason,
+.invite-label,
+.invite-status {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1.2;
+  box-sizing: border-box;
+  vertical-align: middle;
+}
+
+.filter-chip,
+.quick-chip,
+.tab,
+.skill {
+  display: flex;
+}
+.danger { color: #dc2626; }
+.primary-btn {
+  background: #0f766e;
+  color: #fff;
+  border-radius: 12rpx;
+  font-size: 28rpx;
+}
+.ghost-btn {
+  background: #eef6f5;
+  color: #0f766e;
+  border-radius: 12rpx;
+  font-size: 28rpx;
+}
+input {
+  width: 100%;
+  height: 76rpx;
+  line-height: 76rpx;
+  background: #fff;
+  border: 1px solid #e4e7ec;
+  border-radius: 12rpx;
+  padding: 0 20rpx;
+  margin-bottom: 18rpx;
+  font-size: 28rpx;
+  box-sizing: border-box;
+}
+textarea, picker {
+  width: 100%;
+  background: #fff;
+  border: 1px solid #e4e7ec;
+  border-radius: 12rpx;
+  padding: 20rpx;
+  margin-bottom: 18rpx;
+  font-size: 28rpx;
+  box-sizing: border-box;
+}
+textarea { width: 100%; min-height: 150rpx; }
+.stat { text-align: center; }
+.stat-num { font-size: 40rpx; font-weight: 800; color: #0f766e; }

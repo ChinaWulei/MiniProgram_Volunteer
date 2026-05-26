@@ -1,0 +1,47 @@
+<view class="review-page">
+  <view class="filter-card">
+    <input placeholder="搜索报名人、学号、活动名称、地点" value="{{keyword}}" bindinput="input" confirm-type="search" bindconfirm="load" />
+    <view class="filter-row">
+      <picker mode="selector" range="{{statuses}}" bindchange="pickStatus">
+        <view class="filter-chip">状态：{{status || '全部'}}</view>
+      </picker>
+      <button class="search-btn" bindtap="load">筛选</button>
+    </view>
+  </view>
+
+  <view class="review-card" wx:for="{{list}}" wx:key="id">
+    <view class="user-row">
+      <image wx:if="{{item.avatarUrl}}" class="avatar" src="{{item.avatarUrl}}" mode="aspectFill"></image>
+      <view wx:else class="avatar">{{item.avatarText}}</view>
+      <view class="user-main">
+        <view class="name">{{item.userText}}</view>
+        <view class="meta">{{item.identityNo}} · {{item.college}} · {{item.majorClass}}</view>
+      </view>
+      <view class="status">{{item.status}}</view>
+    </view>
+    <view class="activity-box" bindtap="goActivity" data-id="{{item.activity_id || item.activityId}}">
+      <view class="activity-title">{{item.activityName}}</view>
+      <view class="meta">{{item.category}} · {{item.location}}</view>
+      <view class="meta">{{item.timeText}}</view>
+      <view class="meta">报名时间：{{item.createdText}}</view>
+    </view>
+    <view class="actions">
+      <button wx:if="{{item.status === '待审核'}}" bindtap="review" data-id="{{item.id}}" data-status="已通过">通过</button>
+      <button wx:if="{{item.status === '待审核'}}" bindtap="review" data-id="{{item.id}}" data-status="已拒绝">拒绝</button>
+      <button bindtap="openCancel" data-id="{{item.id}}" class="danger">取消报名</button>
+    </view>
+  </view>
+
+  <view wx:if="{{list.length === 0}}" class="empty">暂无报名记录</view>
+
+  <view wx:if="{{showCancel}}" class="mask" bindtap="closeCancel"></view>
+  <view wx:if="{{showCancel}}" class="cancel-panel">
+    <view class="panel-title">取消 {{cancelItem.userText}} 的报名</view>
+    <view class="meta">{{cancelItem.activityName}}</view>
+    <textarea placeholder="填写取消原因，学生会收到通知" value="{{cancelReason}}" bindinput="inputReason"></textarea>
+    <view class="panel-actions">
+      <button bindtap="closeCancel">返回</button>
+      <button class="danger" bindtap="cancelRegistration">确认取消</button>
+    </view>
+  </view>
+</view>

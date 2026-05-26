@@ -1,0 +1,39 @@
+.checkin-page { min-height: 100vh; padding: 24rpx; background: #f5f7fb; box-sizing: border-box; }
+.summary-card, .filter-card, .person-card { background: #fff; border-radius: 18rpx; box-shadow: 0 8rpx 24rpx rgba(16,24,40,.06); }
+.summary-card { padding: 26rpx; text-align: center; }
+.activity-title { color: #172033; font-size: 32rpx; font-weight: 800; }
+.meta { margin-top: 8rpx; color: #667085; font-size: 23rpx; line-height: 1.35; }
+.rate { margin-top: 18rpx; color: #0f766e; font-size: 54rpx; font-weight: 900; }
+.rate-label { color: #667085; font-size: 23rpx; }
+.stat-grid { display: grid; grid-template-columns: repeat(4,1fr); gap: 10rpx; margin-top: 18rpx; }
+.stat-grid view { padding: 14rpx 4rpx; border-radius: 14rpx; background: #eefaf7; }
+.stat-grid text { display: block; }
+.stat-grid text:first-child { color: #0f766e; font-size: 30rpx; font-weight: 800; }
+.stat-grid text:last-child { margin-top: 4rpx; color: #667085; font-size: 20rpx; }
+.filter-card { margin-top: 18rpx; padding: 18rpx; }
+.filter-card input { margin-bottom: 14rpx; background: #f8fbfb; }
+.tabs { white-space: nowrap; }
+.tab { display: inline-block; margin-right: 12rpx; padding: 10rpx 18rpx; border-radius: 999rpx; color: #0f766e; background: #eefaf7; font-size: 23rpx; }
+.tab.active { color: #fff; background: #0f766e; }
+.person-card { display: flex; gap: 16rpx; margin-top: 16rpx; padding: 20rpx; }
+.avatar { width: 82rpx; height: 82rpx; line-height: 82rpx; border-radius: 50%; background: #0f766e; color: #fff; text-align: center; font-size: 30rpx; font-weight: 800; }
+.person-main { flex: 1; min-width: 0; }
+.row { display: flex; align-items: center; justify-content: space-between; gap: 12rpx; }
+.name { color: #172033; font-size: 28rpx; font-weight: 800; }
+.status { padding: 6rpx 12rpx; border-radius: 999rpx; font-size: 21rpx; color: #667085; background: #f2f4f7; }
+.status.CHECKED_IN { background: #dcfce7; color: #15803d; }
+.status.MANUAL_CHECKED_IN { background: #dbeafe; color: #2563eb; }
+.status.LATE_CHECKED_IN { background: #ffedd5; color: #c2410c; }
+.status.ABSENT { background: #fee2e2; color: #dc2626; }
+.person-actions { display: flex; justify-content: flex-end; gap: 12rpx; margin-top: 14rpx; }
+.manual-btn, .cancel-btn { width: 150rpx; height: 58rpx; line-height: 58rpx; margin: 0; padding: 0; border-radius: 14rpx; color: #fff; background: #0f766e; font-size: 23rpx; }
+.cancel-btn { color: #dc2626; background: #fee2e2; }
+button::after { border: 0; }
+.mask { position: fixed; left: 0; right: 0; top: 0; bottom: 0; z-index: 40; background: rgba(0,0,0,.35); }
+.manual-panel { position: fixed; left: 24rpx; right: 24rpx; bottom: 32rpx; z-index: 41; padding: 24rpx; border-radius: 20rpx; background: #fff; }
+.panel-title { color: #172033; font-size: 30rpx; font-weight: 800; margin-bottom: 14rpx; }
+.manual-panel textarea { min-height: 150rpx; background: #f8fbfb; }
+.panel-actions { display: flex; gap: 14rpx; margin-top: 16rpx; }
+.panel-actions button { flex: 1; height: 68rpx; line-height: 68rpx; margin: 0; border-radius: 16rpx; color: #0f766e; background: #eefaf7; font-size: 25rpx; }
+.panel-actions .primary { color: #fff; background: #0f766e; }
+.panel-actions .danger { color: #fff; background: #dc2626; }

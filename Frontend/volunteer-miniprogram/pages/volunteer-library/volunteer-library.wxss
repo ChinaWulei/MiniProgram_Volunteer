@@ -1,0 +1,23 @@
+.library-page { min-height: 100vh; padding: 24rpx; background: #f5f7fb; box-sizing: border-box; }
+.top-band { display: flex; justify-content: space-between; align-items: center; padding: 30rpx; border-radius: 20rpx; color: #fff; background: linear-gradient(135deg,#0f766e,#14b8a6); box-shadow: 0 14rpx 32rpx rgba(15,118,110,.22); }
+.kicker { font-size: 22rpx; opacity: .9; }
+.title { margin-top: 8rpx; font-size: 38rpx; font-weight: 800; }
+.msg-btn { width: 104rpx; height: 58rpx; line-height: 58rpx; margin: 0; padding: 0; border-radius: 30rpx; color: #0f766e; background: #fff; font-size: 24rpx; }
+.msg-btn::after, .search-btn::after { border: 0; }
+.filter-panel { margin-top: 22rpx; padding: 20rpx; border-radius: 18rpx; background: #fff; box-shadow: 0 8rpx 24rpx rgba(16,24,40,.06); }
+.filter-panel input { margin-bottom: 14rpx; background: #f8fbfb; }
+.filter-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12rpx; }
+.filter-row { display: flex; gap: 12rpx; align-items: center; }
+.filter-row picker { flex: 1; min-width: 0; }
+.filter-chip { height: 62rpx; line-height: 1.2; padding: 0 14rpx; border-radius: 14rpx; color: #0f766e; background: #eefaf7; font-size: 23rpx; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; display: flex; align-items: center; justify-content: center; box-sizing: border-box; }
+.search-btn { width: 112rpx; height: 62rpx; line-height: 62rpx; margin: 0; padding: 0; border-radius: 14rpx; background: #0f766e; color: #fff; font-size: 24rpx; }
+.vol-card { display: flex; gap: 18rpx; margin-top: 18rpx; padding: 22rpx; border-radius: 18rpx; background: #fff; box-shadow: 0 8rpx 24rpx rgba(16,24,40,.06); border: 1rpx solid #edf4f2; }
+.avatar { width: 92rpx; height: 92rpx; line-height: 92rpx; border-radius: 50%; text-align: center; color: #fff; background: #0f766e; font-size: 34rpx; font-weight: 800; }
+.vol-main { flex: 1; min-width: 0; }
+.name-row { display: flex; align-items: center; justify-content: space-between; gap: 12rpx; }
+.name { color: #172033; font-size: 30rpx; font-weight: 800; }
+.level { flex: 0 0 auto; color: #0f766e; background: #e6fffb; border-radius: 999rpx; padding: 6rpx 12rpx; font-size: 21rpx; }
+.meta, .stats, .recent { margin-top: 8rpx; color: #667085; font-size: 23rpx; line-height: 1.35; }
+.tags { margin-top: 8rpx; }
+.tag { display: inline-block; margin: 6rpx 8rpx 0 0; padding: 6rpx 12rpx; border-radius: 999rpx; color: #0f766e; background: #f0fdfa; font-size: 21rpx; }
+.empty { margin-top: 28rpx; padding: 34rpx; text-align: center; color: #667085; background: #fff; border-radius: 18rpx; }

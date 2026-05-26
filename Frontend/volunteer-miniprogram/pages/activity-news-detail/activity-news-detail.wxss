@@ -1,0 +1,6 @@
+.detail-page { min-height: 100vh; padding: 34rpx 28rpx; background: #fff; box-sizing: border-box; }
+.title { color: #172033; font-size: 42rpx; line-height: 1.25; font-weight: 900; }
+.meta { margin-top: 14rpx; color: #98a2b3; font-size: 23rpx; }
+.info-card { margin-top: 24rpx; padding: 20rpx; border-radius: 16rpx; color: #0f766e; background: #f0fdfa; font-size: 24rpx; line-height: 1.55; }
+.content { margin-top: 28rpx; color: #172033; font-size: 29rpx; line-height: 1.8; white-space: pre-wrap; }
+.news-image { width: 100%; margin-top: 22rpx; border-radius: 16rpx; background: #e6fffb; }

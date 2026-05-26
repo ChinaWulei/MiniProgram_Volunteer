@@ -1,0 +1,25 @@
+<view class="message-page">
+  <view class="section-title">私聊消息</view>
+  <view class="conversation" wx:for="{{conversations}}" wx:key="id" bindtap="goChat" data-id="{{item.id}}">
+    <image wx:if="{{item.peerAvatarUrl}}" class="avatar" src="{{item.peerAvatarUrl}}" mode="aspectFill"></image>
+    <view wx:else class="avatar">{{item.avatarText}}</view>
+    <view class="main">
+      <view class="row">
+        <view class="name">{{item.peerName}}</view>
+        <view class="time">{{item.timeText}}</view>
+      </view>
+      <view class="summary">{{item.lastMessage || '开始学院内部交流'}}</view>
+      <view class="meta">{{item.peerCollege}} · {{item.peerMajorClass}}</view>
+    </view>
+    <view wx:if="{{item.unreadCount}}" class="unread">{{item.unreadCount}}</view>
+  </view>
+  <view wx:if="{{conversations.length === 0}}" class="empty">暂无私聊消息</view>
+
+  <view class="section-title second">活动邀请与通知</view>
+  <view class="notice" wx:for="{{notices}}" wx:key="id" bindtap="goNotice" data-id="{{item.id}}">
+    <view class="notice-type">{{item.type}}</view>
+    <view class="notice-title">{{item.title}}</view>
+    <view class="notice-summary">{{item.summary}}</view>
+    <view class="notice-time">{{item.time}}</view>
+  </view>
+</view>

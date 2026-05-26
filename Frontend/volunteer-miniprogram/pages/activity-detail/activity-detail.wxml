@@ -1,0 +1,91 @@
+<view class="detail-page" wx:if="{{activity}}">
+  <image wx:if="{{activity.coverImageUrl}}" class="detail-cover" src="{{activity.coverImageUrl}}" mode="aspectFill"></image>
+  <view class="detail-hero">
+    <view class="status-pill">{{activity.status}}</view>
+    <view class="detail-title">{{activity.name}}</view>
+    <view class="detail-sub">{{activity.category}} · {{activity.location}}</view>
+  </view>
+
+  <view class="quota-panel">
+    <view class="quota-item"><view class="quota-num">{{activity.recruitNumber}}</view><view class="quota-label">招募人数</view></view>
+    <view class="quota-item"><view class="quota-num">{{activity.registeredNumber}}</view><view class="quota-label">已报名</view></view>
+    <view class="quota-item"><view class="quota-num">{{activity.remainingNumber}}</view><view class="quota-label">剩余名额</view></view>
+    <view class="quota-item"><view class="quota-num">{{activity.serviceHours}}</view><view class="quota-label">服务时长</view></view>
+  </view>
+
+  <view class="detail-section">
+    <view class="section-title">活动信息</view>
+    <view class="info-line"><text>活动时间</text><text>{{activity.startTimeText}} 至 {{activity.endTimeText}}</text></view>
+    <view class="info-line"><text>报名截止</text><text>{{activity.signupDeadlineText || '以活动通知为准'}}</text></view>
+    <view class="info-line"><text>活动地点</text><text>{{activity.location}}</text></view>
+    <view class="info-line"><text>活动类型</text><text>{{activity.category}}</text></view>
+    <view class="info-line"><text>审核方式</text><text>{{activity.reviewMethod || '人工审核'}}</text></view>
+  </view>
+
+  <view wx:if="{{!isAdmin && activity.signupStatus === '已通过'}}" class="detail-section checkin-section">
+    <view class="section-title">活动签到</view>
+    <view class="info-line"><text>签到地点</text><text>{{activity.location}}</text></view>
+    <view class="info-line"><text>活动时间</text><text>{{activity.startTimeText}} 至 {{activity.endTimeText}}</text></view>
+    <view class="info-line"><text>签到状态</text><text class="checkin-tag {{checkin.status}}">{{checkin.statusText || '未签到'}}</text></view>
+    <view class="info-line"><text>签到时间</text><text>{{checkin.checkinTime || '-'}}</text></view>
+    <view class="info-line"><text>签到方式</text><text>{{checkin.method || '-'}}</text></view>
+    <button class="checkin-btn" disabled="{{checkin.status && checkin.status !== 'NOT_CHECKED_IN' && checkin.status !== 'ABSENT'}}" bindtap="checkin">定位签到</button>
+  </view>
+
+  <view class="detail-section">
+    <view class="section-title">所需技能</view>
+    <view><text class="tag" wx:for="{{skills}}" wx:key="*this">{{item}}</text></view>
+  </view>
+
+  <view class="detail-section">
+    <view class="section-title">活动简介</view>
+    <view class="paragraph">{{activity.description || '暂无活动简介'}}</view>
+  </view>
+
+  <view class="detail-section">
+    <view class="section-title">报名要求</view>
+    <view class="paragraph">{{activity.signupRequirement || '暂无特殊要求'}}</view>
+  </view>
+
+  <view class="detail-section contact-section">
+    <view class="section-title">联系人</view>
+    <view class="info-line"><text>联系人</text><text>{{activity.contactName || '-'}}</text></view>
+    <view class="info-line"><text>联系电话</text><text>{{activity.contactPhone || '-'}}</text></view>
+  </view>
+
+  <view wx:if="{{isAdmin}}" class="detail-section">
+    <view class="section-title">报名人员</view>
+    <view class="reg-card" wx:for="{{registrations}}" wx:key="id">
+      <image wx:if="{{item.avatarUrl}}" class="reg-avatar" src="{{item.avatarUrl}}" mode="aspectFill"></image>
+      <view wx:else class="reg-avatar">{{item.avatarText}}</view>
+      <view class="reg-main">
+        <view class="reg-row">
+          <view class="reg-name">{{item.userText}}</view>
+          <view class="reg-status">{{item.status}}</view>
+        </view>
+        <view class="reg-meta">{{item.identityNo}} · {{item.college}} · {{item.majorClass}}</view>
+        <view class="reg-meta">报名时间：{{item.createdText}}</view>
+        <button class="reg-cancel" bindtap="openCancel" data-id="{{item.id}}">取消报名</button>
+      </view>
+    </view>
+    <view wx:if="{{registrations.length === 0}}" class="empty-reg">暂无报名人员</view>
+  </view>
+
+  <view wx:if="{{showCancel}}" class="mask" bindtap="closeCancel"></view>
+  <view wx:if="{{showCancel}}" class="cancel-panel">
+    <view class="panel-title">取消 {{cancelItem.userText}} 的报名</view>
+    <textarea placeholder="填写取消原因，学生会收到通知" value="{{cancelReason}}" bindinput="inputCancelReason"></textarea>
+    <view class="panel-actions">
+      <button bindtap="closeCancel">返回</button>
+      <button class="danger" bindtap="cancelRegistration">确认取消</button>
+    </view>
+  </view>
+
+  <view class="bottom-bar">
+    <button wx:if="{{!isAdmin}}" class="signup-btn {{buttonDisabled ? 'disabled' : ''}}" disabled="{{buttonDisabled}}" bindtap="join">{{buttonText}}</button>
+    <button wx:if="{{!isAdmin}}" class="admin-edit" bindtap="contactAdmin">联系管理员</button>
+    <button wx:if="{{isAdmin}}" class="signup-btn" bindtap="goMatch">查看推荐志愿者</button>
+    <button wx:if="{{isAdmin}}" class="admin-edit" bindtap="goCheckinManage">签到管理</button>
+    <button wx:if="{{isAdmin}}" class="admin-edit" bindtap="edit">编辑活动</button>
+  </view>
+</view>

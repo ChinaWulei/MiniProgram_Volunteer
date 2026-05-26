@@ -1,0 +1,28 @@
+<view class="chat-page">
+  <scroll-view class="chat-list" scroll-y scroll-with-animation scroll-into-view="{{scrollIntoView}}">
+    <view wx:for="{{messages}}" wx:key="id" id="m-{{item.id}}" class="msg-row {{item.isMine ? 'right' : 'left'}}">
+      <view class="avatar">{{item.avatarText}}</view>
+      <view class="bubble-wrap">
+        <view class="time">{{item.timeText}}</view>
+        <view wx:if="{{item.type === 'TEXT'}}" class="bubble {{item.isMine ? 'mine' : 'peer'}}">{{item.content}}</view>
+        <view wx:elif="{{item.type === 'ACTIVITY_INVITE' || item.type === 'ACTIVITY_CARD'}}" class="invite-card">
+          <view class="invite-label">活动邀请</view>
+          <view class="invite-title">{{item.activityName}}</view>
+          <view class="invite-meta">{{item.activityTime}}</view>
+          <view class="invite-meta">{{item.location}} · 剩余 {{item.remainingSlots}} 个名额</view>
+          <view class="invite-reason">{{item.content}}</view>
+          <view class="invite-status">{{item.statusText}}</view>
+          <view class="invite-actions" wx:if="{{item.type === 'ACTIVITY_INVITE' && !item.isMine && item.inviteStatus === 'PENDING'}}">
+            <button bindtap="replyInvite" data-id="{{item.id}}" data-status="DECLINED">暂时拒绝</button>
+            <button class="accept" bindtap="replyInvite" data-id="{{item.id}}" data-status="ACCEPTED">接受邀请</button>
+          </view>
+          <button class="detail-btn" bindtap="goActivity" data-id="{{item.activityId}}">查看活动</button>
+        </view>
+      </view>
+    </view>
+  </scroll-view>
+  <view class="input-bar">
+    <input class="chat-input" placeholder="输入消息" value="{{inputValue}}" bindinput="input" confirm-type="send" bindconfirm="send" adjust-position="{{true}}" hold-keyboard="{{true}}" />
+    <button class="send-btn" bindtap="send">发送</button>
+  </view>
+</view>

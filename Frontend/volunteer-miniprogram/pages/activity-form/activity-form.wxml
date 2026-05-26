@@ -1,0 +1,14 @@
+<view class="page">
+  <view class="card">
+    <input placeholder="活动名称" value="{{form.name}}" data-k="name" bindinput="input" />
+    <input placeholder="活动类别" value="{{form.category}}" data-k="category" bindinput="input" />
+    <input placeholder="活动地点" value="{{form.location}}" data-k="location" bindinput="input" />
+    <input placeholder="开始时间 2026-06-12T13:00:00" value="{{form.startTime}}" data-k="startTime" bindinput="input" />
+    <input placeholder="结束时间 2026-06-12T18:00:00" value="{{form.endTime}}" data-k="endTime" bindinput="input" />
+    <input placeholder="招募人数" type="number" value="{{form.recruitNumber}}" data-k="recruitNumber" bindinput="input" />
+    <input placeholder="技能要求，如 摄影,讲解" value="{{form.skillRequirements}}" data-k="skillRequirements" bindinput="input" />
+    <input placeholder="状态：报名中/已满员/已结束" value="{{form.status}}" data-k="status" bindinput="input" />
+    <textarea placeholder="活动描述" value="{{form.description}}" data-k="description" bindinput="input"></textarea>
+    <button class="primary-btn" bindtap="submit">保存活动</button>
+  </view>
+</view>

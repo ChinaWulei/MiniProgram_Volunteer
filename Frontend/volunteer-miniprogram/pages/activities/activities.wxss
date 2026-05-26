@@ -1,0 +1,21 @@
+.activity-card {
+  position: relative;
+}
+.activity-card::after {
+  content: '';
+  position: absolute;
+  right: 24rpx;
+  bottom: 24rpx;
+  width: 14rpx;
+  height: 14rpx;
+  border-top: 3rpx solid #98a2b3;
+  border-right: 3rpx solid #98a2b3;
+  transform: rotate(45deg);
+}
+.activity-cover {
+  width: 100%;
+  height: 240rpx;
+  margin-bottom: 18rpx;
+  border-radius: 14rpx;
+  background: #e6fffb;
+}

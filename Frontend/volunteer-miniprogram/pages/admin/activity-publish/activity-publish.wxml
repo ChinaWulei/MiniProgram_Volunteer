@@ -1,0 +1,62 @@
+<view class="publish-page">
+  <view class="cover-box" bindtap="chooseCover">
+    <image wx:if="{{form.coverImageUrl}}" class="cover-preview" src="{{form.coverImageUrl}}" mode="aspectFill"></image>
+    <view wx:else class="cover-empty">
+      <view class="cover-plus">+</view>
+      <view>上传活动封面</view>
+    </view>
+  </view>
+
+  <view class="form-card">
+    <input placeholder="活动标题" value="{{form.title}}" data-key="title" bindinput="input" />
+    <input placeholder="活动类型，如 校园服务" value="{{form.category}}" data-key="category" bindinput="input" />
+    <view class="field-title">活动时间</view>
+    <view class="picker-row">
+      <picker mode="date" value="{{activityDate}}" bindchange="pickActivityDate">
+        <view class="picker-field small">{{activityDate || '选择日期'}}</view>
+      </picker>
+      <picker mode="time" value="{{activityClock}}" bindchange="pickActivityClock">
+        <view class="picker-field small">{{activityClock || '选择时间'}}</view>
+      </picker>
+    </view>
+    <view class="field-title">报名截止时间</view>
+    <view class="picker-row">
+      <picker mode="date" value="{{deadlineDate}}" bindchange="pickDeadlineDate">
+        <view class="picker-field small">{{deadlineDate || '选择日期'}}</view>
+      </picker>
+      <picker mode="time" value="{{deadlineClock}}" bindchange="pickDeadlineClock">
+        <view class="picker-field small">{{deadlineClock || '选择时间'}}</view>
+      </picker>
+    </view>
+    <view class="field-title">活动地点与签到位置</view>
+    <button class="location-btn" bindtap="chooseLocation">{{form.location ? '重新选择签到地点' : '选择签到地点'}}</button>
+    <view wx:if="{{form.location}}" class="location-card">
+      <view class="location-name">{{form.location}}</view>
+      <view class="location-address">{{form.locationAddress || '已选择地图位置'}}</view>
+      <view class="location-coord">签到范围：该位置 500 米内</view>
+    </view>
+    <view class="two-col">
+      <input placeholder="招募人数" type="number" value="{{form.recruitCount}}" data-key="recruitCount" bindinput="input" />
+      <input placeholder="服务时长" type="digit" value="{{form.serviceHours}}" data-key="serviceHours" bindinput="input" />
+    </view>
+
+    <view class="field-title">所需技能</view>
+    <view class="skill-grid">
+      <view wx:for="{{skillOptions}}" wx:key="name" class="skill {{item.selected ? 'active' : ''}}" data-name="{{item.name}}" bindtap="toggleSkill">{{item.name}}</view>
+    </view>
+
+    <textarea placeholder="活动简介" value="{{form.description}}" data-key="description" bindinput="input"></textarea>
+    <textarea placeholder="报名要求" value="{{form.requirements}}" data-key="requirements" bindinput="input"></textarea>
+    <input placeholder="联系人" value="{{form.contactName}}" data-key="contactName" bindinput="input" />
+    <input placeholder="联系电话" value="{{form.contactPhone}}" data-key="contactPhone" bindinput="input" />
+
+    <picker mode="selector" range="{{auditModes}}" bindchange="pickAudit">
+      <view class="picker-field">审核方式：{{form.auditMode}}</view>
+    </picker>
+    <picker mode="selector" range="{{statuses}}" bindchange="pickStatus">
+      <view class="picker-field">活动状态：{{form.status}}</view>
+    </picker>
+  </view>
+
+  <button class="submit-btn" bindtap="submit" loading="{{submitting}}">{{id ? '保存活动' : '发布活动'}}</button>
+</view>

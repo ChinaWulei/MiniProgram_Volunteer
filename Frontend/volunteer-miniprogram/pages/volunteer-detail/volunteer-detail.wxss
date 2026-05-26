@@ -1,0 +1,46 @@
+.detail-page { min-height: 100vh; padding: 24rpx 24rpx 148rpx; background: #f5f7fb; box-sizing: border-box; }
+.archive-hero { display: flex; gap: 22rpx; align-items: center; padding: 30rpx; border-radius: 20rpx; color: #fff; background: linear-gradient(135deg,#0f766e,#14b8a6); box-shadow: 0 14rpx 32rpx rgba(15,118,110,.22); }
+.avatar { width: 112rpx; height: 112rpx; line-height: 112rpx; border-radius: 50%; background: rgba(255,255,255,.22); color: #fff; text-align: center; font-size: 42rpx; font-weight: 800; }
+.hero-main { flex: 1; min-width: 0; }
+.name { font-size: 38rpx; font-weight: 800; }
+.no, .school { margin-top: 8rpx; font-size: 24rpx; opacity: .92; }
+.metrics { display: grid; grid-template-columns: repeat(3,1fr); gap: 12rpx; margin: 18rpx 0; }
+.metrics view { padding: 20rpx 8rpx; border-radius: 16rpx; background: #fff; text-align: center; box-shadow: 0 8rpx 20rpx rgba(16,24,40,.05); }
+.metrics text { display: block; }
+.metrics text:first-child { color: #0f766e; font-size: 34rpx; font-weight: 800; }
+.metrics text:last-child { margin-top: 6rpx; color: #667085; font-size: 22rpx; }
+.section { margin-top: 18rpx; padding: 24rpx; border-radius: 18rpx; background: #fff; box-shadow: 0 8rpx 24rpx rgba(16,24,40,.06); }
+.section-title { color: #172033; font-size: 30rpx; font-weight: 800; margin-bottom: 14rpx; }
+.level { display: inline-block; padding: 8rpx 14rpx; border-radius: 999rpx; color: #0f766e; background: #e6fffb; font-size: 23rpx; }
+.tag { display: inline-block; margin: 12rpx 8rpx 0 0; padding: 7rpx 13rpx; border-radius: 999rpx; color: #0f766e; background: #f0fdfa; font-size: 22rpx; }
+.line { display: flex; justify-content: space-between; gap: 18rpx; margin-top: 18rpx; color: #667085; font-size: 24rpx; }
+.bio, .history, .muted { margin-top: 14rpx; color: #667085; font-size: 25rpx; line-height: 1.5; }
+.history-card { display: flex; gap: 16rpx; margin-top: 14rpx; padding: 16rpx; border-radius: 16rpx; background: #f8fbfb; border: 1rpx solid #eef2f1; }
+.history-cover { width: 150rpx; height: 112rpx; border-radius: 12rpx; background: #e6fffb; flex: 0 0 auto; }
+.history-main { flex: 1; min-width: 0; }
+.history-title { color: #172033; font-size: 27rpx; font-weight: 800; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
+.history-meta { margin-top: 8rpx; color: #667085; font-size: 22rpx; line-height: 1.35; }
+.history-bottom { display: flex; align-items: center; justify-content: space-between; gap: 12rpx; margin-top: 10rpx; }
+.history-hours { color: #0f766e; font-size: 22rpx; font-weight: 700; }
+.history-status { padding: 5rpx 10rpx; border-radius: 999rpx; color: #0f766e; background: #e6fffb; font-size: 20rpx; }
+.badges { display: flex; flex-wrap: wrap; gap: 12rpx; }
+.badge { padding: 12rpx 16rpx; border-radius: 14rpx; background: #eefaf7; color: #0f766e; font-size: 23rpx; }
+.trust-grid { display: grid; grid-template-columns: repeat(2,1fr); gap: 12rpx; }
+.trust-grid view { padding: 18rpx 8rpx; border-radius: 14rpx; background: #eefaf7; text-align: center; }
+.trust-grid text { display: block; }
+.trust-grid text:first-child { color: #0f766e; font-size: 32rpx; font-weight: 800; }
+.trust-grid text:last-child { margin-top: 6rpx; color: #667085; font-size: 22rpx; }
+.recent-checkin { margin-top: 12rpx; padding: 14rpx; border-radius: 14rpx; background: #f8fbfb; }
+.recent-title { color: #172033; font-size: 25rpx; font-weight: 700; }
+.recent-meta { margin-top: 6rpx; color: #667085; font-size: 22rpx; }
+.bottom-actions { position: fixed; left: 0; right: 0; bottom: 0; display: flex; gap: 14rpx; padding: 18rpx 24rpx calc(24rpx + env(safe-area-inset-bottom)); background: #fff; box-shadow: 0 -8rpx 20rpx rgba(16,24,40,.06); }
+.primary-btn, .ghost-btn { flex: 1; height: 76rpx; line-height: 76rpx; margin: 0; border-radius: 18rpx; font-size: 27rpx; }
+.primary-btn { background: #0f766e; color: #fff; }
+.ghost-btn { background: #eefaf7; color: #0f766e; }
+.primary-btn::after, .ghost-btn::after { border: 0; }
+.mask { position: fixed; left: 0; right: 0; top: 0; bottom: 0; z-index: 40; background: rgba(0,0,0,.35); }
+.invite-panel { position: fixed; left: 24rpx; right: 24rpx; bottom: 32rpx; z-index: 41; padding: 24rpx; border-radius: 20rpx; background: #fff; }
+.panel-title { font-size: 30rpx; font-weight: 800; color: #172033; margin-bottom: 16rpx; }
+.picker-field { height: 74rpx; line-height: 74rpx; padding: 0 18rpx; border-radius: 14rpx; color: #172033; background: #f2f4f7; font-size: 25rpx; }
+.invite-panel textarea { margin-top: 16rpx; min-height: 150rpx; background: #f8fbfb; }
+.panel-actions { display: flex; gap: 14rpx; margin-top: 12rpx; }

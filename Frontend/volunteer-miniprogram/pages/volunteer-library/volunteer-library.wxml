@@ -1,0 +1,45 @@
+<view class="library-page">
+  <view class="top-band">
+    <view>
+      <view class="kicker">数计学院内部</view>
+      <view class="title">志愿者人才档案库</view>
+    </view>
+    <button class="msg-btn" bindtap="goMessages">消息</button>
+  </view>
+
+  <view class="filter-panel">
+    <input placeholder="搜索昵称、班级、技能" value="{{keyword}}" data-key="keyword" bindinput="input" confirm-type="search" bindconfirm="load" />
+    <view class="filter-grid">
+      <input placeholder="学院" value="{{college}}" data-key="college" bindinput="input" bindconfirm="load" />
+      <input placeholder="专业班级" value="{{majorClass}}" data-key="majorClass" bindinput="input" bindconfirm="load" />
+    </view>
+    <view class="filter-row">
+      <picker mode="selector" range="{{skillOptions}}" bindchange="pickSkill">
+        <view class="filter-chip">技能：{{skillTag || '全部'}}</view>
+      </picker>
+      <picker mode="selector" range="{{sortOptions}}" bindchange="pickSort">
+        <view class="filter-chip">排序：{{sortBy === 'hours' ? '服务时长' : '积分'}}</view>
+      </picker>
+      <button class="search-btn" bindtap="load">筛选</button>
+    </view>
+  </view>
+
+  <view class="vol-card" wx:for="{{list}}" wx:key="userId" bindtap="goDetail" data-id="{{item.userId}}">
+    <view class="avatar-wrap">
+      <image wx:if="{{item.avatarUrl}}" class="avatar" src="{{item.avatarUrl}}" mode="aspectFill"></image>
+      <view wx:else class="avatar">{{item.avatarText}}</view>
+    </view>
+    <view class="vol-main">
+      <view class="name-row">
+        <view class="name">{{item.displayName}}</view>
+        <view class="level">{{item.volunteerLevel}}</view>
+      </view>
+      <view class="meta">{{item.college}} · {{item.majorClass}}</view>
+      <view class="stats">{{item.totalHours || 0}} 小时 · {{item.volunteerPoints || item.creditScore || 0}} 积分</view>
+      <view class="tags"><text class="tag" wx:for="{{item.tags}}" wx:key="*this">{{item}}</text></view>
+      <view class="recent">最近参与：{{item.recentActivity}}</view>
+    </view>
+  </view>
+
+  <view wx:if="{{list.length === 0}}" class="empty">暂无匹配的学院志愿者</view>
+</view>

@@ -1,0 +1,55 @@
+<view class="manage-page">
+  <view class="header">
+    <view>
+      <view class="kicker">管理员</view>
+      <view class="title">活动管理</view>
+    </view>
+    <button class="publish-btn" bindtap="publish">发布活动</button>
+  </view>
+
+  <view class="filter-card">
+    <input placeholder="搜索活动标题" value="{{keyword}}" bindinput="input" confirm-type="search" bindconfirm="load" />
+    <view class="filter-row">
+      <picker mode="selector" range="{{statuses}}" bindchange="pickStatus">
+        <view class="filter-chip">状态：{{status || '全部'}}</view>
+      </picker>
+      <button class="search-btn" bindtap="load">筛选</button>
+    </view>
+  </view>
+
+  <view class="activity-card" wx:for="{{list}}" wx:key="id">
+    <image wx:if="{{item.coverImageUrl}}" class="cover" src="{{item.coverImageUrl}}" mode="aspectFill"></image>
+    <view wx:else class="cover placeholder">志愿服务</view>
+    <view class="card-main">
+      <view class="row">
+        <view class="activity-title">{{item.title}}</view>
+        <view class="status">{{item.status}}</view>
+      </view>
+      <view class="meta">{{item.category}} · {{item.location}}</view>
+      <view class="meta">{{item.timeText}}</view>
+      <view class="meta">招募 {{item.recruitNumber}} 人 · 已报名 {{item.registeredNumber}} 人 · 剩余 {{item.remainingNumber}}</view>
+      <view class="actions">
+        <button bindtap="detail" data-id="{{item.id}}">详情</button>
+        <button class="edit" bindtap="edit" data-id="{{item.id}}">编辑</button>
+        <button bindtap="checkin" data-id="{{item.id}}">签到</button>
+        <button bindtap="finish" data-id="{{item.id}}">结束</button>
+        <button wx:if="{{item.status === '已结束'}}" bindtap="summary" data-id="{{item.id}}">总结</button>
+        <button class="danger" bindtap="remove" data-id="{{item.id}}">删除</button>
+      </view>
+    </view>
+  </view>
+
+  <view wx:if="{{list.length === 0}}" class="empty">暂无活动</view>
+
+  <view wx:if="{{showSummary}}" class="mask" bindtap="closeSummary"></view>
+  <view wx:if="{{showSummary}}" class="summary-panel">
+    <view class="summary-title">活动总结</view>
+    <scroll-view scroll-y class="summary-scroll">
+      <text class="summary-text">{{summaryText}}</text>
+    </scroll-view>
+    <view class="summary-actions">
+      <button bindtap="closeSummary">关闭</button>
+      <button class="edit" bindtap="copySummary">复制</button>
+    </view>
+  </view>
+</view>

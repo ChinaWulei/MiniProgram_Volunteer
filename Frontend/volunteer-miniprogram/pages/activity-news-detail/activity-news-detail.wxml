@@ -1,0 +1,12 @@
+<view class="detail-page" wx:if="{{news}}">
+  <view class="title">{{news.title}}</view>
+  <view class="meta">{{timeText}} · 阅读 {{news.readCount || 0}}</view>
+  <view class="info-card">
+    <view>{{news.activityName}}</view>
+    <view>{{news.activityTime}}</view>
+    <view>{{news.location}}</view>
+    <view>参与 {{news.participantCount || 0}} 人 · 累计 {{news.totalServiceHours || 0}} 小时</view>
+  </view>
+  <view class="content">{{news.content}}</view>
+  <image wx:for="{{news.imageUrls}}" wx:key="*this" class="news-image" src="{{item}}" mode="widthFix" data-url="{{item}}" bindtap="preview"></image>
+</view>

@@ -1,0 +1,14 @@
+<view class="news-page">
+  <view class="hero">
+    <view class="kicker">数计学院</view>
+    <view class="title">活动风采</view>
+  </view>
+  <view class="news-card" wx:for="{{list}}" wx:key="id" bindtap="detail" data-id="{{item.id}}">
+    <image wx:if="{{item.cover}}" class="cover" src="{{item.cover}}" mode="aspectFill"></image>
+    <view wx:else class="cover placeholder">活动风采</view>
+    <view class="news-title">{{item.title}}</view>
+    <view class="meta">{{item.activityName}} · {{item.timeText}}</view>
+    <view class="meta">阅读 {{item.readCount || 0}} · 参与 {{item.participantCount || 0}} 人</view>
+  </view>
+  <view wx:if="{{list.length === 0}}" class="empty">暂无已发布活动新闻</view>
+</view>

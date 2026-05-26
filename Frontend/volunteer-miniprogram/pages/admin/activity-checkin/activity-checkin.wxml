@@ -1,0 +1,58 @@
+<view class="checkin-page">
+  <view class="summary-card">
+    <view class="activity-title">{{stats.activityName}}</view>
+    <view class="meta">{{stats.startTime}} 至 {{stats.endTime}}</view>
+    <view class="meta">{{stats.location}}</view>
+    <view class="rate">{{stats.successRate || 0}}%</view>
+    <view class="rate-label">签到成功率</view>
+    <view class="stat-grid">
+      <view><text>{{stats.approvedCount || 0}}</text><text>通过人数</text></view>
+      <view><text>{{stats.checkedCount || 0}}</text><text>已签到</text></view>
+      <view><text>{{stats.manualCount || 0}}</text><text>补签</text></view>
+      <view><text>{{stats.notCheckedCount || 0}}</text><text>未签到</text></view>
+    </view>
+  </view>
+
+  <view class="filter-card">
+    <input placeholder="搜索姓名或学号" value="{{keyword}}" bindinput="input" confirm-type="search" bindconfirm="loadList" />
+    <scroll-view scroll-x class="tabs">
+      <view wx:for="{{tabs}}" wx:key="value" class="tab {{status === item.value ? 'active' : ''}}" data-status="{{item.value}}" bindtap="pickStatus">{{item.label}}</view>
+    </scroll-view>
+  </view>
+
+  <view class="person-card" wx:for="{{list}}" wx:key="userId">
+    <image wx:if="{{item.avatarUrl}}" class="avatar" src="{{item.avatarUrl}}" mode="aspectFill"></image>
+    <view wx:else class="avatar">{{item.avatarText}}</view>
+    <view class="person-main">
+      <view class="row"><view class="name">{{item.nickname || item.name}}</view><view class="status {{item.status}}">{{item.statusText}}</view></view>
+      <view class="meta">{{item.college}} · {{item.majorClass}}</view>
+      <view class="meta">学号 {{item.identityNo}}</view>
+      <view class="meta">签到时间：{{item.checkinTime || '-'}}</view>
+      <view class="meta">签到方式：{{item.method || '-'}}</view>
+      <view class="person-actions">
+        <button wx:if="{{item.status === 'NOT_CHECKED_IN' || item.status === 'ABSENT'}}" class="manual-btn" data-id="{{item.userId}}" bindtap="openManual">补签到</button>
+        <button class="cancel-btn" data-regid="{{item.registrationId}}" data-name="{{item.nickname || item.name}}" bindtap="openCancel">取消报名</button>
+      </view>
+    </view>
+  </view>
+
+  <view wx:if="{{showManual}}" class="mask" bindtap="closeManual"></view>
+  <view wx:if="{{showManual}}" class="manual-panel">
+    <view class="panel-title">管理员补签到</view>
+    <textarea placeholder="填写补签原因，如 志愿者已到场但忘记签到" value="{{manualReason}}" bindinput="inputReason"></textarea>
+    <view class="panel-actions">
+      <button bindtap="closeManual">取消</button>
+      <button class="primary" bindtap="submitManual">提交补签</button>
+    </view>
+  </view>
+
+  <view wx:if="{{showCancel}}" class="mask" bindtap="closeCancel"></view>
+  <view wx:if="{{showCancel}}" class="manual-panel">
+    <view class="panel-title">取消 {{cancelUser.name}} 的报名</view>
+    <textarea placeholder="填写取消原因" value="{{cancelReason}}" bindinput="inputCancelReason"></textarea>
+    <view class="panel-actions">
+      <button bindtap="closeCancel">返回</button>
+      <button class="danger" bindtap="submitCancel">确认取消</button>
+    </view>
+  </view>
+</view>

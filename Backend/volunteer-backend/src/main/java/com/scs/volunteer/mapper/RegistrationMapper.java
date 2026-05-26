@@ -75,10 +75,10 @@ public class RegistrationMapper {
                   and (? is null or u.name like concat('%',?,'%') or u.nickname like concat('%',?,'%')
                        or u.identity_no like concat('%',?,'%') or a.name like concat('%',?,'%')
                        or a.category like concat('%',?,'%') or a.location like concat('%',?,'%'))
-                order by r.created_at desc
-                """, n(status), n(status), activityId, activityId,
-                k, k, k, k, k, k, k, k, k);
-    }
+            order by r.created_at desc
+            """, n(status), n(status), activityId, activityId,
+            k, k, k, k, k, k, k);
+}
 
     public List<Map<String, Object>> byActivity(Long activityId) {
         return adminList(null, null, activityId);

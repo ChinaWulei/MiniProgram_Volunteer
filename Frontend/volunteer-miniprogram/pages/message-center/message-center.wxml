@@ -15,8 +15,19 @@
   </view>
   <view wx:if="{{conversations.length === 0}}" class="empty">暂无私聊消息</view>
 
-  <view class="section-title second">活动邀请与通知</view>
+  <view class="section-title second">
+    活动邀请与通知
+    <view wx:if="{{inviteUnread + noticeUnread > 0}}" class="module-dot"></view>
+  </view>
+  <view class="notice invite" wx:for="{{activityInvites}}" wx:key="id" bindtap="goInvite" data-id="{{item.id}}">
+    <view wx:if="{{item.unread}}" class="notice-dot"></view>
+    <view class="notice-type">活动邀请 · {{item.statusText}}</view>
+    <view class="notice-title">{{item.activityName}}</view>
+    <view class="notice-summary">{{item.content}}</view>
+    <view class="notice-time">{{item.activityTime}} · {{item.time}}</view>
+  </view>
   <view class="notice" wx:for="{{notices}}" wx:key="id" bindtap="goNotice" data-id="{{item.id}}">
+    <view wx:if="{{item.unread}}" class="notice-dot"></view>
     <view class="notice-type">{{item.type}}</view>
     <view class="notice-title">{{item.title}}</view>
     <view class="notice-summary">{{item.summary}}</view>

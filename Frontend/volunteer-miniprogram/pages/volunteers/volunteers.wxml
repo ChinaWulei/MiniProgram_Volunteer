@@ -5,7 +5,7 @@
     <input placeholder="技能标签" value="{{skill}}" data-k="skill" bindinput="input" />
     <button class="primary-btn" bindtap="load">搜索</button>
   </view>
-  <view class="card" wx:for="{{list}}" wx:key="userId">
+  <view class="card" wx:for="{{list}}" wx:key="userId" bindtap="goVolunteer" data-id="{{item.userId}}">
     <view class="row"><view class="title">{{item.name}}</view><view class="tag">信用 {{item.creditScore}}</view></view>
     <view class="muted">{{item.majorClass}} · {{item.phone}}</view>
     <view class="muted">累计 {{item.totalHours}} 小时 · 服务 {{item.serviceCount}} 次</view>

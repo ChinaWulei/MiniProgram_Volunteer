@@ -76,8 +76,10 @@ public class RegistrationMapper {
         return jdbcTemplate.queryForList("""
                 select r.id,r.activity_id,r.user_id,r.status,r.review_remark,r.created_at,
                        u.name as userName,u.nickname,u.identity_no as identityNo,u.avatar_url as avatarUrl,
-                       p.college,p.major_class as majorClass,
-                       a.name as activityName,a.category,a.location,a.start_time as startTime,a.end_time as endTime
+                       p.college,p.major_class as majorClass,p.skill_tags as skillTags,p.available_time as availableTime,
+                       p.credit_score as creditScore,p.total_hours as totalHours,p.service_count as serviceCount,
+                       a.name as activityName,a.category,a.location,a.start_time as startTime,a.end_time as endTime,
+                       a.skill_requirements as skillRequirements
                 from registration r
                 join user u on r.user_id=u.id
                 left join volunteer_profile p on p.user_id=u.id

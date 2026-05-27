@@ -10,6 +10,7 @@ public class AiProperties {
     private String apiKey;
     private String baseUrl;
     private String model;
+    private String embeddingModel;
 
     public String getProvider() { return provider; }
     public void setProvider(String provider) { this.provider = provider; }
@@ -19,4 +20,6 @@ public class AiProperties {
     public void setBaseUrl(String baseUrl) { this.baseUrl = baseUrl; }
     public String getModel() { return model; }
     public void setModel(String model) { this.model = model; }
+    public String getEmbeddingModel() { return embeddingModel; }
+    public void setEmbeddingModel(String embeddingModel) { this.embeddingModel = embeddingModel; }
 }

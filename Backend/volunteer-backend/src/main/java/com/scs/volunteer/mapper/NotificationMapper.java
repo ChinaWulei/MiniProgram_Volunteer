@@ -32,4 +32,8 @@ public class NotificationMapper {
         Integer count = jdbcTemplate.queryForObject("select count(*) from notification where user_id=? and read_at is null", Integer.class, userId);
         return count == null ? 0 : count;
     }
+
+    public void markRead(Long userId, Long id) {
+        jdbcTemplate.update("update notification set read_at=coalesce(read_at, now()) where id=? and user_id=?", id, userId);
+    }
 }

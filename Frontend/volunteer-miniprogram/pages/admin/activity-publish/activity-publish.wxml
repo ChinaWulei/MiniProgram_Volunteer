@@ -62,8 +62,16 @@
       <view class="location-coord">签到范围：该位置 500 米内</view>
     </view>
     <view class="two-col">
-      <input placeholder="招募人数" type="number" value="{{form.recruitCount}}" data-key="recruitCount" bindinput="input" />
-      <input placeholder="服务时长" type="digit" value="{{form.serviceHours}}" data-key="serviceHours" bindinput="input" />
+      <view class="field-box">
+        <view class="field-title compact">招募人数</view>
+        <view class="field-hint">本次活动计划招募的志愿者名额</view>
+        <input placeholder="请输入人数" type="number" value="{{form.recruitCount}}" data-key="recruitCount" bindinput="input" />
+      </view>
+      <view class="field-box">
+        <view class="field-title compact">服务时长</view>
+        <view class="field-hint">每名志愿者完成后计入的小时数</view>
+        <input placeholder="请输入小时数" type="digit" value="{{form.serviceHours}}" data-key="serviceHours" bindinput="input" />
+      </view>
     </view>
 
     <view class="field-title">所需技能</view>

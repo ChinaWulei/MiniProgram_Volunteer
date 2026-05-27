@@ -1,0 +1,17 @@
+<view class="rule-page">
+  <view class="top-actions">
+    <button class="primary-btn" bindtap="goQa">AI规则问答</button>
+    <button wx:if="{{isAdmin}}" class="ghost-btn" loading="{{uploading}}" bindtap="chooseFile">上传规则文件</button>
+  </view>
+
+  <view class="file-card" wx:for="{{files}}" wx:key="id">
+    <view class="file-main">
+      <view class="file-title">{{item.originalName}}</view>
+      <view class="file-meta">{{item.fileType}} · {{item.chunkCount}} 个片段 · {{item.status}}</view>
+      <view class="file-meta">{{item.createdText}}</view>
+    </view>
+    <button class="download-btn" bindtap="download" data-id="{{item.id}}">下载</button>
+  </view>
+
+  <view wx:if="{{files.length === 0}}" class="empty">暂无规则文件</view>
+</view>

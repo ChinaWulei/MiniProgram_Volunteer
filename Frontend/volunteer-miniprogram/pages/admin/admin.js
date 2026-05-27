@@ -45,6 +45,16 @@ Page({
   manageActivities() { wx.navigateTo({ url: '/pages/admin/activity-manage/activity-manage' }) },
   volunteers() { wx.navigateTo({ url: '/pages/volunteers/volunteers' }) },
   reviewList() { wx.navigateTo({ url: '/pages/admin/registration-review/registration-review' }) },
+  goStat(e) {
+    const type = e.currentTarget.dataset.type
+    const urls = {
+      activities: '/pages/admin/activity-manage/activity-manage',
+      volunteers: '/pages/volunteers/volunteers',
+      hours: '/pages/volunteers/volunteers?sort=hours',
+      pending: '/pages/admin/registration-review/registration-review?pending=1'
+    }
+    if (urls[type]) wx.navigateTo({ url: urls[type] })
+  },
   goVolunteer(e) { wx.navigateTo({ url: `/pages/volunteer-detail/volunteer-detail?id=${e.currentTarget.dataset.id}` }) },
   review(e) {
     request({

@@ -8,10 +8,10 @@
   </view>
 
   <view class="stats-grid">
-    <view class="stat-card"><view class="stat-num">{{stats.activityTotal || 0}}</view><view class="stat-label">活动总数</view></view>
-    <view class="stat-card"><view class="stat-num">{{stats.volunteerTotal || 0}}</view><view class="stat-label">志愿者人数</view></view>
-    <view class="stat-card"><view class="stat-num">{{stats.totalHours || 0}}</view><view class="stat-label">总服务时长</view></view>
-    <view class="stat-card urgent"><view class="stat-num">{{stats.pendingRegistrationTotal || 0}}</view><view class="stat-label">待审核报名</view></view>
+    <view class="stat-card" bindtap="goStat" data-type="activities"><view class="stat-num">{{stats.activityTotal || 0}}</view><view class="stat-label">活动总数</view></view>
+    <view class="stat-card" bindtap="goStat" data-type="volunteers"><view class="stat-num">{{stats.volunteerTotal || 0}}</view><view class="stat-label">志愿者人数</view></view>
+    <view class="stat-card" bindtap="goStat" data-type="hours"><view class="stat-num">{{stats.totalHours || 0}}</view><view class="stat-label">总服务时长</view></view>
+    <view class="stat-card urgent" bindtap="goStat" data-type="pending"><view class="stat-num">{{stats.pendingRegistrationTotal || 0}}</view><view class="stat-label">待审核报名</view></view>
   </view>
 
   <view class="action-grid">

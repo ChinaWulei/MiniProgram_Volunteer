@@ -17,8 +17,8 @@ spring:
       validation-timeout: 3000
   servlet:
     multipart:
-      max-file-size: 5MB
-      max-request-size: 5MB
+      max-file-size: 20MB
+      max-request-size: 20MB
 
 app:
   auth:
@@ -34,6 +34,16 @@ app:
     api-key: ${AI_API_KEY:}
     base-url: ${AI_BASE_URL:}
     model: ${AI_MODEL:}
+    embedding-model: ${AI_EMBEDDING_MODEL:text-embedding-004}
+  rag:
+    vector:
+      url: ${RAG_VECTOR_DATASOURCE_URL:jdbc:postgresql://localhost:5432/volunteer_rag}
+      username: ${RAG_VECTOR_DATASOURCE_USERNAME:postgres}
+      password: ${RAG_VECTOR_DATASOURCE_PASSWORD:postgres}
+    chunk-size: ${RAG_CHUNK_SIZE:900}
+    chunk-overlap: ${RAG_CHUNK_OVERLAP:160}
+    top-k: ${RAG_TOP_K:5}
+    embedding-dimensions: ${RAG_EMBEDDING_DIMENSIONS:768}
 
 logging:
   level:

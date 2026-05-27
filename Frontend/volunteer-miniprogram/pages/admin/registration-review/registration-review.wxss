@@ -15,6 +15,11 @@
 .status { padding: 7rpx 13rpx; border-radius: 999rpx; color: #0f766e; background: #e6fffb; font-size: 22rpx; }
 .activity-box { margin-top: 16rpx; padding: 16rpx; border-radius: 14rpx; background: #f8fbfb; }
 .activity-title { color: #172033; font-size: 28rpx; font-weight: 800; }
+.match-box, .ai-box { margin-top: 14rpx; padding: 16rpx; border-radius: 14rpx; background: #f8fbfb; }
+.ai-box { background: #fff7ed; }
+.match-head { display: flex; align-items: center; justify-content: space-between; gap: 12rpx; }
+.match-title { color: #172033; font-size: 25rpx; font-weight: 800; }
+.match-score { flex: 0 0 auto; padding: 6rpx 14rpx; border-radius: 999rpx; color: #fff; background: #0f766e; font-size: 24rpx; font-weight: 800; }
 .actions { display: flex; justify-content: flex-end; gap: 12rpx; margin-top: 16rpx; }
 .actions button { width: 126rpx; height: 58rpx; line-height: 58rpx; margin: 0; padding: 0; border-radius: 14rpx; color: #0f766e; background: #eefaf7; font-size: 23rpx; }
 .actions .danger { color: #dc2626; background: #fee2e2; }

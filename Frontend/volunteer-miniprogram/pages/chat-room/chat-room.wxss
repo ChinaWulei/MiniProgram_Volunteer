@@ -26,6 +26,7 @@
 .activity-option-meta { margin-top: 6rpx; color: #667085; font-size: 22rpx; }
 .input-bar { flex: 0 0 auto; display: flex; gap: 14rpx; align-items: center; padding: 18rpx 22rpx calc(28rpx + env(safe-area-inset-bottom)); background: #fff; box-shadow: 0 -8rpx 20rpx rgba(16,24,40,.06); box-sizing: border-box; }
 .tool-btn { flex: 0 0 72rpx; width: 72rpx; height: 64rpx; line-height: 64rpx; margin: 0; padding: 0; border-radius: 32rpx; color: #0f766e; background: #eefaf7; font-size: 22rpx; }
+.tool-btn.danger { color: #dc2626; background: #fee2e2; }
 .tool-btn::after { border: 0; }
 .chat-input { flex: 1; width: 0; min-width: 0; height: 76rpx; margin: 0; padding: 0 24rpx; border-radius: 38rpx; background: #f2f4f7; border: 0; box-sizing: border-box; font-size: 28rpx; }
 .send-btn { flex: 0 0 112rpx; width: 112rpx; height: 76rpx; line-height: 76rpx; margin: 0; padding: 0; border-radius: 38rpx; background: #0f766e; color: #fff; font-size: 26rpx; font-weight: 800; }

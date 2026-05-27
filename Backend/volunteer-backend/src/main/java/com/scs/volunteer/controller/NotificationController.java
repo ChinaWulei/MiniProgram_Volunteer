@@ -4,6 +4,8 @@ import com.scs.volunteer.common.ApiResponse;
 import com.scs.volunteer.mapper.NotificationMapper;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
@@ -25,5 +27,11 @@ public class NotificationController extends BaseController {
     @GetMapping("/api/notifications/unread-count")
     public ApiResponse<Map<String, Integer>> unreadCount(HttpServletRequest request) {
         return ApiResponse.ok(Map.of("unreadCount", notificationMapper.unreadCount(currentUser(request).getId())));
+    }
+
+    @PostMapping("/api/notifications/{id}/read")
+    public ApiResponse<Void> markRead(HttpServletRequest request, @PathVariable Long id) {
+        notificationMapper.markRead(currentUser(request).getId(), id);
+        return ApiResponse.ok(null);
     }
 }

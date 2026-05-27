@@ -3,7 +3,7 @@
     <view class="hero-title">推荐志愿者 Top 5</view>
     <view class="hero-sub">技能重合度 60% + 时间匹配 20% + 信用评分 20%</view>
   </view>
-  <view class="card" wx:for="{{list}}" wx:key="volunteer.userId">
+  <view class="card" wx:for="{{list}}" wx:key="volunteer.userId" bindtap="goVolunteer" data-id="{{item.volunteer.userId}}">
     <view class="row"><view class="title">{{item.volunteer.name}}</view><view class="stat-num">{{item.score}}</view></view>
     <view class="muted">{{item.volunteer.majorClass}} · {{item.volunteer.skillTags}}</view>
     <view class="muted">{{item.reason}}</view>

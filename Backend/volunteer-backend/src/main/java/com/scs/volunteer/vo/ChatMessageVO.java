@@ -16,6 +16,7 @@ public class ChatMessageVO {
     private String location;
     private Integer remainingSlots;
     private String inviteStatus;
+    private LocalDateTime readAt;
     private LocalDateTime createdAt;
 
     public Long getId() { return id; }
@@ -44,6 +45,8 @@ public class ChatMessageVO {
     public void setRemainingSlots(Integer remainingSlots) { this.remainingSlots = remainingSlots; }
     public String getInviteStatus() { return inviteStatus; }
     public void setInviteStatus(String inviteStatus) { this.inviteStatus = inviteStatus; }
+    public LocalDateTime getReadAt() { return readAt; }
+    public void setReadAt(LocalDateTime readAt) { this.readAt = readAt; }
     public LocalDateTime getCreatedAt() { return createdAt; }
     public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
 }

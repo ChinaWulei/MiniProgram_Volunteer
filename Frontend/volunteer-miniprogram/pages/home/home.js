@@ -128,10 +128,11 @@ Page({
     }
     Promise.all([
       request({ url: '/api/chat/conversations', silent: true }).catch(() => []),
-      request({ url: '/api/notifications/unread-count', silent: true }).catch(() => ({ unreadCount: 0 }))
-    ]).then(([list, notice]) => {
+      request({ url: '/api/notifications/unread-count', silent: true }).catch(() => ({ unreadCount: 0 })),
+      request({ url: '/api/chat/activity-invites/unread-count', silent: true }).catch(() => ({ unreadCount: 0 }))
+    ]).then(([list, notice, invites]) => {
       const chatUnread = (list || []).reduce((sum, item) => sum + toNumber(item.unreadCount), 0)
-      this.setData({ unreadCount: chatUnread + toNumber(notice.unreadCount) })
+      this.setData({ unreadCount: chatUnread + toNumber(notice.unreadCount) + toNumber(invites.unreadCount) })
     }).catch(() => {})
   },
   startUnreadPolling() {
@@ -203,6 +204,7 @@ Page({
   goVolunteers() { wx.navigateTo({ url: '/pages/volunteer-library/volunteer-library' }) },
   goMessages() { wx.navigateTo({ url: '/pages/message-center/message-center' }) },
   goNews() { wx.navigateTo({ url: '/pages/activity-news/activity-news' }) },
+  goRules() { wx.navigateTo({ url: '/pages/rule-center/rule-center' }) },
   goAi() { wx.navigateTo({ url: '/pages/ai-chat/ai-chat' }) },
   goAdmin() { wx.navigateTo({ url: '/pages/admin/admin' }) },
   goActivityPublish() { wx.navigateTo({ url: '/pages/admin/activity-publish/activity-publish' }) },

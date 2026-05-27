@@ -32,7 +32,7 @@ public class ActivityServiceImpl implements ActivityService {
 
     @Override
     public List<Activity> list(String category, String status, String keyword) {
-        activityMapper.finishExpired();
+        activityMapper.refreshLifecycleStatus();
         return activityMapper.search(category, status, keyword);
     }
 
@@ -50,12 +50,12 @@ public class ActivityServiceImpl implements ActivityService {
 
     @Override
     public Activity detail(Long id) {
+        activityMapper.refreshLifecycleStatus();
         return activityMapper.findById(id).orElseThrow(() -> new BizException("活动不存在"));
     }
 
     @Override
     public ActivityDetailVO detail(Long id, CurrentUser currentUser) {
-        activityMapper.finishExpired();
         Activity activity = detail(id);
         ActivityDetailVO vo = new ActivityDetailVO();
         vo.setId(activity.getId());
@@ -143,7 +143,10 @@ public class ActivityServiceImpl implements ActivityService {
         if (serviceHours == null || serviceHours <= 0) {
             serviceHours = Math.max(1.0, Duration.between(startTime, endTime).toMinutes() / 60.0);
         }
-        String status = first(dto.getStatus(), "已发布");
+        LocalDateTime signupStartTime = blank(dto.getSignupStartTime()) ? null : parseDateTime(dto.getSignupStartTime(), "报名开始时间");
+        LocalDateTime signupDeadline = blank(dto.getSignupDeadline()) ? null : parseDateTime(dto.getSignupDeadline(), "报名截止时间");
+        Integer recruitNumber = dto.getRecruitNumber() == null ? dto.getRecruitCount() : dto.getRecruitNumber();
+        String status = normalizePublishStatus(first(dto.getStatus(), "已发布"), startTime, endTime, signupStartTime, signupDeadline, recruitNumber, 0);
 
         a.setName(name);
         a.setCoverImageUrl(dto.getCoverImageUrl());
@@ -153,11 +156,11 @@ public class ActivityServiceImpl implements ActivityService {
         a.setLongitude(dto.getLongitude());
         a.setStartTime(startTime);
         a.setEndTime(endTime);
-        a.setSignupStartTime(blank(dto.getSignupStartTime()) ? null : parseDateTime(dto.getSignupStartTime(), "报名开始时间"));
-        a.setSignupDeadline(dto.getSignupDeadline() == null || dto.getSignupDeadline().isBlank() ? null : parseDateTime(dto.getSignupDeadline(), "报名截止时间"));
+        a.setSignupStartTime(signupStartTime);
+        a.setSignupDeadline(signupDeadline);
         a.setCheckinStartTime(blank(dto.getCheckinStartTime()) ? startTime : parseDateTime(dto.getCheckinStartTime(), "签到开始时间"));
         a.setCheckinEndTime(blank(dto.getCheckinEndTime()) ? endTime : parseDateTime(dto.getCheckinEndTime(), "签到结束时间"));
-        a.setRecruitNumber(dto.getRecruitNumber() == null ? dto.getRecruitCount() : dto.getRecruitNumber());
+        a.setRecruitNumber(recruitNumber);
         a.setSkillRequirements(dto.getSkillRequirements() == null && dto.getRequiredSkills() != null ? String.join(",", dto.getRequiredSkills()) : dto.getSkillRequirements());
         a.setDescription(dto.getDescription());
         a.setSignupRequirement(first(dto.getSignupRequirement(), dto.getRequirements()));
@@ -198,6 +201,29 @@ public class ActivityServiceImpl implements ActivityService {
         if (blank(value)) return "人工审核";
         if ("管理员审核".equals(value)) return "人工审核";
         return value;
+    }
+
+    private String normalizePublishStatus(String status, LocalDateTime startTime, LocalDateTime endTime,
+                                          LocalDateTime signupStartTime, LocalDateTime signupDeadline,
+                                          Integer recruitNumber, Integer registeredNumber) {
+        if ("草稿".equals(status) || "已取消".equals(status) || "已结束".equals(status) || "已满员".equals(status)) {
+            return status;
+        }
+        LocalDateTime now = LocalDateTime.now();
+        if (endTime != null && now.isAfter(endTime)) {
+            return "已结束";
+        }
+        int recruit = recruitNumber == null ? 0 : recruitNumber;
+        int registered = registeredNumber == null ? 0 : registeredNumber;
+        if (recruit > 0 && registered >= recruit) {
+            return "已满员";
+        }
+        LocalDateTime signupStart = signupStartTime == null ? now : signupStartTime;
+        LocalDateTime signupEnd = signupDeadline == null ? startTime : signupDeadline;
+        if ((now.isEqual(signupStart) || now.isAfter(signupStart)) && (signupEnd == null || now.isBefore(signupEnd) || now.isEqual(signupEnd))) {
+            return "报名中";
+        }
+        return "已发布";
     }
 
     private String first(String value, String fallback) {

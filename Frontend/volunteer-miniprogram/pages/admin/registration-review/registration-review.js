@@ -23,6 +23,11 @@ Page({
     cancelItem: null,
     cancelReason: ''
   },
+  onLoad(options) {
+    if (options && options.pending) {
+      this.setData({ status: this.data.statuses[1] })
+    }
+  },
   onShow() {
     this.load()
   },
@@ -74,5 +79,8 @@ Page({
   },
   goActivity(e) {
     wx.navigateTo({ url: `/pages/activity-detail/activity-detail?id=${e.currentTarget.dataset.id}` })
+  },
+  goVolunteer(e) {
+    wx.navigateTo({ url: `/pages/volunteer-detail/volunteer-detail?id=${e.currentTarget.dataset.id}` })
   }
 })

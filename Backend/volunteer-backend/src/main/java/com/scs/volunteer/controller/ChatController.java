@@ -65,4 +65,32 @@ public class ChatController extends BaseController {
     public ApiResponse<ChatMessageVO> reply(HttpServletRequest request, @PathVariable Long id, @RequestBody InviteReplyRequest body) {
         return ApiResponse.ok(chatService.replyInvite(currentUser(request).getId(), id, body));
     }
+
+    @GetMapping("/activity-invites")
+    public ApiResponse<List<ChatMessageVO>> activityInvites(HttpServletRequest request) {
+        return ApiResponse.ok(chatService.activityInvites(currentUser(request).getId()));
+    }
+
+    @GetMapping("/activity-invites/unread-count")
+    public ApiResponse<Map<String, Integer>> unreadActivityInviteCount(HttpServletRequest request) {
+        return ApiResponse.ok(Map.of("unreadCount", chatService.unreadActivityInviteCount(currentUser(request).getId())));
+    }
+
+    @PostMapping("/messages/{id}/read")
+    public ApiResponse<Void> markMessageRead(HttpServletRequest request, @PathVariable Long id) {
+        chatService.markMessageRead(currentUser(request).getId(), id);
+        return ApiResponse.ok(null);
+    }
+
+    @PostMapping("/block/{targetUserId}")
+    public ApiResponse<Void> block(HttpServletRequest request, @PathVariable Long targetUserId) {
+        chatService.block(currentUser(request).getId(), targetUserId);
+        return ApiResponse.ok(null);
+    }
+
+    @DeleteMapping("/block/{targetUserId}")
+    public ApiResponse<Void> unblock(HttpServletRequest request, @PathVariable Long targetUserId) {
+        chatService.unblock(currentUser(request).getId(), targetUserId);
+        return ApiResponse.ok(null);
+    }
 }

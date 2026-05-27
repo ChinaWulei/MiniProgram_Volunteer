@@ -116,6 +116,22 @@ public class ActivityMapper {
         jdbcTemplate.update("update activity set status='已结束' where end_time<? and status in ('报名中','已发布')", LocalDateTime.now());
     }
 
+    public void refreshLifecycleStatus() {
+        LocalDateTime now = LocalDateTime.now();
+        jdbcTemplate.update("""
+                update activity
+                set status = case
+                    when finished_at is not null then '已结束'
+                    when end_time < ? then '已结束'
+                    when registered_number >= recruit_number then '已满员'
+                    when coalesce(signup_start_time, published_at, created_at) <= ?
+                         and coalesce(signup_deadline, start_time) >= ? then '报名中'
+                    else '已发布'
+                end
+                where status not in ('草稿','已取消')
+                """, now, now, now);
+    }
+
     public List<AiActivityCandidateVO> availableForAi() {
         return jdbcTemplate.query("""
                 select id,name,category,location,start_time,end_time,skill_requirements,description,service_hours,

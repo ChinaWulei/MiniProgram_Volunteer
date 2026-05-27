@@ -16,4 +16,9 @@ public interface ChatService {
     ChatMessageVO sendMessage(Long userId, MessageRequest request);
     ChatMessageVO sendActivityInvite(Long userId, String role, ActivityInviteRequest request);
     ChatMessageVO replyInvite(Long userId, Long inviteId, InviteReplyRequest request);
+    List<ChatMessageVO> activityInvites(Long userId);
+    int unreadActivityInviteCount(Long userId);
+    void markMessageRead(Long userId, Long messageId);
+    void block(Long userId, Long targetUserId);
+    void unblock(Long userId, Long targetUserId);
 }

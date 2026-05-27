@@ -10,7 +10,7 @@
   </view>
 
   <view class="review-card" wx:for="{{list}}" wx:key="id">
-    <view class="user-row">
+    <view class="user-row" bindtap="goVolunteer" data-id="{{item.user_id || item.userId}}">
       <image wx:if="{{item.avatarUrl}}" class="avatar" src="{{item.avatarUrl}}" mode="aspectFill"></image>
       <view wx:else class="avatar">{{item.avatarText}}</view>
       <view class="user-main">
@@ -24,6 +24,17 @@
       <view class="meta">{{item.category}} · {{item.location}}</view>
       <view class="meta">{{item.timeText}}</view>
       <view class="meta">报名时间：{{item.createdText}}</view>
+    </view>
+    <view class="match-box">
+      <view class="match-head">
+        <view class="match-title">匹配情况</view>
+        <view class="match-score">{{item.matchScore || 0}}</view>
+      </view>
+      <view class="meta">{{item.matchReason}}</view>
+    </view>
+    <view class="ai-box">
+      <view class="match-title">AI历史评价总结</view>
+      <view class="meta">{{item.aiEvaluationSummary}}</view>
     </view>
     <view class="actions">
       <button wx:if="{{item.status === '待审核'}}" bindtap="review" data-id="{{item.id}}" data-status="已通过">通过</button>

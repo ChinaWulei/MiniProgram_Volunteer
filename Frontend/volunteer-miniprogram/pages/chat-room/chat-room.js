@@ -26,8 +26,16 @@ Page({
     this.loadMessages()
     this.loadActivities()
     this.connectSocket()
+    this.startMessagePolling()
+  },
+  onShow() {
+    if (this.data.conversationId) this.startMessagePolling()
+  },
+  onHide() {
+    this.stopMessagePolling()
   },
   onUnload() {
+    this.stopMessagePolling()
     if (this.socket) this.socket.close()
   },
   connectSocket() {
@@ -35,10 +43,30 @@ Page({
     const base = app.globalData.baseUrl.replace(/^http/, 'ws')
     this.socket = wx.connectSocket({ url: `${base}/ws/chat?token=${encodeURIComponent(token)}&userId=${this.data.currentUserId}` })
     this.socket.onOpen(() => this.setData({ socketOpen: true }))
-    this.socket.onMessage(() => this.loadMessages())
+    this.socket.onMessage(event => {
+      try {
+        const body = JSON.parse(event.data || '{}')
+        const message = body.data || {}
+        if (!message.conversationId || message.conversationId === this.data.conversationId) this.loadMessages()
+      } catch (e) {
+        this.loadMessages()
+      }
+    })
+    this.socket.onClose(() => this.setData({ socketOpen: false }))
+    this.socket.onError(() => this.setData({ socketOpen: false }))
   },
-  loadMessages() {
-    request({ url: `/api/chat/conversations/${this.data.conversationId}/messages` })
+  startMessagePolling() {
+    this.stopMessagePolling()
+    this.messageTimer = setInterval(() => this.loadMessages(true), 3000)
+  },
+  stopMessagePolling() {
+    if (this.messageTimer) {
+      clearInterval(this.messageTimer)
+      this.messageTimer = null
+    }
+  },
+  loadMessages(silent) {
+    request({ url: `/api/chat/conversations/${this.data.conversationId}/messages`, silent: !!silent })
       .then(list => {
         const messages = (list || []).map(item => {
           const isMine = item.senderId === this.data.currentUserId
@@ -96,6 +124,14 @@ Page({
       })
     }
   },
+  previewImage(e) {
+    const current = e.currentTarget.dataset.url
+    const urls = this.data.messages
+      .filter(item => item.type === 'IMAGE')
+      .map(item => item.imageUrl || item.content)
+      .filter(Boolean)
+    wx.previewImage({ current, urls: urls.length ? urls : [current] })
+  },
   loadActivities() {
     request({ url: '/api/activities', data: { status: '报名中' }, silent: true })
       .then(list => this.setData({ activityList: (list || []).slice(0, 12) }))
@@ -127,5 +163,20 @@ Page({
   },
   goActivity(e) {
     wx.navigateTo({ url: `/pages/activity-detail/activity-detail?id=${e.currentTarget.dataset.id}` })
+  },
+  blockPeer() {
+    wx.showModal({
+      title: '拉黑联系人',
+      content: '拉黑后你不会再收到对方消息，对方也无法继续给你发消息。',
+      success: res => {
+        if (!res.confirm) return
+        request({ url: `/api/chat/block/${this.data.peerId}`, method: 'POST' })
+          .then(() => {
+            wx.showToast({ title: '已拉黑' })
+            setTimeout(() => wx.navigateBack(), 500)
+          })
+          .catch(() => {})
+      }
+    })
   }
 })

@@ -55,6 +55,7 @@ function uploadFile(options) {
       url,
       filePath: options.filePath,
       name: options.name || 'file',
+      formData: options.formData || {},
       header: { 'Authorization': token || '' },
       success(res) {
         let body = {}

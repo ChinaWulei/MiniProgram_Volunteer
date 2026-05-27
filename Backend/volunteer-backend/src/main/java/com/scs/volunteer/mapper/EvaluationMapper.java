@@ -42,4 +42,15 @@ public class EvaluationMapper {
                 order by e.created_at desc
                 """, activityId);
     }
+
+    public List<Map<String, Object>> byVolunteer(Long userId) {
+        return jdbcTemplate.queryForList("""
+                select e.score,e.content,e.created_at,a.name as activityName
+                from activity_evaluation e
+                join activity a on a.id=e.activity_id
+                where e.target_type='VOLUNTEER' and e.target_user_id=?
+                order by e.created_at desc
+                limit 10
+                """, userId);
+    }
 }

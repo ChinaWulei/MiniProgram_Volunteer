@@ -47,9 +47,13 @@ Page({
     request({ url: '/api/registrations/admin', data: { activityId: this.data.id }, silent: true })
       .then(list => {
         const registrations = (list || []).map(item => Object.assign({}, item, {
+          userId: item.userId || item.user_id,
+          activityId: item.activityId || item.activity_id,
           userText: item.nickname || item.userName || '志愿者',
           avatarText: (item.nickname || item.userName || '志').substring(0, 1),
-          createdText: this.formatTime(item.created_at || item.createdAt)
+          createdText: this.formatTime(item.created_at || item.createdAt),
+          evaluationScore: item.evaluationScore || 5,
+          evaluationContent: item.evaluationContent || ''
         }))
         this.setData({ registrations })
       })
@@ -136,8 +140,30 @@ Page({
   goMatch() {
     wx.navigateTo({ url: `/pages/match/match?activityId=${this.data.id}` })
   },
+  goVolunteer(e) {
+    wx.navigateTo({ url: `/pages/volunteer-detail/volunteer-detail?id=${e.currentTarget.dataset.userid}` })
+  },
+  chatVolunteer(e) {
+    const userId = e.currentTarget.dataset.userid
+    const name = e.currentTarget.dataset.name || '志愿者'
+    request({ url: '/api/chat/conversations', method: 'POST', data: { targetUserId: userId } })
+      .then(data => wx.navigateTo({ url: `/pages/chat-room/chat-room?conversationId=${data.conversationId}&peerId=${userId}&peerName=${encodeURIComponent(name)}` }))
+      .catch(() => {})
+  },
+  reviewRegistration(e) {
+    const id = e.currentTarget.dataset.id
+    const status = e.currentTarget.dataset.status
+    request({
+      url: `/api/registrations/${id}/review`,
+      method: 'PUT',
+      data: { status, reviewRemark: '管理员审核' }
+    }).then(() => {
+      wx.showToast({ title: '已处理' })
+      this.load()
+    }).catch(() => {})
+  },
   edit() {
-    wx.navigateTo({ url: `/pages/activity-form/activity-form?id=${this.data.id}` })
+    wx.navigateTo({ url: `/pages/admin/activity-publish/activity-publish?id=${this.data.id}` })
   },
   checkin() {
     wx.getLocation({
@@ -183,8 +209,18 @@ Page({
   setEvalScore(e) {
     this.setData({ evaluationScore: Number(e.detail.value) + 1 })
   },
+  setRegEvalScore(e) {
+    const id = e.currentTarget.dataset.id
+    const index = this.data.registrations.findIndex(item => item.id === id)
+    if (index >= 0) this.setData({ [`registrations[${index}].evaluationScore`]: Number(e.detail.value) })
+  },
   inputEvaluation(e) {
     this.setData({ evaluationContent: e.detail.value })
+  },
+  inputRegEvaluation(e) {
+    const id = e.currentTarget.dataset.id
+    const index = this.data.registrations.findIndex(item => item.id === id)
+    if (index >= 0) this.setData({ [`registrations[${index}].evaluationContent`]: e.detail.value })
   },
   pickEvaluationVolunteer(e) {
     this.setData({ evaluationTargetUserId: e.currentTarget.dataset.userid })
@@ -206,5 +242,40 @@ Page({
         this.setData({ evaluationContent: '', evaluationScore: 5, evaluationTargetUserId: null })
       })
       .catch(() => {})
+  },
+  submitRegEvaluation(e) {
+    const id = e.currentTarget.dataset.id
+    const item = this.data.registrations.find(row => row.id === id)
+    if (!item) return
+    this.submitVolunteerEvaluation(item)
+  },
+  submitAllEvaluations() {
+    const items = this.data.registrations.filter(item => item.userId)
+    if (!items.length) {
+      wx.showToast({ title: '暂无可提交评价', icon: 'none' })
+      return
+    }
+    wx.showLoading({ title: '提交中' })
+    Promise.all(items.map(item => this.submitVolunteerEvaluation(item, true).catch(err => err)))
+      .then(() => {
+        wx.showToast({ title: '评价已提交' })
+        this.loadRegistrations()
+      })
+      .finally(() => wx.hideLoading())
+  },
+  submitVolunteerEvaluation(item, silent) {
+    return request({
+      url: `/api/activities/${this.data.id}/evaluations`,
+      method: 'POST',
+      silent: !!silent,
+      data: {
+        targetType: 'VOLUNTEER',
+        targetUserId: item.userId,
+        score: item.evaluationScore || 5,
+        content: item.evaluationContent || ''
+      }
+    }).then(() => {
+      if (!silent) wx.showToast({ title: '评价已提交' })
+    })
   }
 })

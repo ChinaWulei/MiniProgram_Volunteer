@@ -66,7 +66,21 @@
         </view>
         <view class="reg-meta">{{item.identityNo}} · {{item.college}} · {{item.majorClass}}</view>
         <view class="reg-meta">报名时间：{{item.createdText}}</view>
-        <button class="reg-cancel" bindtap="openCancel" data-id="{{item.id}}">取消报名</button>
+        <view class="match-panel">
+          <view class="match-row"><text>匹配情况</text><text>{{item.matchScore || 0}} 分</text></view>
+          <view class="reg-meta">{{item.matchReason}}</view>
+        </view>
+        <view class="ai-panel">
+          <view class="match-row"><text>AI历史评价总结</text></view>
+          <view class="reg-meta">{{item.aiEvaluationSummary}}</view>
+        </view>
+        <view class="reg-actions">
+          <button bindtap="goVolunteer" data-userid="{{item.userId}}">资料</button>
+          <button bindtap="chatVolunteer" data-userid="{{item.userId}}" data-name="{{item.userText}}">私聊</button>
+          <button wx:if="{{item.status === '待审核'}}" bindtap="reviewRegistration" data-id="{{item.id}}" data-status="已通过">通过</button>
+          <button wx:if="{{item.status === '待审核'}}" class="danger" bindtap="reviewRegistration" data-id="{{item.id}}" data-status="已拒绝">拒绝</button>
+          <button class="danger" bindtap="openCancel" data-id="{{item.id}}">取消</button>
+        </view>
       </view>
     </view>
     <view wx:if="{{registrations.length === 0}}" class="empty-reg">暂无报名人员</view>
@@ -74,12 +88,23 @@
 
   <view wx:if="{{activity.status === '已结束' || activity.status === '宸茬粨鏉?'}}" class="detail-section">
     <view class="section-title">{{isAdmin ? '评价志愿者' : '评价活动'}}</view>
-    <view wx:if="{{isAdmin}}" class="eval-users">
-      <button wx:for="{{registrations}}" wx:key="id" class="eval-user {{evaluationTargetUserId == item.userId ? 'active' : ''}}" data-userid="{{item.userId}}" bindtap="pickEvaluationVolunteer">{{item.userText}}</button>
+    <view wx:if="{{isAdmin}}">
+      <view class="eval-card" wx:for="{{registrations}}" wx:key="id">
+        <view class="reg-row">
+          <view class="reg-name">{{item.userText}}</view>
+          <view class="reg-status">{{item.evaluationScore || 5}} 分</view>
+        </view>
+        <slider min="1" max="5" step="1" value="{{item.evaluationScore || 5}}" show-value data-id="{{item.id}}" bindchange="setRegEvalScore"></slider>
+        <textarea class="eval-textarea" placeholder="填写对该志愿者的表现评价，可只打分或同时填写文字评价" value="{{item.evaluationContent}}" data-id="{{item.id}}" bindinput="inputRegEvaluation"></textarea>
+        <button class="checkin-btn small" bindtap="submitRegEvaluation" data-id="{{item.id}}">提交该志愿者评价</button>
+      </view>
+      <button class="checkin-btn" bindtap="submitAllEvaluations">一键提交全部评价</button>
     </view>
-    <slider min="1" max="5" step="1" value="{{evaluationScore}}" show-value bindchange="setEvalScore"></slider>
-    <textarea class="eval-textarea" placeholder="{{isAdmin ? '填写对该志愿者的表现评价' : '填写对活动组织和负责人的评价'}}" value="{{evaluationContent}}" bindinput="inputEvaluation"></textarea>
-    <button class="checkin-btn" bindtap="submitEvaluation">提交评价</button>
+    <view wx:else>
+      <slider min="1" max="5" step="1" value="{{evaluationScore}}" show-value bindchange="setEvalScore"></slider>
+      <textarea class="eval-textarea" placeholder="填写对活动组织和负责人的评价" value="{{evaluationContent}}" bindinput="inputEvaluation"></textarea>
+      <button class="checkin-btn" bindtap="submitEvaluation">提交评价</button>
+    </view>
   </view>
 
   <view wx:if="{{showCancel}}" class="mask" bindtap="closeCancel"></view>

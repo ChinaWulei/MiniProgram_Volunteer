@@ -61,19 +61,24 @@ public class ChatMapper {
                        p.college as peer_college,
                        p.major_class as peer_major_class,
                        c.last_message,c.last_message_at,
-                       (select count(*) from chat_message m where m.conversation_id=c.id and m.receiver_id=? and m.read_at is null) as unread_count
+                       (select count(*) from chat_message m where m.conversation_id=c.id and m.receiver_id=? and m.read_at is null and m.type<>'ACTIVITY_INVITE') as unread_count
                 from chat_conversation c
                 join user u on u.id=if(c.user_a_id=?, c.user_b_id, c.user_a_id)
                 left join volunteer_profile p on p.user_id=u.id
-                where c.user_a_id=? or c.user_b_id=?
+                where (c.user_a_id=? or c.user_b_id=?)
+                  and not exists (
+                    select 1 from chat_block b
+                    where (b.blocker_id=? and b.blocked_user_id=if(c.user_a_id=?, c.user_b_id, c.user_a_id))
+                       or (b.blocked_user_id=? and b.blocker_id=if(c.user_a_id=?, c.user_b_id, c.user_a_id))
+                  )
                 order by c.last_message_at desc,c.updated_at desc
-                """, new BeanPropertyRowMapper<>(ChatConversationVO.class), userId, userId, userId, userId, userId);
+                """, new BeanPropertyRowMapper<>(ChatConversationVO.class), userId, userId, userId, userId, userId, userId, userId, userId, userId);
     }
 
     public List<ChatMessageVO> messages(Long conversationId) {
         return jdbcTemplate.query("""
                 select m.id,m.conversation_id,m.sender_id,m.receiver_id,m.type,m.content,m.activity_id,m.image_url,
-                       m.invite_status,m.created_at,
+                       m.invite_status,m.read_at,m.created_at,
                        a.name as activity_name,
                        concat(date_format(a.start_time,'%m-%d %H:%i'),' 至 ',date_format(a.end_time,'%m-%d %H:%i')) as activity_time,
                        a.location,
@@ -111,7 +116,7 @@ public class ChatMapper {
     public Optional<ChatMessageVO> findMessage(Long messageId) {
         List<ChatMessageVO> list = jdbcTemplate.query("""
                 select m.id,m.conversation_id,m.sender_id,m.receiver_id,m.type,m.content,m.activity_id,m.image_url,
-                       m.invite_status,m.created_at,
+                       m.invite_status,m.read_at,m.created_at,
                        a.name as activity_name,
                        concat(date_format(a.start_time,'%m-%d %H:%i'),' 至 ',date_format(a.end_time,'%m-%d %H:%i')) as activity_time,
                        a.location,
@@ -127,5 +132,51 @@ public class ChatMapper {
 
     public void updateInviteStatus(Long messageId, String status) {
         jdbcTemplate.update("update chat_message set invite_status=? where id=? and type='ACTIVITY_INVITE'", status, messageId);
+    }
+
+    public List<ChatMessageVO> activityInvites(Long userId) {
+        return jdbcTemplate.query("""
+                select m.id,m.conversation_id,m.sender_id,m.receiver_id,m.type,m.content,m.activity_id,m.image_url,
+                       m.invite_status,m.read_at,m.created_at,
+                       a.name as activity_name,
+                       concat(date_format(a.start_time,'%m-%d %H:%i'),' 至 ',date_format(a.end_time,'%m-%d %H:%i')) as activity_time,
+                       a.location,
+                       greatest(a.recruit_number-a.registered_number,0) as remaining_slots
+                from chat_message m
+                left join activity a on m.activity_id=a.id
+                where m.receiver_id=? and m.type='ACTIVITY_INVITE'
+                order by m.created_at desc
+                limit 50
+                """, new BeanPropertyRowMapper<>(ChatMessageVO.class), userId);
+    }
+
+    public int unreadActivityInviteCount(Long userId) {
+        Integer count = jdbcTemplate.queryForObject("select count(*) from chat_message where receiver_id=? and type='ACTIVITY_INVITE' and read_at is null", Integer.class, userId);
+        return count == null ? 0 : count;
+    }
+
+    public void markMessageRead(Long userId, Long messageId) {
+        jdbcTemplate.update("update chat_message set read_at=coalesce(read_at, ?) where id=? and receiver_id=?", LocalDateTime.now(), messageId, userId);
+    }
+
+    public boolean isBlocked(Long senderId, Long receiverId) {
+        Integer count = jdbcTemplate.queryForObject("""
+                select count(*) from chat_block
+                where (blocker_id=? and blocked_user_id=?)
+                   or (blocker_id=? and blocked_user_id=?)
+                """, Integer.class, receiverId, senderId, senderId, receiverId);
+        return count != null && count > 0;
+    }
+
+    public void block(Long blockerId, Long blockedUserId) {
+        jdbcTemplate.update("""
+                insert into chat_block(blocker_id, blocked_user_id)
+                values(?, ?)
+                on duplicate key update created_at=created_at
+                """, blockerId, blockedUserId);
+    }
+
+    public void unblock(Long blockerId, Long blockedUserId) {
+        jdbcTemplate.update("delete from chat_block where blocker_id=? and blocked_user_id=?", blockerId, blockedUserId);
     }
 }

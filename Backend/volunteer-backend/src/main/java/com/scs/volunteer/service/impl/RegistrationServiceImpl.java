@@ -7,6 +7,7 @@ import com.scs.volunteer.dto.ReviewDTO;
 import com.scs.volunteer.entity.Activity;
 import com.scs.volunteer.mapper.ActivityMapper;
 import com.scs.volunteer.mapper.CreditMapper;
+import com.scs.volunteer.mapper.EvaluationMapper;
 import com.scs.volunteer.mapper.NotificationMapper;
 import com.scs.volunteer.mapper.RegistrationMapper;
 import com.scs.volunteer.mapper.ServiceRecordMapper;
@@ -15,8 +16,12 @@ import com.scs.volunteer.service.RegistrationService;
 import org.springframework.stereotype.Service;
 
 import java.time.Duration;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.HashSet;
+import java.util.stream.Collectors;
 
 @Service
 public class RegistrationServiceImpl implements RegistrationService {
@@ -26,14 +31,16 @@ public class RegistrationServiceImpl implements RegistrationService {
     private final ServiceRecordMapper serviceRecordMapper;
     private final NotificationMapper notificationMapper;
     private final CreditMapper creditMapper;
+    private final EvaluationMapper evaluationMapper;
 
-    public RegistrationServiceImpl(RegistrationMapper registrationMapper, ActivityMapper activityMapper, VolunteerMapper volunteerMapper, ServiceRecordMapper serviceRecordMapper, NotificationMapper notificationMapper, CreditMapper creditMapper) {
+    public RegistrationServiceImpl(RegistrationMapper registrationMapper, ActivityMapper activityMapper, VolunteerMapper volunteerMapper, ServiceRecordMapper serviceRecordMapper, NotificationMapper notificationMapper, CreditMapper creditMapper, EvaluationMapper evaluationMapper) {
         this.registrationMapper = registrationMapper;
         this.activityMapper = activityMapper;
         this.volunteerMapper = volunteerMapper;
         this.serviceRecordMapper = serviceRecordMapper;
         this.notificationMapper = notificationMapper;
         this.creditMapper = creditMapper;
+        this.evaluationMapper = evaluationMapper;
     }
 
     @Override
@@ -79,7 +86,70 @@ public class RegistrationServiceImpl implements RegistrationService {
         if (currentUser == null || !"ADMIN".equals(currentUser.getRole())) {
             throw new BizException("仅管理员可查看报名列表");
         }
-        return registrationMapper.adminList(keyword, status, activityId);
+        return registrationMapper.adminList(keyword, status, activityId).stream()
+                .map(this::enrichReviewInfo)
+                .toList();
+    }
+
+    private Map<String, Object> enrichReviewInfo(Map<String, Object> row) {
+        row.put("matchScore", matchScore(row));
+        row.put("matchReason", matchReason(row));
+        row.put("aiEvaluationSummary", evaluationSummary(((Number) row.get("user_id")).longValue()));
+        return row;
+    }
+
+    private double matchScore(Map<String, Object> row) {
+        Set<String> required = split(text(row.get("skillRequirements")));
+        Set<String> skills = split(text(row.get("skillTags")));
+        long hits = required.stream().filter(skills::contains).count();
+        double skillScore = required.isEmpty() ? 1 : (double) hits / required.size();
+        double creditScore = Math.min(100, number(row.get("creditScore"), 80)) / 100.0;
+        double serviceScore = Math.min(1, number(row.get("serviceCount"), 0) / 5.0);
+        return Math.round((skillScore * 60 + creditScore * 25 + serviceScore * 15) * 10.0) / 10.0;
+    }
+
+    private String matchReason(Map<String, Object> row) {
+        Set<String> required = split(text(row.get("skillRequirements")));
+        Set<String> skills = split(text(row.get("skillTags")));
+        long hits = required.stream().filter(skills::contains).count();
+        return "技能匹配 " + hits + "/" + required.size()
+                + "，信用分 " + (int) number(row.get("creditScore"), 80)
+                + "，服务次数 " + (int) number(row.get("serviceCount"), 0);
+    }
+
+    private String evaluationSummary(Long userId) {
+        List<Map<String, Object>> evaluations = evaluationMapper.byVolunteer(userId);
+        if (evaluations.isEmpty()) {
+            return "暂无历史志愿者评价，可重点参考服务时长、信用分和技能匹配度。";
+        }
+        double average = evaluations.stream().mapToDouble(item -> number(item.get("score"), 0)).average().orElse(0);
+        String highlights = evaluations.stream()
+                .map(item -> text(item.get("content")))
+                .filter(content -> !content.isBlank())
+                .limit(3)
+                .collect(Collectors.joining("; "));
+        if (highlights.isBlank()) {
+            highlights = "近期评价暂无文字内容。";
+        }
+        return "AI摘要：历史均分 " + Math.round(average * 10.0) / 10.0 + "/5。" + highlights;
+    }
+
+    private Set<String> split(String value) {
+        if (value == null || value.isBlank()) {
+            return Set.of();
+        }
+        return Arrays.stream(value.split("[,;|，、\\s]+"))
+                .map(String::trim)
+                .filter(item -> !item.isBlank())
+                .collect(Collectors.toCollection(HashSet::new));
+    }
+
+    private String text(Object value) {
+        return value == null ? "" : String.valueOf(value);
+    }
+
+    private double number(Object value, double fallback) {
+        return value instanceof Number ? ((Number) value).doubleValue() : fallback;
     }
 
     @Override
@@ -89,6 +159,14 @@ public class RegistrationServiceImpl implements RegistrationService {
         }
         Map<String, Object> reg = registrationMapper.findMap(id);
         registrationMapper.review(id, dto.getStatus(), dto.getReviewRemark());
+        Long noticeUserId = ((Number) reg.get("user_id")).longValue();
+        Long noticeActivityId = ((Number) reg.get("activity_id")).longValue();
+        Activity noticeActivity = activityMapper.findById(noticeActivityId).orElse(null);
+        if (noticeActivity != null) {
+            notificationMapper.insert(noticeUserId, "REGISTRATION_REVIEW", "报名审核结果",
+                    "你报名的《" + noticeActivity.getName() + "》状态已更新为：" + dto.getStatus(),
+                    "ACTIVITY", noticeActivityId);
+        }
         if ("已完成".equals(dto.getStatus())) {
             Long userId = ((Number) reg.get("user_id")).longValue();
             Long activityId = ((Number) reg.get("activity_id")).longValue();

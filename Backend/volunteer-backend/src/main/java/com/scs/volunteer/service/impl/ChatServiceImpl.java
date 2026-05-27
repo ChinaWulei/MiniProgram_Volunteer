@@ -59,6 +59,9 @@ public class ChatServiceImpl implements ChatService {
             ensureParticipant(userId, conversationId);
             receiverId = chatMapper.peerId(conversationId, userId);
         }
+        if (chatMapper.isBlocked(userId, receiverId)) {
+            throw new BizException("对方已被拉黑或已拉黑你，无法发送消息");
+        }
         String type = request.getType() == null ? "" : request.getType().trim().toUpperCase();
         String content = request.getContent() == null ? "" : request.getContent().trim();
         if ("IMAGE".equals(type)) {
@@ -81,6 +84,7 @@ public class ChatServiceImpl implements ChatService {
     public ChatMessageVO sendActivityInvite(Long userId, String role, ActivityInviteRequest request) {
         if (!"ADMIN".equals(role)) throw new BizException("仅管理员可发送活动邀请");
         if (request.getReceiverId() == null || request.getActivityId() == null) throw new BizException("邀请信息不完整");
+        if (chatMapper.isBlocked(userId, request.getReceiverId())) throw new BizException("对方已被拉黑或已拉黑你，无法发送邀请");
         activityMapper.findById(request.getActivityId()).orElseThrow(() -> new BizException("活动不存在"));
         Long conversationId = getOrCreateConversation(userId, target(request.getReceiverId()));
         String reason = request.getReason() == null || request.getReason().isBlank() ? "邀请你参加这项学院志愿活动" : request.getReason();
@@ -100,6 +104,32 @@ public class ChatServiceImpl implements ChatService {
         ChatMessageVO reply = chatMapper.insertMessage(invite.getConversationId(), userId, invite.getSenderId(), "TEXT", text, null, null);
         webSocketHandler.pushToUser(invite.getSenderId(), "message", reply);
         return chatMapper.findMessage(inviteId).orElse(invite);
+    }
+
+    @Override
+    public List<ChatMessageVO> activityInvites(Long userId) {
+        return chatMapper.activityInvites(userId);
+    }
+
+    @Override
+    public int unreadActivityInviteCount(Long userId) {
+        return chatMapper.unreadActivityInviteCount(userId);
+    }
+
+    @Override
+    public void markMessageRead(Long userId, Long messageId) {
+        chatMapper.markMessageRead(userId, messageId);
+    }
+
+    @Override
+    public void block(Long userId, Long targetUserId) {
+        if (targetUserId == null || targetUserId.equals(userId)) throw new BizException("请选择有效用户");
+        chatMapper.block(userId, targetUserId);
+    }
+
+    @Override
+    public void unblock(Long userId, Long targetUserId) {
+        chatMapper.unblock(userId, targetUserId);
     }
 
     private void ensureParticipant(Long userId, Long conversationId) {

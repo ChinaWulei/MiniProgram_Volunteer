@@ -6,8 +6,11 @@
 .form-card { margin-top: 20rpx; padding: 22rpx; border-radius: 18rpx; background: #fff; box-shadow: 0 8rpx 24rpx rgba(16,24,40,.06); }
 .form-card input, .form-card textarea { background: #f8fbfb; }
 .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 12rpx; }
+.field-box { min-width: 0; }
 .picker-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12rpx; margin-bottom: 16rpx; }
 .field-title { margin: 6rpx 0 12rpx; color: #172033; font-size: 27rpx; font-weight: 800; }
+.field-title.compact { margin-bottom: 6rpx; font-size: 25rpx; }
+.field-hint { min-height: 62rpx; color: #667085; font-size: 22rpx; line-height: 1.4; }
 .skill-grid { display: flex; flex-wrap: wrap; gap: 12rpx; margin-bottom: 18rpx; }
 .skill { padding: 10rpx 16rpx; border-radius: 999rpx; color: #0f766e; background: #eefaf7; font-size: 24rpx; }
 .skill.active { color: #fff; background: #0f766e; }

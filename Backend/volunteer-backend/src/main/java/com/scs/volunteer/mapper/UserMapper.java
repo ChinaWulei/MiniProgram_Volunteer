@@ -101,4 +101,8 @@ public class UserMapper {
         Integer count = jdbcTemplate.queryForObject("select count(*) from registration where user_id=?", Integer.class, userId);
         return count == null ? 0 : count;
     }
+
+    public List<Long> volunteerIds() {
+        return jdbcTemplate.queryForList("select id from user where role='VOLUNTEER'", Long.class);
+    }
 }

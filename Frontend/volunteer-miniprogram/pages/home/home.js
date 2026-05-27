@@ -204,7 +204,6 @@ Page({
   goVolunteers() { wx.navigateTo({ url: '/pages/volunteer-library/volunteer-library' }) },
   goMessages() { wx.navigateTo({ url: '/pages/message-center/message-center' }) },
   goNews() { wx.navigateTo({ url: '/pages/activity-news/activity-news' }) },
-  goRules() { wx.navigateTo({ url: '/pages/rule-center/rule-center' }) },
   goAi() { wx.navigateTo({ url: '/pages/ai-chat/ai-chat' }) },
   goAdmin() { wx.navigateTo({ url: '/pages/admin/admin' }) },
   goActivityPublish() { wx.navigateTo({ url: '/pages/admin/activity-publish/activity-publish' }) },

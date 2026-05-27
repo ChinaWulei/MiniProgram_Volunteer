@@ -19,6 +19,7 @@
     <button class="ghost-btn" bindtap="manageActivities">编辑/结束活动</button>
     <button class="ghost-btn" bindtap="reviewList">审核报名</button>
     <button class="ghost-btn" bindtap="volunteers">志愿者库</button>
+    <button class="ghost-btn" bindtap="goAnnouncement">发布公告</button>
   </view>
 
   <view class="chart-panel">

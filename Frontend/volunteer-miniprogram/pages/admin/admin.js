@@ -45,6 +45,7 @@ Page({
   manageActivities() { wx.navigateTo({ url: '/pages/admin/activity-manage/activity-manage' }) },
   volunteers() { wx.navigateTo({ url: '/pages/volunteers/volunteers' }) },
   reviewList() { wx.navigateTo({ url: '/pages/admin/registration-review/registration-review' }) },
+  goAnnouncement() { wx.navigateTo({ url: '/pages/admin/announcement-edit/announcement-edit' }) },
   goStat(e) {
     const type = e.currentTarget.dataset.type
     const urls = {

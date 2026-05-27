@@ -18,7 +18,8 @@ public class RagService {
     private final AiModelClient aiModelClient;
     private final RagProperties properties;
 
-    public RagService(EmbeddingService embeddingService, VectorSearchService vectorSearchService, AiModelClient aiModelClient, RagProperties properties) {
+    public RagService(EmbeddingService embeddingService, VectorSearchService vectorSearchService,
+                      AiModelClient aiModelClient, RagProperties properties) {
         this.embeddingService = embeddingService;
         this.vectorSearchService = vectorSearchService;
         this.aiModelClient = aiModelClient;

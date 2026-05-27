@@ -21,8 +21,8 @@
     "pages/chat-room/chat-room",
     "pages/activity-news/activity-news",
     "pages/activity-news-detail/activity-news-detail",
-    "pages/rule-center/rule-center",
-    "pages/rule-qa/rule-qa",
+    "pages/admin/announcement-edit/announcement-edit",
+    "pages/announcement-detail/announcement-detail",
     "pages/ai-chat/ai-chat"
   ],
   "window": {

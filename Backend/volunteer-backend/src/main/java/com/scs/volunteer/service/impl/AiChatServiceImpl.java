@@ -7,10 +7,12 @@ import com.scs.volunteer.mapper.ActivityMapper;
 import com.scs.volunteer.mapper.RegistrationMapper;
 import com.scs.volunteer.service.AiChatService;
 import com.scs.volunteer.service.AiModelClient;
+import com.scs.volunteer.service.RagService;
 import com.scs.volunteer.service.UserProfileService;
 import com.scs.volunteer.vo.AiActivityCandidateVO;
 import com.scs.volunteer.vo.AiChatResponseVO;
 import com.scs.volunteer.vo.AiRecommendedActivityVO;
+import com.scs.volunteer.vo.RagAnswerVO;
 import com.scs.volunteer.vo.UserProfileVO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -34,13 +36,15 @@ public class AiChatServiceImpl implements AiChatService {
     private final RegistrationMapper registrationMapper;
     private final ActivityMapper activityMapper;
     private final AiModelClient aiModelClient;
+    private final RagService ragService;
 
     public AiChatServiceImpl(UserProfileService userProfileService, RegistrationMapper registrationMapper,
-                             ActivityMapper activityMapper, AiModelClient aiModelClient) {
+                             ActivityMapper activityMapper, AiModelClient aiModelClient, RagService ragService) {
         this.userProfileService = userProfileService;
         this.registrationMapper = registrationMapper;
         this.activityMapper = activityMapper;
         this.aiModelClient = aiModelClient;
+        this.ragService = ragService;
     }
 
     @Override
@@ -60,6 +64,16 @@ public class AiChatServiceImpl implements AiChatService {
         response.setSessionId(request.getSessionId() == null || request.getSessionId().isBlank()
                 ? UUID.randomUUID().toString()
                 : request.getSessionId());
+        if (hasRuleIntent(message)) {
+            try {
+                RagAnswerVO rag = ragService.answer(message, null);
+                response.setReply(withSources(rag));
+                response.setRecommendedActivities(List.of());
+                return response;
+            } catch (Exception e) {
+                log.warn("RAG answer failed, fallback to normal AI chat: {}", e.getMessage());
+            }
+        }
         response.setRecommendedActivities(recommendIntent ? toRecommended(candidates) : List.of());
         String reply = "";
         if (aiModelClient.available()) {
@@ -209,6 +223,28 @@ public class AiChatServiceImpl implements AiChatService {
                 || message.contains("适合")
                 || message.contains("参加")
                 || message.contains("服务");
+    }
+
+    private boolean hasRuleIntent(String message) {
+        return message.contains("规则")
+                || message.contains("制度")
+                || message.contains("公告")
+                || message.contains("附件")
+                || message.contains("要求")
+                || message.contains("流程")
+                || message.contains("规定")
+                || message.contains("办法")
+                || message.contains("通知")
+                || message.contains("文件");
+    }
+
+    private String withSources(RagAnswerVO rag) {
+        String answer = rag.getAnswer() == null ? "" : rag.getAnswer();
+        if (rag.getSources() == null || rag.getSources().isEmpty()) {
+            return answer;
+        }
+        String sourceLine = "引用：" + String.join("；", rag.getSources());
+        return answer.contains("引用：") ? answer : answer + "\n\n" + sourceLine;
     }
 
     private boolean isGreetingOrSmallTalk(String message) {

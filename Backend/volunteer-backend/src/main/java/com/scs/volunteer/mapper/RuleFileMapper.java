@@ -52,4 +52,9 @@ public class RuleFileMapper {
         List<RuleFile> list = jdbcTemplate.query("select * from rule_file where id=?", new BeanPropertyRowMapper<>(RuleFile.class), id);
         return list.stream().findFirst();
     }
+
+    public Optional<RuleFile> findByS3Key(String s3Key) {
+        List<RuleFile> list = jdbcTemplate.query("select * from rule_file where s3_key=?", new BeanPropertyRowMapper<>(RuleFile.class), s3Key);
+        return list.stream().findFirst();
+    }
 }

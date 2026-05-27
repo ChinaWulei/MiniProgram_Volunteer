@@ -30,9 +30,13 @@ Page({
       extension: ['pdf', 'docx', 'txt'],
       success: res => {
         const file = (res.tempFiles || [])[0]
-        if (!file) return
+        const filePath = file && (file.path || file.tempFilePath)
+        if (!filePath) {
+          wx.showToast({ title: '文件路径无效，请重新选择', icon: 'none' })
+          return
+        }
         wx.showLoading({ title: '上传解析中' })
-        uploadFile({ url: '/api/admin/announcements/attachments', filePath: file.path, name: 'file' })
+        uploadFile({ url: '/api/admin/announcements/attachments', filePath, name: 'file' })
           .then(data => this.setData({ attachments: this.data.attachments.concat([data]) }))
           .finally(() => wx.hideLoading())
       }

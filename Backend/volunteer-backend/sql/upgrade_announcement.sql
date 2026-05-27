@@ -1,3 +1,5 @@
+use volunteer_service;
+
 create table if not exists announcement (
     id bigint primary key auto_increment,
     title varchar(200) not null,

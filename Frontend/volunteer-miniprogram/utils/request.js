@@ -51,6 +51,12 @@ function uploadFile(options) {
   const token = app.globalData.token || wx.getStorageSync('token')
   const url = apiUrl(options.url)
   return new Promise((resolve, reject) => {
+    if (!options.filePath) {
+      const err = { errMsg: 'filePath is empty' }
+      wx.showToast({ title: '文件路径无效', icon: 'none' })
+      reject(err)
+      return
+    }
     wx.uploadFile({
       url,
       filePath: options.filePath,

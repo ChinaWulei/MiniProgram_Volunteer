@@ -57,8 +57,16 @@ public class ActivityAiAnalysisServiceImpl implements ActivityAiAnalysisService 
         try {
             analysis = aiModelClient.chat(buildPrompt(profile, history, activity, question));
         } catch (HttpServerErrorException.ServiceUnavailable | ResourceAccessException e) {
+            log.warn("AI activity analysis upstream busy activityId={}, userId={}, error={}",
+                    activityId, currentUser.getId(), e.getMessage(), e);
             throw new BizException("AI服务当前较繁忙，请稍后再试");
+        } catch (HttpServerErrorException e) {
+            log.warn("AI activity analysis upstream server error activityId={}, userId={}, status={}, body={}",
+                    activityId, currentUser.getId(), e.getStatusCode(), e.getResponseBodyAsString(), e);
+            throw new BizException("AI服务暂时不可用，请稍后再试");
         } catch (RestClientException e) {
+            log.warn("AI activity analysis request failed activityId={}, userId={}, error={}",
+                    activityId, currentUser.getId(), e.getMessage(), e);
             throw new BizException("AI服务暂时不可用，请稍后再试");
         }
         if (analysis == null || analysis.isBlank()) {
@@ -94,7 +102,7 @@ public class ActivityAiAnalysisServiceImpl implements ActivityAiAnalysisService 
 
                 严格要求：
                 1. 必须使用自然、直接、适合小程序展示的中文表达。
-                2. 不要只套固定模板，但必须覆盖：综合匹配度、技能匹配分析、时间匹配分析、历史经验匹配分析、是否推荐报名、活动注意事项、自然语言总结。
+                2. 不要只套固定模板，但必须覆盖：综合匹配度、技能匹配分析、时间匹配分析、历史经验匹配分析、是否推荐报名、活动注意事项，并在最后用一段自然的话收束；不要输出“自然语言总结”这几个字。
                 3. 综合匹配度用百分比表示，并解释主要依据。
                 4. 如果技能或时间不匹配，也要给出可执行建议。
                 5. 禁止编造不存在的数据；数据缺失时明确说明“平台暂未提供”或“暂无记录”。

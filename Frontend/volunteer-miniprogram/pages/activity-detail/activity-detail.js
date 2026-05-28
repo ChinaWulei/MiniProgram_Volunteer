@@ -326,10 +326,12 @@ Page({
           data: { activityId: this.data.id, latitude: res.latitude, longitude: res.longitude }
         }).then(checkin => {
           this.setData({ checkin })
+          wx.hideLoading()
           wx.showToast({ title: '签到成功' })
         }).catch(err => {
+          wx.hideLoading()
           wx.showToast({ title: (err && err.message) || '签到失败，请稍后重试', icon: 'none' })
-        }).finally(() => wx.hideLoading())
+        })
       },
       fail: () => wx.showToast({ title: '定位失败，请检查授权', icon: 'none' })
     })

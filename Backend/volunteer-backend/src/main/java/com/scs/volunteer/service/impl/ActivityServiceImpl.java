@@ -208,7 +208,7 @@ public class ActivityServiceImpl implements ActivityService {
     private String normalizePublishStatus(String status, LocalDateTime startTime, LocalDateTime endTime,
                                           LocalDateTime signupStartTime, LocalDateTime signupDeadline,
                                           Integer recruitNumber, Integer registeredNumber) {
-        if ("草稿".equals(status) || "已取消".equals(status) || "已结束".equals(status) || "已满员".equals(status)) {
+        if ("草稿".equals(status) || "已取消".equals(status) || "已结束".equals(status) || "已满员".equals(status) || "已发布".equals(status)) {
             return status;
         }
         LocalDateTime now = LocalDateTime.now();

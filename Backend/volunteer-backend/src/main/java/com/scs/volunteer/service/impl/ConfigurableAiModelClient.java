@@ -60,7 +60,7 @@ public class ConfigurableAiModelClient implements AiModelClient {
                 )),
                 "generationConfig", Map.of(
                         "temperature", 0.3,
-                        "maxOutputTokens", 1600
+                        "maxOutputTokens", 2400
                 )
         );
 
@@ -86,7 +86,7 @@ public class ConfigurableAiModelClient implements AiModelClient {
                 "model", model,
                 "input", prompt,
                 "temperature", 0.3,
-                "max_output_tokens", 1600
+                "max_output_tokens", 2400
         );
 
         ResponseEntity<Map> response = restTemplate.exchange(

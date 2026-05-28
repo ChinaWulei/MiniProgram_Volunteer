@@ -380,6 +380,10 @@
   max-height: 420rpx;
   overflow: hidden;
 }
+.ai-content.error {
+  height: 96rpx;
+  max-height: 96rpx;
+}
 .ai-content-text {
   white-space: pre-wrap;
   color: #344054;

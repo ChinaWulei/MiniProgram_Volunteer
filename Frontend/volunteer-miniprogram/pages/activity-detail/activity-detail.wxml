@@ -137,7 +137,7 @@
       <view class="spinner"></view>
       <text>AI总结中...</text>
     </view>
-    <scroll-view wx:else class="sheet-content" scroll-y>
+    <scroll-view wx:else class="sheet-content {{aiError ? 'error' : ''}}" scroll-y>
       <view class="ai-analysis-text">{{aiAnalysis}}</view>
     </scroll-view>
     <view class="followup-row">

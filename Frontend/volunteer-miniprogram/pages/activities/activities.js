@@ -10,7 +10,8 @@ function normalize(item) {
     endTimeText: formatTime(item.endTime),
     aiExpanded: false,
     aiLoading: false,
-    aiAnalysis: ''
+    aiAnalysis: '',
+    aiError: false
   })
 }
 
@@ -61,10 +62,16 @@ Page({
     this.setData({ [`list[${index}].aiLoading`]: true })
     request({ url: `/api/activities/${id}/ai-analysis`, method: 'POST', silent: true })
       .then(data => {
-        this.setData({ [`list[${index}].aiAnalysis`]: (data && data.analysis) || 'AI暂未返回分析结果' })
+        this.setData({
+          [`list[${index}].aiAnalysis`]: (data && data.analysis) || 'AI暂未返回分析结果',
+          [`list[${index}].aiError`]: false
+        })
       })
       .catch(err => {
-        this.setData({ [`list[${index}].aiAnalysis`]: (err && err.message) || 'AI分析失败，请稍后重试' })
+        this.setData({
+          [`list[${index}].aiAnalysis`]: (err && err.message) || 'AI分析失败，请稍后重试',
+          [`list[${index}].aiError`]: true
+        })
       })
       .finally(() => this.setData({ [`list[${index}].aiLoading`]: false }))
   }

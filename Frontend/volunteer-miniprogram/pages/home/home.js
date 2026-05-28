@@ -35,7 +35,8 @@ function normalizeActivity(activity) {
     reason: getRecommendReason(activity),
     aiExpanded: false,
     aiLoading: false,
-    aiAnalysis: ''
+    aiAnalysis: '',
+    aiError: false
   })
 }
 
@@ -207,8 +208,14 @@ Page({
     if (item.aiAnalysis) return
     this.setData({ [`${listName}[${index}].aiLoading`]: true })
     request({ url: `/api/activities/${id}/ai-analysis`, method: 'POST', silent: true })
-      .then(data => this.setData({ [`${listName}[${index}].aiAnalysis`]: (data && data.analysis) || 'AI暂未返回分析结果' }))
-      .catch(err => this.setData({ [`${listName}[${index}].aiAnalysis`]: (err && err.message) || 'AI分析失败，请稍后重试' }))
+      .then(data => this.setData({
+        [`${listName}[${index}].aiAnalysis`]: (data && data.analysis) || 'AI暂未返回分析结果',
+        [`${listName}[${index}].aiError`]: false
+      }))
+      .catch(err => this.setData({
+        [`${listName}[${index}].aiAnalysis`]: (err && err.message) || 'AI分析失败，请稍后重试',
+        [`${listName}[${index}].aiError`]: true
+      }))
       .finally(() => this.setData({ [`${listName}[${index}].aiLoading`]: false }))
   },
   goMine() {

@@ -20,6 +20,7 @@ Page({
     showAiSheet: false,
     aiLoading: false,
     aiAnalysis: '',
+    aiError: false,
     aiQuestion: '',
     aiFloatLeft: 0,
     aiFloatTop: 0,
@@ -203,8 +204,8 @@ Page({
   loadAiAnalysis() {
     this.setData({ aiLoading: true })
     request({ url: `/api/activities/${this.data.id}/ai-analysis`, method: 'POST', silent: true })
-      .then(data => this.setData({ aiAnalysis: (data && data.analysis) || 'AI暂未返回分析结果' }))
-      .catch(err => this.setData({ aiAnalysis: (err && err.message) || 'AI分析失败，请稍后重试' }))
+      .then(data => this.setData({ aiAnalysis: (data && data.analysis) || 'AI暂未返回分析结果', aiError: false }))
+      .catch(err => this.setData({ aiAnalysis: (err && err.message) || 'AI分析失败，请稍后重试', aiError: true }))
       .finally(() => this.setData({ aiLoading: false }))
   },
   inputAiQuestion(e) {
@@ -221,9 +222,10 @@ Page({
       .then(data => {
         const answer = (data && data.analysis) || 'AI暂未返回分析结果'
         const prefix = this.data.aiAnalysis ? `${this.data.aiAnalysis}\n\n追问：${question}\n` : `追问：${question}\n`
-        this.setData({ aiAnalysis: prefix + answer, aiQuestion: '' })
+        this.setData({ aiAnalysis: prefix + answer, aiQuestion: '', aiError: false })
       })
       .catch(err => {
+        this.setData({ aiError: true })
         wx.showToast({ title: (err && err.message) || '追问失败', icon: 'none' })
       })
       .finally(() => this.setData({ aiLoading: false }))

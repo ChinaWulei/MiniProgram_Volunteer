@@ -77,7 +77,7 @@
           <view class="spinner"></view>
           <text>AI正在分析活动匹配情况...</text>
         </view>
-        <scroll-view wx:else class="ai-content" scroll-y>
+        <scroll-view wx:else class="ai-content {{item.aiError ? 'error' : ''}}" scroll-y>
           <view class="ai-content-text">{{item.aiAnalysis}}</view>
         </scroll-view>
       </view>
@@ -139,7 +139,7 @@
           <view class="spinner"></view>
           <text>AI正在分析活动匹配情况...</text>
         </view>
-        <scroll-view wx:else class="ai-content" scroll-y>
+        <scroll-view wx:else class="ai-content {{item.aiError ? 'error' : ''}}" scroll-y>
           <view class="ai-content-text">{{item.aiAnalysis}}</view>
         </scroll-view>
       </view>

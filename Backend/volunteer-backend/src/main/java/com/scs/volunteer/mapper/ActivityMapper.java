@@ -119,6 +119,7 @@ public class ActivityMapper {
 
     public void refreshLifecycleStatus() {
         LocalDateTime now = LocalDateTime.now();
+        refreshRegisteredNumbers();
         jdbcTemplate.update("""
                 update activity
                 set status = case
@@ -131,6 +132,18 @@ public class ActivityMapper {
                 end
                 where status not in ('草稿','已取消')
                 """, now, now, now);
+    }
+
+    public void refreshRegisteredNumbers() {
+        jdbcTemplate.update("""
+                update activity a
+                set registered_number = (
+                    select count(*)
+                    from registration r
+                    where r.activity_id = a.id
+                      and r.status in ('待审核','已通过','已完成')
+                )
+                """);
     }
 
     public List<AiActivityCandidateVO> availableForAi() {

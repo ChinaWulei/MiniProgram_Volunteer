@@ -5,6 +5,29 @@ function formatTime(value) {
   return String(value).replace('T', ' ').slice(5, 16)
 }
 
+function cleanText(value, fallback = '') {
+  if (value === null || value === undefined) return fallback
+  const text = String(value).trim()
+  if (!text || text === 'null' || text === 'undefined') return fallback
+  return text
+}
+
+function normalizeConversation(item) {
+  const peerName = cleanText(item.peerName, '学院同学')
+  const peerCollege = cleanText(item.peerCollege)
+  const peerMajorClass = cleanText(item.peerMajorClass)
+  return Object.assign({}, item, {
+    peerName,
+    peerAvatarUrl: cleanText(item.peerAvatarUrl),
+    peerCollege,
+    peerMajorClass,
+    lastMessage: cleanText(item.lastMessage, '开始学院内部交流'),
+    timeText: formatTime(item.lastMessageAt),
+    avatarText: peerName.substring(0, 1),
+    metaText: [peerCollege, peerMajorClass].filter(Boolean).join(' · ')
+  })
+}
+
 Page({
   data: {
     conversations: [],
@@ -23,10 +46,7 @@ Page({
     request({ url: '/api/chat/conversations' })
       .then(list => {
         this.setData({
-          conversations: (list || []).map(item => Object.assign({}, item, {
-            timeText: formatTime(item.lastMessageAt),
-            avatarText: (item.peerName || '志').substring(0, 1)
-          }))
+          conversations: (list || []).map(normalizeConversation)
         })
       })
       .catch(() => {})
@@ -70,7 +90,7 @@ Page({
   goChat(e) {
     const item = this.data.conversations.find(conv => conv.id === e.currentTarget.dataset.id)
     if (!item) return
-    wx.navigateTo({ url: `/pages/chat-room/chat-room?conversationId=${item.id}&peerId=${item.peerUserId}&peerName=${encodeURIComponent(item.peerName)}` })
+    wx.navigateTo({ url: `/pages/chat-room/chat-room?conversationId=${item.id}&peerId=${item.peerUserId}&peerName=${encodeURIComponent(item.peerName || '学院同学')}` })
   },
   goInvite(e) {
     const item = this.data.activityInvites.find(invite => invite.id === e.currentTarget.dataset.id)

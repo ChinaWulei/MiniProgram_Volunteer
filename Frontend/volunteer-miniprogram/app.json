@@ -11,6 +11,7 @@
     "pages/admin/activity-manage/activity-manage",
     "pages/admin/activity-publish/activity-publish",
     "pages/admin/activity-checkin/activity-checkin",
+    "pages/admin/checkin-adjustments/checkin-adjustments",
     "pages/admin/activity-news-edit/activity-news-edit",
     "pages/admin/registration-review/registration-review",
     "pages/activity-form/activity-form",

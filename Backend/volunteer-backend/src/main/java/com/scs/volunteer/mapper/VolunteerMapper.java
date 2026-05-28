@@ -93,6 +93,15 @@ public class VolunteerMapper {
         jdbcTemplate.update("update volunteer_profile set total_hours=total_hours+?, service_count=service_count+1 where user_id=?", hours, userId);
     }
 
+    public void adjustService(Long userId, double hourDelta, int serviceCountDelta) {
+        jdbcTemplate.update("""
+                update volunteer_profile
+                set total_hours=greatest(total_hours + ?, 0),
+                    service_count=greatest(service_count + ?, 0)
+                where user_id=?
+                """, hourDelta, serviceCountDelta, userId);
+    }
+
     private String emptyToNull(String value) {
         return value == null || value.isBlank() ? null : value;
     }

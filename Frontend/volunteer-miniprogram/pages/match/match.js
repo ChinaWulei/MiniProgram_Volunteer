@@ -1,4 +1,28 @@
 const { request } = require('../../utils/request')
+
+function clean(value, fallback = '') {
+  if (value === null || value === undefined) return fallback
+  const text = String(value).trim()
+  if (!text || text === 'null' || text === 'undefined') return fallback
+  return text
+}
+
+function normalizeMatch(item) {
+  const volunteer = item.volunteer || {}
+  const name = clean(volunteer.name || volunteer.nickname, '志愿者')
+  const majorClass = clean(volunteer.majorClass)
+  const skillTags = clean(volunteer.skillTags, '暂无技能标签')
+  return Object.assign({}, item, {
+    volunteer: Object.assign({}, volunteer, {
+      name,
+      majorClassText: majorClass,
+      skillTagsText: skillTags,
+      metaText: [majorClass, skillTags].filter(Boolean).join(' · ')
+    }),
+    reason: clean(item.reason, '暂无匹配说明')
+  })
+}
+
 Page({
   data: { activityId: null, list: [], loading: false },
   onLoad(options) {
@@ -8,7 +32,7 @@ Page({
   load() {
     this.setData({ loading: true })
     request({ url: `/api/match/activity/${this.data.activityId}` })
-      .then(list => this.setData({ list: list || [] }))
+      .then(list => this.setData({ list: (list || []).map(normalizeMatch) }))
       .catch(() => this.setData({ list: [] }))
       .finally(() => this.setData({ loading: false }))
   },

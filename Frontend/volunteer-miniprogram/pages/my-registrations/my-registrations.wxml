@@ -1,10 +1,40 @@
 <view class="page">
-  <view class="card registration-card" wx:for="{{list}}" wx:key="id" bindtap="goDetail" data-id="{{item.activity_id}}">
-    <view class="row"><view class="title">{{item.activity_name}}</view><view class="tag">{{item.status}}</view></view>
-    <view class="muted">{{item.category}} · {{item.location}}</view>
-    <view class="muted">{{item.start_time}} 至 {{item.end_time}}</view>
-    <view class="muted" wx:if="{{item.service_hours}}">服务时长：{{item.service_hours}} 小时</view>
-    <view class="muted" wx:if="{{item.review_remark}}">审核意见：{{item.review_remark}}</view>
+  <view class="card registration-card" wx:for="{{list}}" wx:key="id">
+    <view bindtap="goDetail" data-id="{{item.activity_id}}">
+      <view class="row">
+        <view class="title">{{item.activity_name}}</view>
+        <view class="tag">{{item.status}}</view>
+      </view>
+      <view class="muted">{{item.category}} · {{item.location}}</view>
+      <view class="muted">{{item.start_time}} 至 {{item.end_time}}</view>
+      <view class="muted" wx:if="{{item.service_hours}}">服务时长：{{item.service_hours}} 小时</view>
+      <view class="checkin-line {{item.checkinStatus}}">
+        签到状态：{{item.checkinStatusText}}
+      </view>
+      <view wx:if="{{item.adjustmentStatusText}}" class="adjust-line">
+        补签审核：{{item.adjustmentStatusText}}
+      </view>
+      <view class="muted danger" wx:if="{{item.adjustment_admin_remark}}">管理员备注：{{item.adjustment_admin_remark}}</view>
+      <view class="muted" wx:if="{{item.review_remark}}">报名审核意见：{{item.review_remark}}</view>
+    </view>
+    <button wx:if="{{item.canApplyAdjustment}}" class="apply-btn" catchtap="openApply" data-index="{{index}}">申请补签</button>
   </view>
   <view class="card muted" wx:if="{{list.length === 0}}">暂无报名记录</view>
+
+  <view wx:if="{{showApply}}" class="mask" bindtap="closeApply"></view>
+  <view wx:if="{{showApply}}" class="apply-panel">
+    <view class="panel-title">补签申请</view>
+    <view class="panel-sub">{{applyItem.activity_name}}</view>
+    <input placeholder="补签原因" value="{{applyForm.reason}}" data-key="reason" bindinput="inputApply" />
+    <textarea placeholder="补充说明" value="{{applyForm.description}}" data-key="description" bindinput="inputApply"></textarea>
+    <view class="proof-row">
+      <button class="ghost-btn" bindtap="chooseProof" loading="{{uploading}}">上传证明图片</button>
+      <text wx:if="{{applyForm.proofImageUrl}}">已上传</text>
+    </view>
+    <image wx:if="{{applyForm.proofImageUrl}}" class="proof" src="{{applyForm.proofImageUrl}}" mode="aspectFill"></image>
+    <view class="panel-actions">
+      <button class="ghost-btn" bindtap="closeApply">取消</button>
+      <button class="primary-btn" bindtap="submitApply" loading="{{submitting}}">提交</button>
+    </view>
+  </view>
 </view>

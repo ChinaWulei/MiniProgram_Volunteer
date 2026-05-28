@@ -8,8 +8,8 @@
         <view class="name">{{item.peerName}}</view>
         <view class="time">{{item.timeText}}</view>
       </view>
-      <view class="summary">{{item.lastMessage || '开始学院内部交流'}}</view>
-      <view class="meta">{{item.peerCollege}} · {{item.peerMajorClass}}</view>
+      <view class="summary">{{item.lastMessage}}</view>
+      <view wx:if="{{item.metaText}}" class="meta">{{item.metaText}}</view>
     </view>
     <view wx:if="{{item.unreadCount}}" class="unread">{{item.unreadCount}}</view>
   </view>

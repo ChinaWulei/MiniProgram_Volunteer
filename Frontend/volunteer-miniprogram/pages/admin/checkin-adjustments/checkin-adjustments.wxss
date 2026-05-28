@@ -1,0 +1,31 @@
+.page { min-height: 100vh; padding: 24rpx; background: #f5f7fb; box-sizing: border-box; }
+.filter-panel, .record-card { padding: 22rpx; margin-bottom: 16rpx; border-radius: 18rpx; background: #fff; box-shadow: 0 8rpx 24rpx rgba(16,24,40,.06); }
+.filter-panel { display: grid; grid-template-columns: 1fr 180rpx 120rpx; gap: 12rpx; align-items: center; }
+input, textarea { width: 100%; padding: 0 16rpx; border-radius: 14rpx; background: #f8fafc; font-size: 24rpx; box-sizing: border-box; }
+input { height: 68rpx; }
+textarea { min-height: 140rpx; padding-top: 16rpx; margin-top: 14rpx; }
+.filter-chip { display: flex; align-items: center; justify-content: center; height: 68rpx; border-radius: 14rpx; color: #0f766e; background: #eefaf7; font-size: 23rpx; }
+.row { display: flex; align-items: center; justify-content: space-between; gap: 12rpx; }
+.title { color: #172033; font-size: 30rpx; font-weight: 800; }
+.muted { margin-top: 8rpx; color: #667085; font-size: 24rpx; line-height: 1.45; }
+.status-line { margin-top: 10rpx; color: #d97706; font-size: 24rpx; font-weight: 700; }
+.status-line.ok { color: #0f766e; }
+.audit { padding: 6rpx 12rpx; border-radius: 999rpx; color: #0f766e; background: #e6fffb; font-size: 22rpx; }
+.audit.PENDING { color: #d97706; background: #fef3c7; }
+.audit.REJECTED { color: #dc2626; background: #fee2e2; }
+.proof { width: 180rpx; height: 120rpx; margin-top: 14rpx; border-radius: 12rpx; background: #eef2f7; }
+.primary-btn, .ghost-btn { display: flex; align-items: center; justify-content: center; height: 68rpx; line-height: 1; margin: 14rpx 0 0; padding: 0; border-radius: 14rpx; font-size: 25rpx; box-sizing: border-box; }
+.primary-btn { color: #fff; background: #0f766e; }
+.ghost-btn { color: #0f766e; background: #eefaf7; }
+button::after { border: 0; }
+.empty { padding: 36rpx; border-radius: 18rpx; color: #667085; background: #fff; text-align: center; }
+.mask { position: fixed; left: 0; right: 0; top: 0; bottom: 0; z-index: 30; background: rgba(0,0,0,.35); }
+.audit-panel { position: fixed; left: 24rpx; right: 24rpx; bottom: 28rpx; z-index: 31; padding: 24rpx; border-radius: 20rpx; background: #fff; box-shadow: 0 16rpx 48rpx rgba(16,24,40,.18); }
+.panel-title { color: #172033; font-size: 32rpx; font-weight: 800; }
+.panel-sub { margin-top: 8rpx; color: #667085; font-size: 24rpx; }
+.seg { display: flex; flex-wrap: wrap; gap: 10rpx; margin-top: 16rpx; }
+.seg view { flex: 1; min-width: 112rpx; padding: 14rpx 10rpx; border-radius: 14rpx; color: #344054; background: #f2f4f7; text-align: center; font-size: 24rpx; }
+.seg .active { color: #fff; background: #0f766e; }
+.seg .reject { background: #dc2626; }
+.panel-actions { display: flex; gap: 14rpx; margin-top: 16rpx; }
+.panel-actions button { flex: 1; margin-top: 0; }

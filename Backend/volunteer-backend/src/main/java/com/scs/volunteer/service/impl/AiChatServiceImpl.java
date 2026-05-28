@@ -85,7 +85,11 @@ public class AiChatServiceImpl implements AiChatService {
             if (response.getSources().isEmpty()) {
                 response.setAnswer("暂未找到明确规则依据");
             } else {
-                response.setAnswer(withSources(rag));
+                String answer = withSources(rag);
+                if (isCheckinAdjustmentQuestion(message)) {
+                    answer += "\n\n如果规则允许补签，你可以在“我的活动”中找到对应活动，点击“申请补签”，填写原因并上传证明后等待管理员审核。";
+                }
+                response.setAnswer(answer);
             }
         } catch (Exception e) {
             log.warn("RULE_QA RAG failed: {}", e.getMessage(), e);
@@ -94,6 +98,10 @@ public class AiChatServiceImpl implements AiChatService {
         }
         response.setRecommendations(List.of());
         return response;
+    }
+
+    private boolean isCheckinAdjustmentQuestion(String message) {
+        return message.contains("补签") || message.contains("漏签") || message.contains("迟到") || message.contains("签到异常");
     }
 
     private AiChatResponseVO handleActivityRecommend(String message, CurrentUser currentUser, AiChatResponseVO response) {

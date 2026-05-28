@@ -46,8 +46,33 @@ public class RegistrationMapper {
     public List<Map<String, Object>> my(Long userId) {
         return jdbcTemplate.queryForList("""
                 select r.*,a.name as activity_name,a.category,a.location,a.start_time,a.end_time,
-                       a.service_hours,a.contact_name,a.contact_phone
+                       a.service_hours,a.contact_name,a.contact_phone,
+                       coalesce(e.new_status,c.status, if(now() > a.end_time and r.status in ('已通过','已完成'), 'ABSENT', 'NOT_CHECKED_IN')) as checkin_status,
+                       coalesce(e.new_checkin_time,c.checkin_time) as checkin_time,
+                       ca.audit_status as adjustment_status,
+                       ca.admin_remark as adjustment_admin_remark,
+                       ca.reason as adjustment_reason
                 from registration r join activity a on r.activity_id=a.id
+                left join activity_checkin c on c.activity_id=r.activity_id and c.user_id=r.user_id
+                left join (
+                    select x.*
+                    from checkin_adjustment x
+                    join (
+                        select activity_id,user_id,max(id) as id
+                        from checkin_adjustment
+                        group by activity_id,user_id
+                    ) latest on latest.id=x.id
+                ) ca on ca.activity_id=r.activity_id and ca.user_id=r.user_id
+                left join (
+                    select x.*
+                    from checkin_adjustment x
+                    join (
+                        select activity_id,user_id,max(id) as id
+                        from checkin_adjustment
+                        where audit_status='APPROVED'
+                        group by activity_id,user_id
+                    ) latest on latest.id=x.id
+                ) e on e.activity_id=r.activity_id and e.user_id=r.user_id
                 where r.user_id=? order by r.created_at desc
                 """, userId);
     }
@@ -133,6 +158,14 @@ public class RegistrationMapper {
 
     public void review(Long id, String status, String remark) {
         jdbcTemplate.update("update registration set status=?,review_remark=? where id=?", status, remark, id);
+    }
+
+    public void markCompleted(Long activityId, Long userId, String remark) {
+        jdbcTemplate.update("""
+                update registration
+                set status='已完成',review_remark=coalesce(?,review_remark)
+                where activity_id=? and user_id=? and status in ('已通过','已完成')
+                """, remark, activityId, userId);
     }
 
     public void delete(Long id) {

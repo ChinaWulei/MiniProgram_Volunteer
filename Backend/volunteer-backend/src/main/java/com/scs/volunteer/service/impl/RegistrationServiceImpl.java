@@ -74,6 +74,7 @@ public class RegistrationServiceImpl implements RegistrationService {
         String signupStatus = "自动通过".equals(activity.getReviewMethod()) ? "已通过" : "待审核";
         registrationMapper.insert(dto.getActivityId(), currentUser.getId(), signupStatus);
         activityMapper.increaseRegistered(dto.getActivityId());
+        activityMapper.refreshRegisteredNumbers();
     }
 
     @Override
@@ -159,6 +160,7 @@ public class RegistrationServiceImpl implements RegistrationService {
         }
         Map<String, Object> reg = registrationMapper.findMap(id);
         registrationMapper.review(id, dto.getStatus(), dto.getReviewRemark());
+        activityMapper.refreshRegisteredNumbers();
         Long noticeUserId = ((Number) reg.get("user_id")).longValue();
         Long noticeActivityId = ((Number) reg.get("activity_id")).longValue();
         Activity noticeActivity = activityMapper.findById(noticeActivityId).orElse(null);
@@ -192,6 +194,7 @@ public class RegistrationServiceImpl implements RegistrationService {
         Activity activity = activityMapper.findById(activityId).orElseThrow(() -> new BizException("活动不存在"));
         registrationMapper.delete(id);
         activityMapper.decreaseRegistered(activityId);
+        activityMapper.refreshRegisteredNumbers();
         notificationMapper.insert(userId, "REGISTRATION_CANCELLED", "报名已取消",
                 "你报名的《" + activity.getName() + "》已由管理员取消。原因：" + reason,
                 "ACTIVITY", activityId);

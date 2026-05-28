@@ -34,7 +34,7 @@
 .recent-title { color: #172033; font-size: 25rpx; font-weight: 700; }
 .recent-meta { margin-top: 6rpx; color: #667085; font-size: 22rpx; }
 .bottom-actions { position: fixed; left: 0; right: 0; bottom: 0; display: flex; gap: 14rpx; padding: 18rpx 24rpx calc(24rpx + env(safe-area-inset-bottom)); background: #fff; box-shadow: 0 -8rpx 20rpx rgba(16,24,40,.06); }
-.primary-btn, .ghost-btn { flex: 1; height: 76rpx; line-height: 76rpx; margin: 0; border-radius: 18rpx; font-size: 27rpx; }
+.primary-btn, .ghost-btn { flex: 1; height: 76rpx; line-height: 1; margin: 0; padding: 0; border-radius: 18rpx; font-size: 27rpx; display: flex; align-items: center; justify-content: center; box-sizing: border-box; }
 .primary-btn { background: #0f766e; color: #fff; }
 .ghost-btn { background: #eefaf7; color: #0f766e; }
 .primary-btn::after, .ghost-btn::after { border: 0; }

@@ -81,6 +81,31 @@ public class DatabaseStartupCheck implements ApplicationRunner {
                         index idx_announcement_attachment(announcement_id)
                     )
                     """);
+            jdbcTemplate.execute("""
+                    create table if not exists checkin_adjustment (
+                        id bigint primary key auto_increment,
+                        activity_id bigint not null,
+                        user_id bigint not null,
+                        original_status varchar(40) null,
+                        new_status varchar(40) null,
+                        original_checkin_time datetime null,
+                        new_checkin_time datetime null,
+                        reason varchar(500) null,
+                        description text null,
+                        proof_image_url varchar(700) null,
+                        original_service_hours decimal(8,2) null,
+                        new_service_hours decimal(8,2) null,
+                        hours_reason varchar(500) null,
+                        admin_remark varchar(500) null,
+                        audit_status varchar(30) not null default 'PENDING',
+                        admin_id bigint null,
+                        created_at datetime not null default current_timestamp,
+                        updated_at datetime not null default current_timestamp on update current_timestamp,
+                        index idx_checkin_adjustment_user(user_id, created_at),
+                        index idx_checkin_adjustment_admin(audit_status, activity_id, created_at),
+                        index idx_checkin_adjustment_target(activity_id, user_id)
+                    )
+                    """);
             ensureColumn("activity", "tips", "alter table activity add column tips text null after service_hours");
             log.info("Database connection check succeeded");
         } catch (Exception e) {

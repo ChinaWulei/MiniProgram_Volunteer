@@ -13,3 +13,24 @@
   border-right: 3rpx solid #98a2b3;
   transform: translateY(-50%) rotate(45deg);
 }
+.checkin-line { margin-top: 10rpx; font-size: 24rpx; font-weight: 700; color: #0f766e; }
+.checkin-line.LATE_CHECKED_IN { color: #d97706; }
+.checkin-line.ABSENT { color: #dc2626; }
+.checkin-line.NOT_CHECKED_IN { color: #667085; }
+.adjust-line { display: inline-flex; margin-top: 10rpx; padding: 6rpx 14rpx; border-radius: 999rpx; color: #0f766e; background: #e6fffb; font-size: 22rpx; font-weight: 700; }
+.danger { color: #dc2626; }
+.apply-btn { position: relative; z-index: 2; display: flex; align-items: center; justify-content: center; width: 170rpx; height: 58rpx; line-height: 1; margin: 16rpx 0 0; padding: 0; border-radius: 999rpx; color: #fff; background: #0f766e; font-size: 24rpx; }
+.apply-btn::after, .primary-btn::after, .ghost-btn::after { border: 0; }
+.mask { position: fixed; left: 0; right: 0; top: 0; bottom: 0; z-index: 30; background: rgba(0,0,0,.35); }
+.apply-panel { position: fixed; left: 24rpx; right: 24rpx; bottom: 28rpx; z-index: 31; padding: 24rpx; border-radius: 20rpx; background: #fff; box-shadow: 0 16rpx 48rpx rgba(16,24,40,.18); }
+.panel-title { color: #172033; font-size: 32rpx; font-weight: 800; }
+.panel-sub { margin-top: 8rpx; color: #667085; font-size: 24rpx; }
+.apply-panel input, .apply-panel textarea { width: 100%; margin-top: 16rpx; padding: 0 18rpx; border-radius: 14rpx; background: #f8fafc; box-sizing: border-box; font-size: 25rpx; }
+.apply-panel input { height: 76rpx; }
+.apply-panel textarea { min-height: 150rpx; padding-top: 16rpx; }
+.proof-row, .panel-actions { display: flex; align-items: center; gap: 14rpx; margin-top: 16rpx; }
+.proof-row text { color: #0f766e; font-size: 24rpx; }
+.proof { width: 180rpx; height: 120rpx; margin-top: 14rpx; border-radius: 12rpx; background: #eef2f7; }
+.primary-btn, .ghost-btn { flex: 1; display: flex; align-items: center; justify-content: center; height: 72rpx; line-height: 1; margin: 0; padding: 0; border-radius: 16rpx; font-size: 26rpx; box-sizing: border-box; }
+.primary-btn { color: #fff; background: #0f766e; }
+.ghost-btn { color: #0f766e; background: #eefaf7; }

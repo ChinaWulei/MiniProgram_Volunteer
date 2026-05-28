@@ -157,8 +157,8 @@
 .reg-actions button { display: flex; align-items: center; justify-content: center; width: auto; height: 54rpx; line-height: 1; margin: 0; padding: 0 18rpx; border-radius: 14rpx; color: #0f766e; background: #eefaf7; font-size: 22rpx; }
 .reg-actions .danger { color: #dc2626; background: #fee2e2; }
 .reg-actions button::after { border: 0; }
-.reg-audit-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 12rpx; margin-top: 14rpx; }
-.reg-audit-actions button { display: flex; align-items: center; justify-content: center; height: 68rpx; line-height: 1; margin: 0; border-radius: 14rpx; font-size: 26rpx; font-weight: 800; }
+.reg-audit-actions { display: flex; justify-content: flex-end; gap: 10rpx; margin-top: 14rpx; max-width: 100%; box-sizing: border-box; }
+.reg-audit-actions button { display: flex; align-items: center; justify-content: center; width: 128rpx; height: 58rpx; line-height: 1; margin: 0; padding: 0; border-radius: 14rpx; font-size: 24rpx; font-weight: 800; box-sizing: border-box; }
 .reg-audit-actions button::after { border: 0; }
 .reg-audit-actions .approve { color: #fff; background: #0f766e; }
 .reg-audit-actions .reject { color: #dc2626; background: #fee2e2; }

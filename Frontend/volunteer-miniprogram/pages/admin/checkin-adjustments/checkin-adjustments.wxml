@@ -1,0 +1,49 @@
+<view class="page">
+  <view class="filter-panel">
+    <input placeholder="搜索用户、学号或活动" value="{{keyword}}" bindinput="inputKeyword" bindconfirm="search" />
+    <picker mode="selector" range="{{statusOptions}}" value="{{statusIndex}}" bindchange="pickStatus">
+      <view class="filter-chip">状态：{{statusOptions[statusIndex]}}</view>
+    </picker>
+    <button class="primary-btn" bindtap="search">查询</button>
+  </view>
+
+  <view class="record-card" wx:for="{{list}}" wx:key="id">
+    <view class="row">
+      <view class="title">{{item.userName || item.nickname}}</view>
+      <view class="audit {{item.audit_status}}">{{item.auditStatusText}}</view>
+    </view>
+    <view class="muted">{{item.activityName}}</view>
+    <view class="muted">{{item.startTime}} 至 {{item.endTime}}</view>
+    <view class="status-line">原始签到：{{item.originalStatusText}} <text wx:if="{{item.originalCheckinTime}}">· {{item.originalCheckinTime}}</text></view>
+    <view wx:if="{{item.new_status}}" class="status-line ok">调整后：{{item.newStatusText}} <text wx:if="{{item.newCheckinTime}}">· {{item.newCheckinTime}}</text></view>
+    <view class="muted">原因：{{item.reason || '-'}}</view>
+    <view class="muted" wx:if="{{item.description}}">说明：{{item.description}}</view>
+    <view class="muted" wx:if="{{item.adminRemark}}">管理员备注：{{item.adminRemark}}</view>
+    <image wx:if="{{item.proofImageUrl}}" class="proof" src="{{item.proofImageUrl}}" mode="aspectFill" bindtap="previewProof" data-url="{{item.proofImageUrl}}"></image>
+    <button class="ghost-btn" bindtap="openAudit" data-index="{{index}}">审核/调整</button>
+  </view>
+  <view wx:if="{{list.length === 0}}" class="empty">暂无签到异常记录</view>
+
+  <view wx:if="{{showAudit}}" class="mask" bindtap="closeAudit"></view>
+  <view wx:if="{{showAudit}}" class="audit-panel">
+    <view class="panel-title">处理签到异常</view>
+    <view class="panel-sub">{{current.activityName}} · {{current.userName || current.nickname}}</view>
+    <view class="seg">
+      <view class="{{form.auditStatus === 'APPROVED' ? 'active' : ''}}" data-value="APPROVED" bindtap="setAuditResult">通过</view>
+      <view class="{{form.auditStatus === 'REJECTED' ? 'active reject' : ''}}" data-value="REJECTED" bindtap="setAuditResult">驳回</view>
+    </view>
+    <view wx:if="{{form.auditStatus === 'APPROVED'}}" class="seg">
+      <view class="{{form.newStatus === 'CHECKED_IN' ? 'active' : ''}}" data-value="CHECKED_IN" bindtap="setNewStatus">正常</view>
+      <view class="{{form.newStatus === 'LATE_CHECKED_IN' ? 'active' : ''}}" data-value="LATE_CHECKED_IN" bindtap="setNewStatus">迟到</view>
+      <view class="{{form.newStatus === 'MANUAL_CHECKED_IN' ? 'active' : ''}}" data-value="MANUAL_CHECKED_IN" bindtap="setNewStatus">补签</view>
+      <view class="{{form.newStatus === 'ABSENT' ? 'active reject' : ''}}" data-value="ABSENT" bindtap="setNewStatus">缺勤</view>
+    </view>
+    <input placeholder="调整服务时长（选填）" type="digit" value="{{form.newServiceHours}}" data-key="newServiceHours" bindinput="inputForm" />
+    <input placeholder="时长调整原因（选填）" value="{{form.hoursReason}}" data-key="hoursReason" bindinput="inputForm" />
+    <textarea placeholder="审核备注" value="{{form.adminRemark}}" data-key="adminRemark" bindinput="inputForm"></textarea>
+    <view class="panel-actions">
+      <button class="ghost-btn" bindtap="closeAudit">取消</button>
+      <button class="primary-btn" bindtap="submitAudit">提交</button>
+    </view>
+  </view>
+</view>

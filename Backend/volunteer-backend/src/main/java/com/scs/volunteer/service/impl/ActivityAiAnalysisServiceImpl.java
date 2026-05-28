@@ -10,7 +10,12 @@ import com.scs.volunteer.service.AiModelClient;
 import com.scs.volunteer.service.UserProfileService;
 import com.scs.volunteer.vo.AiActivityAnalysisVO;
 import com.scs.volunteer.vo.UserProfileVO;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.HttpServerErrorException;
+import org.springframework.web.client.ResourceAccessException;
+import org.springframework.web.client.RestClientException;
 
 import java.time.format.DateTimeFormatter;
 import java.util.List;
@@ -19,6 +24,7 @@ import java.util.stream.Collectors;
 
 @Service
 public class ActivityAiAnalysisServiceImpl implements ActivityAiAnalysisService {
+    private static final Logger log = LoggerFactory.getLogger(ActivityAiAnalysisServiceImpl.class);
     private static final DateTimeFormatter TIME_FORMAT = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
 
     private final ActivityMapper activityMapper;
@@ -47,10 +53,19 @@ public class ActivityAiAnalysisServiceImpl implements ActivityAiAnalysisService 
         Activity activity = activityMapper.findById(activityId).orElseThrow(() -> new BizException("活动不存在"));
         UserProfileVO profile = userProfileService.profile(currentUser.getId());
         List<Map<String, Object>> history = registrationMapper.aiHistory(currentUser.getId());
-        String analysis = aiModelClient.chat(buildPrompt(profile, history, activity, question));
+        String analysis;
+        try {
+            analysis = aiModelClient.chat(buildPrompt(profile, history, activity, question));
+        } catch (HttpServerErrorException.ServiceUnavailable | ResourceAccessException e) {
+            throw new BizException("AI服务当前较繁忙，请稍后再试");
+        } catch (RestClientException e) {
+            throw new BizException("AI服务暂时不可用，请稍后再试");
+        }
         if (analysis == null || analysis.isBlank()) {
             throw new BizException("AI未返回有效分析结果");
         }
+        log.info("AI activity analysis result activityId={}, userId={}, length={}, content={}",
+                activityId, currentUser.getId(), analysis.length(), analysis);
         return new AiActivityAnalysisVO(activityId, analysis.trim());
     }
 

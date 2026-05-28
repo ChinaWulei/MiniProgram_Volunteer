@@ -1,21 +1,71 @@
 .activity-card {
   position: relative;
 }
-.activity-card::after {
-  content: '';
-  position: absolute;
-  right: 24rpx;
-  bottom: 24rpx;
-  width: 14rpx;
-  height: 14rpx;
-  border-top: 3rpx solid #98a2b3;
-  border-right: 3rpx solid #98a2b3;
-  transform: rotate(45deg);
-}
 .activity-cover {
   width: 100%;
   height: 240rpx;
   margin-bottom: 18rpx;
   border-radius: 14rpx;
   background: #e6fffb;
+}
+.activity-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14rpx;
+  margin-top: 18rpx;
+}
+.activity-actions button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 68rpx;
+  line-height: 1;
+  margin: 0;
+  border-radius: 14rpx;
+  font-size: 25rpx;
+}
+.detail-btn {
+  color: #0f766e;
+  background: #eefaf7;
+}
+.ai-btn {
+  color: #fff;
+  background: #0f766e;
+}
+.ai-btn.active {
+  background: #115e59;
+}
+.activity-actions button::after {
+  border: 0;
+}
+.ai-panel {
+  margin-top: 18rpx;
+  padding: 18rpx;
+  border-radius: 14rpx;
+  background: #f8fbfb;
+  border: 1rpx solid #d9f3ee;
+}
+.ai-loading {
+  display: flex;
+  align-items: center;
+  gap: 14rpx;
+  color: #0f766e;
+  font-size: 25rpx;
+}
+.spinner {
+  width: 30rpx;
+  height: 30rpx;
+  border-radius: 50%;
+  border: 4rpx solid #b8eee4;
+  border-top-color: #0f766e;
+  animation: spin 0.8s linear infinite;
+}
+.ai-content {
+  white-space: pre-wrap;
+  color: #344054;
+  font-size: 25rpx;
+  line-height: 1.65;
+}
+@keyframes spin {
+  to { transform: rotate(360deg); }
 }

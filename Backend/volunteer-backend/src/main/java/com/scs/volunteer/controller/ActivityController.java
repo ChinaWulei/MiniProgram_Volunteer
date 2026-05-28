@@ -1,9 +1,12 @@
 package com.scs.volunteer.controller;
 
 import com.scs.volunteer.common.ApiResponse;
+import com.scs.volunteer.dto.ActivityAiAnalysisRequest;
 import com.scs.volunteer.dto.ActivityDTO;
 import com.scs.volunteer.entity.Activity;
+import com.scs.volunteer.service.ActivityAiAnalysisService;
 import com.scs.volunteer.service.ActivityService;
+import com.scs.volunteer.vo.AiActivityAnalysisVO;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.web.bind.annotation.*;
 
@@ -14,9 +17,11 @@ import java.util.Map;
 @RequestMapping("/api/activities")
 public class ActivityController extends BaseController {
     private final ActivityService activityService;
+    private final ActivityAiAnalysisService activityAiAnalysisService;
 
-    public ActivityController(ActivityService activityService) {
+    public ActivityController(ActivityService activityService, ActivityAiAnalysisService activityAiAnalysisService) {
         this.activityService = activityService;
+        this.activityAiAnalysisService = activityAiAnalysisService;
     }
 
     @GetMapping
@@ -32,6 +37,14 @@ public class ActivityController extends BaseController {
     @GetMapping("/{id}")
     public ApiResponse<Activity> detail(@PathVariable Long id) {
         return ApiResponse.ok(activityService.detail(id));
+    }
+
+    @PostMapping("/{id}/ai-analysis")
+    public ApiResponse<AiActivityAnalysisVO> aiAnalysis(@PathVariable Long id,
+                                                        @RequestBody(required = false) ActivityAiAnalysisRequest body,
+                                                        HttpServletRequest request) {
+        String question = body == null ? null : body.getQuestion();
+        return ApiResponse.ok(activityAiAnalysisService.analyze(id, currentUser(request), question));
     }
 
     @PostMapping

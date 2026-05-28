@@ -7,12 +7,23 @@
       <button class="primary-btn" bindtap="load">筛选</button>
     </view>
   </view>
-  <view class="card activity-card" wx:for="{{list}}" wx:key="id" bindtap="goDetail" data-id="{{item.id}}">
+  <view class="card activity-card" wx:for="{{list}}" wx:key="id">
     <image wx:if="{{item.coverImageUrl}}" class="activity-cover" src="{{item.coverImageUrl}}" mode="aspectFill"></image>
     <view class="row"><view class="title">{{item.name}}</view><view class="tag">{{item.status}}</view></view>
     <view class="muted">{{item.category}} · {{item.location}}</view>
     <view class="muted">{{item.startTimeText}} 至 {{item.endTimeText}}</view>
     <view class="muted">招募 {{item.recruitNumber}} 人，已报名 {{item.registeredNumber}} 人</view>
     <view class="tag">{{item.skillRequirements}}</view>
+    <view class="activity-actions">
+      <button class="detail-btn" bindtap="goDetail" data-id="{{item.id}}">查看详情</button>
+      <button class="ai-btn {{item.aiExpanded ? 'active' : ''}}" bindtap="toggleAiAnalysis" data-id="{{item.id}}">AI分析</button>
+    </view>
+    <view wx:if="{{item.aiExpanded}}" class="ai-panel">
+      <view wx:if="{{item.aiLoading}}" class="ai-loading">
+        <view class="spinner"></view>
+        <text>AI正在分析活动匹配情况...</text>
+      </view>
+      <view wx:else class="ai-content">{{item.aiAnalysis}}</view>
+    </view>
   </view>
 </view>

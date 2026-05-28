@@ -49,7 +49,7 @@ public class ConfigurableAiModelClient implements AiModelClient {
                 )),
                 "generationConfig", Map.of(
                         "temperature", 0.3,
-                        "maxOutputTokens", 600
+                        "maxOutputTokens", 1000
                 )
         );
 

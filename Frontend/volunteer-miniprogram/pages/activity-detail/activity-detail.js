@@ -17,6 +17,10 @@ Page({
     evaluationTargetUserId: null,
     isAdmin: false,
     canEvaluate: false,
+    showAiSheet: false,
+    aiLoading: false,
+    aiAnalysis: '',
+    aiQuestion: '',
     buttonText: '立即报名',
     buttonDisabled: false
   },
@@ -149,6 +153,42 @@ Page({
   },
   goMatch() {
     wx.navigateTo({ url: `/pages/match/match?activityId=${this.data.id}` })
+  },
+  openAiAnalysis() {
+    this.setData({ showAiSheet: true })
+    if (this.data.aiAnalysis || this.data.aiLoading) return
+    this.loadAiAnalysis()
+  },
+  closeAiAnalysis() {
+    this.setData({ showAiSheet: false })
+  },
+  loadAiAnalysis() {
+    this.setData({ aiLoading: true })
+    request({ url: `/api/activities/${this.data.id}/ai-analysis`, method: 'POST', silent: true })
+      .then(data => this.setData({ aiAnalysis: (data && data.analysis) || 'AI暂未返回分析结果' }))
+      .catch(err => this.setData({ aiAnalysis: (err && err.message) || 'AI分析失败，请稍后重试' }))
+      .finally(() => this.setData({ aiLoading: false }))
+  },
+  inputAiQuestion(e) {
+    this.setData({ aiQuestion: e.detail.value })
+  },
+  askAiFollowup() {
+    const question = (this.data.aiQuestion || '').trim()
+    if (!question) {
+      wx.showToast({ title: '请输入追问内容', icon: 'none' })
+      return
+    }
+    this.setData({ aiLoading: true })
+    request({ url: `/api/activities/${this.data.id}/ai-analysis`, method: 'POST', data: { question }, silent: true })
+      .then(data => {
+        const answer = (data && data.analysis) || 'AI暂未返回分析结果'
+        const prefix = this.data.aiAnalysis ? `${this.data.aiAnalysis}\n\n追问：${question}\n` : `追问：${question}\n`
+        this.setData({ aiAnalysis: prefix + answer, aiQuestion: '' })
+      })
+      .catch(err => {
+        wx.showToast({ title: (err && err.message) || '追问失败', icon: 'none' })
+      })
+      .finally(() => this.setData({ aiLoading: false }))
   },
   goVolunteer(e) {
     wx.navigateTo({ url: `/pages/volunteer-detail/volunteer-detail?id=${e.currentTarget.dataset.userid}` })

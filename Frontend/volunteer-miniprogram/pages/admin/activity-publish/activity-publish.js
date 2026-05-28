@@ -19,6 +19,17 @@ function combineDateTime(date, time) {
   return `${date} ${time}`
 }
 
+function uniqueSkills(existing, generated) {
+  const names = existing.map(item => item.name)
+  ;(generated || []).forEach(name => {
+    if (name && names.indexOf(name) < 0) {
+      existing.push({ name, selected: true })
+      names.push(name)
+    }
+  })
+  return existing.map(item => (generated || []).indexOf(item.name) >= 0 ? Object.assign({}, item, { selected: true }) : item)
+}
+
 Page({
   data: {
     id: null,
@@ -42,6 +53,12 @@ Page({
     auditModes: ['管理员审核', '自动通过'],
     statuses: ['已发布', '草稿', '已结束', '已取消'],
     skillOptions: skillNames.map(name => ({ name, selected: false })),
+    generatedFields: {},
+    aiPanelVisible: false,
+    aiPrompt: '',
+    aiGenerating: false,
+    aiCoverGenerating: false,
+    aiLoadingText: 'AI正在生成活动内容与封面...',
     uploading: false,
     submitting: false
   },
@@ -102,6 +119,80 @@ Page({
     const key = e.currentTarget.dataset.key
     const numeric = key === 'recruitCount' || key === 'serviceHours'
     this.setData({ [`form.${key}`]: numeric ? Number(e.detail.value) : e.detail.value })
+  },
+  openAiGenerate() {
+    this.setData({ aiPanelVisible: true })
+  },
+  closeAiGenerate() {
+    if (this.data.aiGenerating) return
+    this.setData({ aiPanelVisible: false })
+  },
+  noop() {},
+  inputAiPrompt(e) {
+    this.setData({ aiPrompt: e.detail.value })
+  },
+  aiGenerate(e) {
+    if (this.data.aiGenerating) return
+    const mode = e.currentTarget.dataset.mode || 'FULL'
+    const prompt = (this.data.aiPrompt || '').trim()
+    if (!prompt) {
+      wx.showToast({ title: '请输入活动需求', icon: 'none' })
+      return
+    }
+    const isCover = mode === 'COVER'
+    this.setData({
+      aiGenerating: true,
+      aiCoverGenerating: isCover || mode === 'FULL',
+      aiLoadingText: isCover ? 'AI正在生成活动封面...' : 'AI正在生成活动内容与封面...'
+    })
+    request({
+      url: '/api/admin/activities/ai-generate',
+      method: 'POST',
+      data: Object.assign({}, this.data.form, {
+        prompt,
+        mode,
+        skills: compactSkills(this.data.skillOptions)
+      })
+    })
+      .then(data => {
+        this.applyAiGenerated(data || {})
+        wx.showToast({ title: '已填充生成内容', icon: 'success' })
+      })
+      .catch(() => {})
+      .finally(() => {
+        this.setData({ aiGenerating: false, aiCoverGenerating: false })
+      })
+  },
+  applyAiGenerated(data) {
+    const form = Object.assign({}, this.data.form)
+    const generatedFields = Object.assign({}, this.data.generatedFields)
+    const mappings = [
+      ['title', 'title'],
+      ['category', 'category'],
+      ['description', 'description'],
+      ['requirements', 'requirements'],
+      ['recruitCount', 'recruitCount'],
+      ['serviceHours', 'serviceHours'],
+      ['tips', 'tips'],
+      ['promotionText', 'promotionText']
+    ]
+    mappings.forEach(([source, target]) => {
+      if (data[source] !== undefined && data[source] !== null && data[source] !== '') {
+        form[target] = data[source]
+        generatedFields[target] = true
+      }
+    })
+    if (data.coverUrl) {
+      form.coverImageUrl = data.coverUrl
+      generatedFields.coverImageUrl = true
+    }
+    let skillOptions = this.data.skillOptions
+    if (Array.isArray(data.skills) && data.skills.length) {
+      skillOptions = uniqueSkills(skillOptions.slice(), data.skills)
+      form.requiredSkills = compactSkills(skillOptions)
+      generatedFields.requiredSkills = true
+    }
+    this.setData({ form, skillOptions, generatedFields, aiPanelVisible: false })
   },
   chooseLocation() {
     wx.chooseLocation({

@@ -11,6 +11,9 @@ public class AiProperties {
     private String baseUrl;
     private String model;
     private String embeddingModel;
+    private String imageApiKey;
+    private String imageBaseUrl;
+    private String imageModel;
 
     public String getProvider() { return provider; }
     public void setProvider(String provider) { this.provider = provider; }
@@ -22,4 +25,10 @@ public class AiProperties {
     public void setModel(String model) { this.model = model; }
     public String getEmbeddingModel() { return embeddingModel; }
     public void setEmbeddingModel(String embeddingModel) { this.embeddingModel = embeddingModel; }
+    public String getImageApiKey() { return imageApiKey; }
+    public void setImageApiKey(String imageApiKey) { this.imageApiKey = imageApiKey; }
+    public String getImageBaseUrl() { return imageBaseUrl; }
+    public void setImageBaseUrl(String imageBaseUrl) { this.imageBaseUrl = imageBaseUrl; }
+    public String getImageModel() { return imageModel; }
+    public void setImageModel(String imageModel) { this.imageModel = imageModel; }
 }

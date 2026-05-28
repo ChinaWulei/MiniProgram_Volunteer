@@ -3,9 +3,11 @@ package com.scs.volunteer.controller;
 import com.scs.volunteer.common.ApiResponse;
 import com.scs.volunteer.common.BizException;
 import com.scs.volunteer.common.CurrentUser;
+import com.scs.volunteer.dto.ActivityAiGenerateRequest;
 import com.scs.volunteer.dto.ActivityDTO;
 import com.scs.volunteer.dto.CreditRuleDTO;
 import com.scs.volunteer.dto.ManualCheckinRequest;
+import com.scs.volunteer.service.ActivityAiGenerateService;
 import com.scs.volunteer.service.ActivityService;
 import com.scs.volunteer.service.CheckinService;
 import com.scs.volunteer.service.S3StorageService;
@@ -23,6 +25,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.Map;
+import com.scs.volunteer.vo.ActivityAiGenerateVO;
 
 @RestController
 @RequestMapping("/api/admin")
@@ -32,13 +35,16 @@ public class AdminController extends BaseController {
     private final S3StorageService s3StorageService;
     private final CheckinService checkinService;
     private final CreditMapper creditMapper;
+    private final ActivityAiGenerateService activityAiGenerateService;
 
-    public AdminController(StatisticsService statisticsService, ActivityService activityService, S3StorageService s3StorageService, CheckinService checkinService, CreditMapper creditMapper) {
+    public AdminController(StatisticsService statisticsService, ActivityService activityService, S3StorageService s3StorageService,
+                           CheckinService checkinService, CreditMapper creditMapper, ActivityAiGenerateService activityAiGenerateService) {
         this.statisticsService = statisticsService;
         this.activityService = activityService;
         this.s3StorageService = s3StorageService;
         this.checkinService = checkinService;
         this.creditMapper = creditMapper;
+        this.activityAiGenerateService = activityAiGenerateService;
     }
 
     @GetMapping("/statistics")
@@ -72,6 +78,11 @@ public class AdminController extends BaseController {
     @PostMapping("/activities")
     public ApiResponse<Map<String, Long>> publishActivity(HttpServletRequest request, @RequestBody ActivityDTO dto) {
         return ApiResponse.ok(Map.of("id", activityService.create(dto, currentUser(request))));
+    }
+
+    @PostMapping("/activities/ai-generate")
+    public ApiResponse<ActivityAiGenerateVO> aiGenerateActivity(HttpServletRequest request, @RequestBody ActivityAiGenerateRequest body) {
+        return ApiResponse.ok(activityAiGenerateService.generate(body, currentUser(request)));
     }
 
     @DeleteMapping("/activities/{id}")

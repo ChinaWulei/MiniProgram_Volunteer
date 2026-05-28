@@ -137,8 +137,12 @@
       <view class="spinner"></view>
       <text>AI总结中...</text>
     </view>
-    <scroll-view wx:else class="sheet-content {{aiError ? 'error' : ''}}" scroll-y>
-      <view class="ai-analysis-text">{{aiAnalysis}}</view>
+    <scroll-view wx:else class="sheet-content {{aiError ? 'error' : ''}}" scroll-y scroll-with-animation scroll-into-view="{{aiScrollIntoView}}">
+      <view wx:for="{{aiMessages}}" wx:key="id" id="{{item.id}}" class="ai-msg-row {{item.role === 'user' ? 'right' : 'left'}}">
+        <view class="ai-avatar">{{item.role === 'user' ? '我' : 'AI'}}</view>
+        <view class="ai-bubble {{item.role === 'user' ? 'mine' : 'bot'}}">{{item.content}}</view>
+      </view>
+      <view id="ai-bottom"></view>
     </scroll-view>
     <view class="followup-row">
       <input placeholder="继续追问" value="{{aiQuestion}}" bindinput="inputAiQuestion" />

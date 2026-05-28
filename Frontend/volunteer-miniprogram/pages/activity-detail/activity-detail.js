@@ -22,6 +22,8 @@ Page({
     aiAnalysis: '',
     aiError: false,
     aiQuestion: '',
+    aiMessages: [],
+    aiScrollIntoView: '',
     aiFloatLeft: 0,
     aiFloatTop: 0,
     aiSheetLeft: 0,
@@ -36,6 +38,12 @@ Page({
     this.initAiFloat()
     this.load()
     if (user && user.role !== 'ADMIN') this.loadProfile()
+  },
+  onUnload() {
+    if (this.aiTypingTimer) {
+      clearInterval(this.aiTypingTimer)
+      this.aiTypingTimer = null
+    }
   },
   initAiFloat() {
     const info = wx.getWindowInfo ? wx.getWindowInfo() : wx.getSystemInfoSync()
@@ -204,9 +212,45 @@ Page({
   loadAiAnalysis() {
     this.setData({ aiLoading: true })
     request({ url: `/api/activities/${this.data.id}/ai-analysis`, method: 'POST', silent: true })
-      .then(data => this.setData({ aiAnalysis: (data && data.analysis) || 'AI暂未返回分析结果', aiError: false }))
-      .catch(err => this.setData({ aiAnalysis: (err && err.message) || 'AI分析失败，请稍后重试', aiError: true }))
+      .then(data => {
+        const analysis = (data && data.analysis) || 'AI暂未返回分析结果'
+        this.setData({
+          aiAnalysis: analysis,
+          aiMessages: [],
+          aiError: false
+        })
+        this.typeAiMessage(analysis)
+      })
+      .catch(err => {
+        const message = (err && err.message) || 'AI分析失败，请稍后重试'
+        this.setData({
+          aiAnalysis: message,
+          aiMessages: [],
+          aiError: true
+        })
+        this.typeAiMessage(message)
+      })
       .finally(() => this.setData({ aiLoading: false }))
+  },
+  typeAiMessage(content) {
+    if (this.aiTypingTimer) clearInterval(this.aiTypingTimer)
+    const text = content || ''
+    const id = `ai-${Date.now()}`
+    const messages = this.data.aiMessages.concat({ id, role: 'ai', content: '' })
+    const index = messages.length - 1
+    this.setData({ aiMessages: messages, aiScrollIntoView: 'ai-bottom' })
+    let cursor = 0
+    this.aiTypingTimer = setInterval(() => {
+      cursor += 1
+      this.setData({
+        [`aiMessages[${index}].content`]: text.slice(0, cursor),
+        aiScrollIntoView: 'ai-bottom'
+      })
+      if (cursor >= text.length) {
+        clearInterval(this.aiTypingTimer)
+        this.aiTypingTimer = null
+      }
+    }, 18)
   },
   inputAiQuestion(e) {
     this.setData({ aiQuestion: e.detail.value })
@@ -218,15 +262,26 @@ Page({
       return
     }
     this.setData({ aiLoading: true })
+    const userMessage = { id: `user-${Date.now()}`, role: 'user', content: question }
+    this.setData({ aiMessages: this.data.aiMessages.concat(userMessage), aiScrollIntoView: 'ai-bottom' })
     request({ url: `/api/activities/${this.data.id}/ai-analysis`, method: 'POST', data: { question }, silent: true })
       .then(data => {
         const answer = (data && data.analysis) || 'AI暂未返回分析结果'
         const prefix = this.data.aiAnalysis ? `${this.data.aiAnalysis}\n\n追问：${question}\n` : `追问：${question}\n`
-        this.setData({ aiAnalysis: prefix + answer, aiQuestion: '', aiError: false })
+        this.setData({
+          aiAnalysis: prefix + answer,
+          aiQuestion: '',
+          aiError: false
+        })
+        this.typeAiMessage(answer)
       })
       .catch(err => {
-        this.setData({ aiError: true })
-        wx.showToast({ title: (err && err.message) || '追问失败', icon: 'none' })
+        const message = (err && err.message) || '追问失败'
+        this.setData({
+          aiError: true
+        })
+        this.typeAiMessage(message)
+        wx.showToast({ title: message, icon: 'none' })
       })
       .finally(() => this.setData({ aiLoading: false }))
   },

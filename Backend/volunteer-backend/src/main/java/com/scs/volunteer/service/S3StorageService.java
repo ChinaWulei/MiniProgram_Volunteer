@@ -53,6 +53,16 @@ public class S3StorageService {
         return upload(file, key, ACTIVITY_COVER_MAX_SIZE, "活动封面");
     }
 
+    public String uploadActivityCoverBytes(byte[] payload, String extension, String contentType) {
+        String safeExtension = extension == null || extension.isBlank() ? "png" : extension.toLowerCase(Locale.ROOT);
+        if (!ALLOWED_EXTENSIONS.contains(safeExtension)) {
+            safeExtension = "png";
+        }
+        String key = "activity/activity-cover/ai/" + System.currentTimeMillis() + "-" + UUID.randomUUID() + "." + safeExtension;
+        String safeContentType = contentType == null || contentType.isBlank() ? MediaType.IMAGE_PNG_VALUE : contentType;
+        return upload(payload, key, ACTIVITY_COVER_MAX_SIZE, safeContentType, "AI娲诲姩灏侀潰");
+    }
+
     public String uploadActivityNewsImage(MultipartFile file) {
         String extension = extension(file.getOriginalFilename());
         String key = "activity/news/" + System.currentTimeMillis() + "-" + UUID.randomUUID() + "." + extension;
@@ -69,14 +79,25 @@ public class S3StorageService {
             throw new BizException(label + "读取失败");
         }
 
+        String contentType = file.getContentType() == null ? MediaType.APPLICATION_OCTET_STREAM_VALUE : file.getContentType();
+        return upload(payload, key, maxSize, contentType, label);
+    }
+
+    private String upload(byte[] payload, String key, long maxSize, String contentType, String label) {
+        if (payload == null || payload.length == 0) {
+            throw new BizException(label + "鍥剧墖涓嶈兘涓虹┖");
+        }
+        if (payload.length > maxSize) {
+            throw new BizException(label + "涓嶈兘瓒呰繃 " + (maxSize / 1024 / 1024) + "MB");
+        }
+        checkConfig();
+
         String host = properties.getBucket() + ".s3." + properties.getRegion() + ".amazonaws.com";
         String url = "https://" + host + "/" + encodeKey(key);
         ZonedDateTime now = ZonedDateTime.now(ZoneOffset.UTC);
         String amzDate = AMZ_DATE.format(now);
         String date = DATE.format(now);
         String payloadHash = sha256Hex(payload);
-        String contentType = file.getContentType() == null ? MediaType.APPLICATION_OCTET_STREAM_VALUE : file.getContentType();
-
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.parseMediaType(contentType));
         headers.set("Host", host);

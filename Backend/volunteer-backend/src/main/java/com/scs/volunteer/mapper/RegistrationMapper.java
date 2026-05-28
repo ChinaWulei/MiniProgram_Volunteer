@@ -25,6 +25,7 @@ public class RegistrationMapper {
                 from registration r join activity a on r.activity_id=a.id
                 where r.user_id=?
                   and r.activity_id<>?
+                  and r.status in ('待审核','已通过')
                   and a.start_time < ?
                   and a.end_time > ?
                 """, Integer.class, userId, activityId, endTime, startTime);

@@ -32,7 +32,8 @@ public class EvaluationController extends BaseController {
     public ApiResponse<Map<String, Long>> submit(@PathVariable Long activityId, @RequestBody ActivityEvaluationDTO dto, HttpServletRequest request) {
         CurrentUser user = currentUser(request);
         Activity activity = activityMapper.findById(activityId).orElseThrow(() -> new BizException("活动不存在"));
-        if (activity.getEndTime() != null && activity.getEndTime().isAfter(LocalDateTime.now())) {
+        boolean endedByStatus = "已结束".equals(activity.getStatus());
+        if (!endedByStatus && activity.getEndTime() != null && activity.getEndTime().isAfter(LocalDateTime.now())) {
             throw new BizException("活动结束后才可评价");
         }
         validate(user, dto);

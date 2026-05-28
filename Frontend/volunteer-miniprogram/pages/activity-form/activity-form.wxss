@@ -1,1 +1,7 @@
 
+.primary-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+}

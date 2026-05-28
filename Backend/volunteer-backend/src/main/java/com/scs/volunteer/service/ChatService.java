@@ -19,6 +19,7 @@ public interface ChatService {
     List<ChatMessageVO> activityInvites(Long userId);
     int unreadActivityInviteCount(Long userId);
     void markMessageRead(Long userId, Long messageId);
+    boolean blockedByMe(Long userId, Long targetUserId);
     void block(Long userId, Long targetUserId);
     void unblock(Long userId, Long targetUserId);
 }

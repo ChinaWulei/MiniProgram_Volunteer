@@ -79,8 +79,8 @@
       <view wx:for="{{skillOptions}}" wx:key="name" class="skill {{item.selected ? 'active' : ''}}" data-name="{{item.name}}" bindtap="toggleSkill">{{item.name}}</view>
     </view>
 
-    <textarea placeholder="活动简介" value="{{form.description}}" data-key="description" bindinput="input"></textarea>
-    <textarea placeholder="报名要求" value="{{form.requirements}}" data-key="requirements" bindinput="input"></textarea>
+    <textarea placeholder="活动简介" value="{{form.description}}" data-key="description" bindinput="input" maxlength="-1"></textarea>
+    <textarea placeholder="报名要求" value="{{form.requirements}}" data-key="requirements" bindinput="input" maxlength="-1"></textarea>
     <input placeholder="联系人" value="{{form.contactName}}" data-key="contactName" bindinput="input" />
     <input placeholder="联系电话" value="{{form.contactPhone}}" data-key="contactPhone" bindinput="input" />
 

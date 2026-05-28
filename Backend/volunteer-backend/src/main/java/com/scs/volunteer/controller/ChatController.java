@@ -88,6 +88,11 @@ public class ChatController extends BaseController {
         return ApiResponse.ok(null);
     }
 
+    @GetMapping("/block/{targetUserId}")
+    public ApiResponse<Map<String, Boolean>> blockStatus(HttpServletRequest request, @PathVariable Long targetUserId) {
+        return ApiResponse.ok(Map.of("blocked", chatService.blockedByMe(currentUser(request).getId(), targetUserId)));
+    }
+
     @DeleteMapping("/block/{targetUserId}")
     public ApiResponse<Void> unblock(HttpServletRequest request, @PathVariable Long targetUserId) {
         chatService.unblock(currentUser(request).getId(), targetUserId);

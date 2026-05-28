@@ -2,7 +2,7 @@
   <view class="editor-card">
     <input class="title-input" placeholder="帖子标题" value="{{form.title}}" data-key="title" bindinput="input" />
     <button class="ai-btn" loading="{{generating}}" bindtap="generate">AI生成活动总结</button>
-    <textarea class="content-input" placeholder="正文内容" value="{{form.content}}" data-key="content" bindinput="input"></textarea>
+    <textarea class="content-input" placeholder="正文内容" value="{{form.content}}" data-key="content" bindinput="input" maxlength="-1"></textarea>
   </view>
 
   <view class="image-section">

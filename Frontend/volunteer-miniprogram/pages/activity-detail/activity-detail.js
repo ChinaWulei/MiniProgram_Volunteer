@@ -16,6 +16,7 @@ Page({
     evaluationContent: '',
     evaluationTargetUserId: null,
     isAdmin: false,
+    canEvaluate: false,
     buttonText: '立即报名',
     buttonDisabled: false
   },
@@ -35,7 +36,7 @@ Page({
         activity.signupDeadlineText = this.formatTime(activity.signupDeadline)
         activity.checkinStartTimeText = this.formatTime(activity.checkinStartTime)
         activity.checkinEndTimeText = this.formatTime(activity.checkinEndTime)
-        this.setData({ activity, skills: this.splitTags(activity.skillRequirements) })
+        this.setData({ activity, skills: this.splitTags(activity.skillRequirements), canEvaluate: this.isActivityEnded(activity) })
         this.refreshButton(activity)
         if (!this.data.isAdmin) this.loadCheckinStatus()
         if (this.data.isAdmin) this.loadRegistrations()
@@ -75,6 +76,12 @@ Page({
   splitTags(tags) {
     return (tags || '').split(',').map(item => item.trim()).filter(Boolean)
   },
+  isActivityEnded(activity) {
+    if (!activity) return false
+    if (activity.status === '已结束') return true
+    if (!activity.endTime) return false
+    return new Date(String(activity.endTime).replace('T', ' ').replace(/-/g, '/')).getTime() <= Date.now()
+  },
   refreshButton(activity) {
     let buttonText = '立即报名'
     let buttonDisabled = false
@@ -109,13 +116,16 @@ Page({
     }
     const submit = () => {
       wx.showLoading({ title: '报名中' })
-      request({ url: `/api/activity/${this.data.id}/signup`, method: 'POST' })
+      request({ url: `/api/activity/${this.data.id}/signup`, method: 'POST', silent: true })
         .then(() => {
+          wx.hideLoading()
           wx.showToast({ title: '报名成功' })
           this.load()
         })
-        .catch(() => {})
-        .finally(() => wx.hideLoading())
+        .catch(err => {
+          wx.hideLoading()
+          wx.showToast({ title: (err && err.message) || '报名失败', icon: 'none' })
+        })
     }
     if (credit !== undefined && credit < 80) {
       wx.showModal({

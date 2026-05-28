@@ -122,6 +122,12 @@ public class ChatServiceImpl implements ChatService {
     }
 
     @Override
+    public boolean blockedByMe(Long userId, Long targetUserId) {
+        if (targetUserId == null || targetUserId.equals(userId)) return false;
+        return chatMapper.isBlockedByMe(userId, targetUserId);
+    }
+
+    @Override
     public void block(Long userId, Long targetUserId) {
         if (targetUserId == null || targetUserId.equals(userId)) throw new BizException("请选择有效用户");
         chatMapper.block(userId, targetUserId);

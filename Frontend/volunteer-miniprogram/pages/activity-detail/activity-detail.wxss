@@ -103,8 +103,11 @@
   box-shadow: 0 -8rpx 24rpx rgba(16, 24, 40, .08);
 }
 .signup-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
   height: 88rpx;
-  line-height: 88rpx;
+  line-height: 1;
   border-radius: 14rpx;
   background: #0f766e;
   color: #fff;
@@ -116,8 +119,11 @@
   color: #fff;
 }
 .admin-edit {
+  display: flex;
+  align-items: center;
+  justify-content: center;
   height: 78rpx;
-  line-height: 78rpx;
+  line-height: 1;
   border-radius: 14rpx;
   background: #eef6f5;
   color: #0f766e;
@@ -135,7 +141,7 @@
 .checkin-tag.MANUAL_CHECKED_IN { background: #dbeafe; color: #2563eb; }
 .checkin-tag.LATE_CHECKED_IN { background: #ffedd5; color: #c2410c; }
 .checkin-tag.ABSENT { background: #fee2e2; color: #dc2626; }
-.checkin-btn { height: 72rpx; line-height: 72rpx; margin-top: 18rpx; border-radius: 16rpx; background: #0f766e; color: #fff; font-size: 27rpx; }
+.checkin-btn { display: flex; align-items: center; justify-content: center; height: 72rpx; line-height: 1; margin-top: 18rpx; border-radius: 16rpx; background: #0f766e; color: #fff; font-size: 27rpx; }
 .checkin-btn::after { border: 0; }
 .reg-card { display: flex; gap: 14rpx; margin-top: 14rpx; padding: 16rpx; border-radius: 14rpx; background: #f8fbfb; }
 .reg-avatar { width: 72rpx; height: 72rpx; line-height: 72rpx; border-radius: 50%; color: #fff; background: #0f766e; text-align: center; font-size: 28rpx; font-weight: 800; }
@@ -148,7 +154,7 @@
 .ai-panel { background: #fff7ed; }
 .match-row { display: flex; justify-content: space-between; gap: 12rpx; color: #172033; font-size: 24rpx; font-weight: 800; }
 .reg-actions { display: flex; flex-wrap: wrap; gap: 10rpx; margin-top: 12rpx; }
-.reg-actions button { width: auto; height: 54rpx; line-height: 54rpx; margin: 0; padding: 0 18rpx; border-radius: 14rpx; color: #0f766e; background: #eefaf7; font-size: 22rpx; }
+.reg-actions button { display: flex; align-items: center; justify-content: center; width: auto; height: 54rpx; line-height: 1; margin: 0; padding: 0 18rpx; border-radius: 14rpx; color: #0f766e; background: #eefaf7; font-size: 22rpx; }
 .reg-actions .danger { color: #dc2626; background: #fee2e2; }
 .reg-actions button::after { border: 0; }
 .empty-reg { margin-top: 14rpx; color: #667085; font-size: 24rpx; text-align: center; }
@@ -158,11 +164,11 @@
 .eval-user::after { border: 0; }
 .eval-textarea { width: 100%; min-height: 140rpx; padding: 16rpx; box-sizing: border-box; border-radius: 14rpx; background: #f8fbfb; font-size: 26rpx; }
 .eval-card { margin-top: 14rpx; padding: 16rpx; border-radius: 14rpx; background: #f8fbfb; }
-.checkin-btn.small { height: 62rpx; line-height: 62rpx; font-size: 24rpx; }
+.checkin-btn.small { height: 62rpx; line-height: 1; font-size: 24rpx; }
 .mask { position: fixed; left: 0; right: 0; top: 0; bottom: 0; z-index: 40; background: rgba(0,0,0,.35); }
 .cancel-panel { position: fixed; left: 24rpx; right: 24rpx; bottom: 32rpx; z-index: 41; padding: 24rpx; border-radius: 20rpx; background: #fff; }
 .panel-title { color: #172033; font-size: 30rpx; font-weight: 800; }
 .cancel-panel textarea { margin-top: 16rpx; min-height: 150rpx; background: #f8fbfb; }
 .panel-actions { display: flex; gap: 14rpx; margin-top: 16rpx; }
-.panel-actions button { flex: 1; height: 68rpx; line-height: 68rpx; margin: 0; border-radius: 16rpx; color: #0f766e; background: #eefaf7; font-size: 25rpx; }
+.panel-actions button { flex: 1; display: flex; align-items: center; justify-content: center; height: 68rpx; line-height: 1; margin: 0; border-radius: 16rpx; color: #0f766e; background: #eefaf7; font-size: 25rpx; }
 .panel-actions .danger { color: #fff; background: #dc2626; }

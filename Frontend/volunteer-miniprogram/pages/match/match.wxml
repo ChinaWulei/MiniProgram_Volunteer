@@ -1,11 +1,16 @@
 <view class="page">
   <view class="hero">
-    <view class="hero-title">推荐志愿者 Top 5</view>
+    <view class="hero-title">推荐志愿者 Top 5 <text class="info-dot" bindtap="showRule">?</text></view>
     <view class="hero-sub">技能重合度 60% + 时间匹配 20% + 信用评分 20%</view>
   </view>
+  <view wx:if="{{loading}}" class="empty">加载中...</view>
   <view class="card" wx:for="{{list}}" wx:key="volunteer.userId" bindtap="goVolunteer" data-id="{{item.volunteer.userId}}">
     <view class="row"><view class="title">{{item.volunteer.name}}</view><view class="stat-num">{{item.score}}</view></view>
     <view class="muted">{{item.volunteer.majorClass}} · {{item.volunteer.skillTags}}</view>
     <view class="muted">{{item.reason}}</view>
+  </view>
+  <view wx:if="{{!loading && list.length === 0}}" class="empty">
+    暂无推荐志愿者
+    <view class="empty-sub">推荐没有最低分门槛；如果为空，请检查志愿者库是否有数据，或当前账号是否为管理员。</view>
   </view>
 </view>

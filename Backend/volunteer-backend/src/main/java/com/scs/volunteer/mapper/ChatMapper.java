@@ -68,11 +68,11 @@ public class ChatMapper {
                 where (c.user_a_id=? or c.user_b_id=?)
                   and not exists (
                     select 1 from chat_block b
-                    where (b.blocker_id=? and b.blocked_user_id=if(c.user_a_id=?, c.user_b_id, c.user_a_id))
-                       or (b.blocked_user_id=? and b.blocker_id=if(c.user_a_id=?, c.user_b_id, c.user_a_id))
+                    where b.blocked_user_id=?
+                      and b.blocker_id=if(c.user_a_id=?, c.user_b_id, c.user_a_id)
                   )
                 order by c.last_message_at desc,c.updated_at desc
-                """, new BeanPropertyRowMapper<>(ChatConversationVO.class), userId, userId, userId, userId, userId, userId, userId, userId, userId);
+                """, new BeanPropertyRowMapper<>(ChatConversationVO.class), userId, userId, userId, userId, userId, userId, userId);
     }
 
     public List<ChatMessageVO> messages(Long conversationId) {
@@ -165,6 +165,13 @@ public class ChatMapper {
                 where (blocker_id=? and blocked_user_id=?)
                    or (blocker_id=? and blocked_user_id=?)
                 """, Integer.class, receiverId, senderId, senderId, receiverId);
+        return count != null && count > 0;
+    }
+
+    public boolean isBlockedByMe(Long blockerId, Long blockedUserId) {
+        Integer count = jdbcTemplate.queryForObject(
+                "select count(*) from chat_block where blocker_id=? and blocked_user_id=?",
+                Integer.class, blockerId, blockedUserId);
         return count != null && count > 0;
     }
 

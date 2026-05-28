@@ -33,7 +33,7 @@
   <view class="input-bar">
     <button class="tool-btn" bindtap="chooseImages">图片</button>
     <button class="tool-btn" bindtap="toggleActivityPicker">活动</button>
-    <button class="tool-btn danger" bindtap="blockPeer">拉黑</button>
+    <button class="tool-btn danger {{isBlocked ? 'blocked' : ''}}" bindtap="toggleBlockPeer">{{isBlocked ? '解黑' : '拉黑'}}</button>
     <input class="chat-input" placeholder="输入消息" value="{{inputValue}}" bindinput="input" confirm-type="send" bindconfirm="send" adjust-position="{{true}}" hold-keyboard="{{true}}" />
     <button class="send-btn" bindtap="send">发送</button>
   </view>

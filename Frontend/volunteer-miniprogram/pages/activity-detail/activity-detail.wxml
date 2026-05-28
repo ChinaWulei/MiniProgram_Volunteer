@@ -86,7 +86,7 @@
     <view wx:if="{{registrations.length === 0}}" class="empty-reg">暂无报名人员</view>
   </view>
 
-  <view wx:if="{{activity.status === '已结束' || activity.status === '宸茬粨鏉?'}}" class="detail-section">
+  <view wx:if="{{canEvaluate}}" class="detail-section">
     <view class="section-title">{{isAdmin ? '评价志愿者' : '评价活动'}}</view>
     <view wx:if="{{isAdmin}}">
       <view class="eval-card" wx:for="{{registrations}}" wx:key="id">
@@ -95,14 +95,14 @@
           <view class="reg-status">{{item.evaluationScore || 5}} 分</view>
         </view>
         <slider min="1" max="5" step="1" value="{{item.evaluationScore || 5}}" show-value data-id="{{item.id}}" bindchange="setRegEvalScore"></slider>
-        <textarea class="eval-textarea" placeholder="填写对该志愿者的表现评价，可只打分或同时填写文字评价" value="{{item.evaluationContent}}" data-id="{{item.id}}" bindinput="inputRegEvaluation"></textarea>
+        <textarea class="eval-textarea" placeholder="填写对该志愿者的表现评价，可只打分或同时填写文字评价" value="{{item.evaluationContent}}" data-id="{{item.id}}" bindinput="inputRegEvaluation" maxlength="-1"></textarea>
         <button class="checkin-btn small" bindtap="submitRegEvaluation" data-id="{{item.id}}">提交该志愿者评价</button>
       </view>
       <button class="checkin-btn" bindtap="submitAllEvaluations">一键提交全部评价</button>
     </view>
     <view wx:else>
       <slider min="1" max="5" step="1" value="{{evaluationScore}}" show-value bindchange="setEvalScore"></slider>
-      <textarea class="eval-textarea" placeholder="填写对活动组织和负责人的评价" value="{{evaluationContent}}" bindinput="inputEvaluation"></textarea>
+      <textarea class="eval-textarea" placeholder="填写对活动组织和负责人的评价" value="{{evaluationContent}}" bindinput="inputEvaluation" maxlength="-1"></textarea>
       <button class="checkin-btn" bindtap="submitEvaluation">提交评价</button>
     </view>
   </view>
@@ -110,7 +110,7 @@
   <view wx:if="{{showCancel}}" class="mask" bindtap="closeCancel"></view>
   <view wx:if="{{showCancel}}" class="cancel-panel">
     <view class="panel-title">取消 {{cancelItem.userText}} 的报名</view>
-    <textarea placeholder="填写取消原因，学生会收到通知" value="{{cancelReason}}" bindinput="inputCancelReason"></textarea>
+    <textarea placeholder="填写取消原因，学生会收到通知" value="{{cancelReason}}" bindinput="inputCancelReason" maxlength="-1"></textarea>
     <view class="panel-actions">
       <button bindtap="closeCancel">返回</button>
       <button class="danger" bindtap="cancelRegistration">确认取消</button>

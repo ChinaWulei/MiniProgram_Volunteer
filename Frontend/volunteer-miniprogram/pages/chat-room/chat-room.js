@@ -17,7 +17,8 @@ Page({
     activityList: [],
     showActivityPicker: false,
     scrollIntoView: '',
-    socketOpen: false
+    socketOpen: false,
+    isBlocked: false
   },
   onLoad(options) {
     const user = app.globalData.user || wx.getStorageSync('user') || {}
@@ -25,6 +26,7 @@ Page({
     wx.setNavigationBarTitle({ title: this.data.peerName })
     this.loadMessages()
     this.loadActivities()
+    this.loadBlockStatus()
     this.connectSocket()
     this.startMessagePolling()
   },
@@ -137,6 +139,12 @@ Page({
       .then(list => this.setData({ activityList: (list || []).slice(0, 12) }))
       .catch(() => {})
   },
+  loadBlockStatus() {
+    if (!this.data.peerId) return
+    request({ url: `/api/chat/block/${this.data.peerId}`, silent: true })
+      .then(data => this.setData({ isBlocked: !!(data && data.blocked) }))
+      .catch(() => {})
+  },
   toggleActivityPicker() {
     this.setData({ showActivityPicker: !this.data.showActivityPicker })
   },
@@ -164,7 +172,16 @@ Page({
   goActivity(e) {
     wx.navigateTo({ url: `/pages/activity-detail/activity-detail?id=${e.currentTarget.dataset.id}` })
   },
-  blockPeer() {
+  toggleBlockPeer() {
+    if (this.data.isBlocked) {
+      request({ url: `/api/chat/block/${this.data.peerId}`, method: 'DELETE' })
+        .then(() => {
+          this.setData({ isBlocked: false })
+          wx.showToast({ title: '已取消拉黑' })
+        })
+        .catch(() => {})
+      return
+    }
     wx.showModal({
       title: '拉黑联系人',
       content: '拉黑后你不会再收到对方消息，对方也无法继续给你发消息。',
@@ -172,8 +189,8 @@ Page({
         if (!res.confirm) return
         request({ url: `/api/chat/block/${this.data.peerId}`, method: 'POST' })
           .then(() => {
+            this.setData({ isBlocked: true })
             wx.showToast({ title: '已拉黑' })
-            setTimeout(() => wx.navigateBack(), 500)
           })
           .catch(() => {})
       }

@@ -8,7 +8,7 @@
     <input placeholder="招募人数" type="number" value="{{form.recruitNumber}}" data-k="recruitNumber" bindinput="input" />
     <input placeholder="技能要求，如 摄影,讲解" value="{{form.skillRequirements}}" data-k="skillRequirements" bindinput="input" />
     <input placeholder="状态：报名中/已满员/已结束" value="{{form.status}}" data-k="status" bindinput="input" />
-    <textarea placeholder="活动描述" value="{{form.description}}" data-k="description" bindinput="input"></textarea>
+    <textarea placeholder="活动描述" value="{{form.description}}" data-k="description" bindinput="input" maxlength="-1"></textarea>
     <button class="primary-btn" bindtap="submit">保存活动</button>
   </view>
 </view>

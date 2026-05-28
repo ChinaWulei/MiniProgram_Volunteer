@@ -70,14 +70,16 @@
       </view>
       <view class="activity-actions">
         <button class="detail-action" bindtap="goDetail" data-id="{{item.id}}">查看详情</button>
-        <button class="ai-action {{item.aiExpanded ? 'active' : ''}}" bindtap="toggleAiAnalysis" data-list="recommendedActivities" data-id="{{item.id}}">AI分析</button>
+        <button class="ai-action {{item.aiExpanded ? 'active' : ''}}" bindtap="toggleAiAnalysis" data-list="recommendedActivities" data-id="{{item.id}}">智能分析</button>
       </view>
       <view wx:if="{{item.aiExpanded}}" class="ai-panel">
         <view wx:if="{{item.aiLoading}}" class="ai-loading">
           <view class="spinner"></view>
           <text>AI正在分析活动匹配情况...</text>
         </view>
-        <view wx:else class="ai-content">{{item.aiAnalysis}}</view>
+        <scroll-view wx:else class="ai-content" scroll-y>
+          <view class="ai-content-text">{{item.aiAnalysis}}</view>
+        </scroll-view>
       </view>
     </view>
 
@@ -130,14 +132,16 @@
       </view>
       <view class="activity-actions">
         <button class="detail-action" bindtap="goDetail" data-id="{{item.id}}">查看详情</button>
-        <button class="ai-action {{item.aiExpanded ? 'active' : ''}}" bindtap="toggleAiAnalysis" data-list="activityList" data-id="{{item.id}}">AI分析</button>
+        <button class="ai-action {{item.aiExpanded ? 'active' : ''}}" bindtap="toggleAiAnalysis" data-list="activityList" data-id="{{item.id}}">智能分析</button>
       </view>
       <view wx:if="{{item.aiExpanded}}" class="ai-panel">
         <view wx:if="{{item.aiLoading}}" class="ai-loading">
           <view class="spinner"></view>
           <text>AI正在分析活动匹配情况...</text>
         </view>
-        <view wx:else class="ai-content">{{item.aiAnalysis}}</view>
+        <scroll-view wx:else class="ai-content" scroll-y>
+          <view class="ai-content-text">{{item.aiAnalysis}}</view>
+        </scroll-view>
       </view>
     </view>
 

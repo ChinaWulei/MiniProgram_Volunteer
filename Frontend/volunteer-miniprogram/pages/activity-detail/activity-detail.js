@@ -21,14 +21,28 @@ Page({
     aiLoading: false,
     aiAnalysis: '',
     aiQuestion: '',
+    aiFloatLeft: 0,
+    aiFloatTop: 0,
+    aiSheetLeft: 0,
+    aiSheetTop: 0,
+    aiSheetWidth: 0,
     buttonText: '立即报名',
     buttonDisabled: false
   },
   onLoad(options) {
     const user = app.globalData.user || wx.getStorageSync('user')
     this.setData({ id: options.activityId || options.id, isAdmin: user && user.role === 'ADMIN' })
+    this.initAiFloat()
     this.load()
     if (user && user.role !== 'ADMIN') this.loadProfile()
+  },
+  initAiFloat() {
+    const info = wx.getWindowInfo ? wx.getWindowInfo() : wx.getSystemInfoSync()
+    this.setData({
+      aiFloatLeft: info.windowWidth - 68,
+      aiFloatTop: info.windowHeight - 210,
+      aiSheetWidth: Math.min(info.windowWidth - 32, 340)
+    })
   },
   load() {
     wx.showLoading({ title: '加载中' })
@@ -155,9 +169,33 @@ Page({
     wx.navigateTo({ url: `/pages/match/match?activityId=${this.data.id}` })
   },
   openAiAnalysis() {
+    if (this.data.showAiSheet) {
+      this.closeAiAnalysis()
+      return
+    }
+    this.placeAiSheet()
     this.setData({ showAiSheet: true })
     if (this.data.aiAnalysis || this.data.aiLoading) return
     this.loadAiAnalysis()
+  },
+  moveAiFloat(e) {
+    const touch = e.touches && e.touches[0]
+    if (!touch) return
+    const info = wx.getWindowInfo ? wx.getWindowInfo() : wx.getSystemInfoSync()
+    const size = 48
+    const left = Math.max(10, Math.min(touch.clientX - size / 2, info.windowWidth - size - 10))
+    const top = Math.max(10, Math.min(touch.clientY - size / 2, info.windowHeight - size - 10))
+    this.setData({ aiFloatLeft: left, aiFloatTop: top })
+    if (this.data.showAiSheet) this.placeAiSheet(left, top)
+  },
+  placeAiSheet(leftValue, topValue) {
+    const info = wx.getWindowInfo ? wx.getWindowInfo() : wx.getSystemInfoSync()
+    const width = this.data.aiSheetWidth || Math.min(info.windowWidth - 32, 340)
+    const left = leftValue === undefined ? this.data.aiFloatLeft : leftValue
+    const top = topValue === undefined ? this.data.aiFloatTop : topValue
+    const sheetLeft = Math.max(12, Math.min(left + 24 - width / 2, info.windowWidth - width - 12))
+    const sheetTop = Math.max(12, Math.min(top + 58, info.windowHeight - 430))
+    this.setData({ aiSheetLeft: sheetLeft, aiSheetTop: sheetTop, aiSheetWidth: width })
   },
   closeAiAnalysis() {
     this.setData({ showAiSheet: false })

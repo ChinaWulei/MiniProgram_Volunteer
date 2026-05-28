@@ -117,11 +117,22 @@
     </view>
   </view>
 
-  <button wx:if="{{!isAdmin}}" class="ai-float" bindtap="openAiAnalysis">AI分析</button>
-  <view wx:if="{{showAiSheet}}" class="mask ai-mask" bindtap="closeAiAnalysis"></view>
-  <view wx:if="{{showAiSheet}}" class="ai-sheet">
-    <view class="sheet-handle"></view>
-    <view class="sheet-title">AI活动分析</view>
+  <view wx:if="{{!isAdmin}}" class="ai-float" style="left: {{aiFloatLeft}}px; top: {{aiFloatTop}}px;" catchtouchmove="moveAiFloat" bindtap="openAiAnalysis" aria-label="智能分析">
+    <view class="robot-icon">
+      <view class="robot-antenna"></view>
+      <view class="robot-head">
+        <view class="robot-eye"></view>
+        <view class="robot-eye"></view>
+      </view>
+      <view class="robot-mouth"></view>
+    </view>
+  </view>
+  <view wx:if="{{showAiSheet}}" class="ai-sheet" style="left: {{aiSheetLeft}}px; top: {{aiSheetTop}}px; width: {{aiSheetWidth}}px;">
+    <view class="sheet-arrow"></view>
+    <view class="sheet-head">
+      <view class="sheet-title">AI活动分析</view>
+      <view class="sheet-close" bindtap="closeAiAnalysis">×</view>
+    </view>
     <view wx:if="{{aiLoading}}" class="sheet-loading">
       <view class="spinner"></view>
       <text>AI总结中...</text>

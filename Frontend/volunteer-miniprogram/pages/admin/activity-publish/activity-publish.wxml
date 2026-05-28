@@ -28,6 +28,15 @@
         <view class="picker-field small">{{activityClock || '选择时间'}}</view>
       </picker>
     </view>
+    <view class="field-title">活动结束时间</view>
+    <view class="picker-row">
+      <picker mode="date" value="{{activityEndDate}}" bindchange="pickActivityEndDate">
+        <view class="picker-field small">{{activityEndDate || '结束日期'}}</view>
+      </picker>
+      <picker mode="time" value="{{activityEndClock}}" bindchange="pickActivityEndClock">
+        <view class="picker-field small">{{activityEndClock || '结束时间'}}</view>
+      </picker>
+    </view>
     <view class="field-title">报名开始时间</view>
     <view class="picker-row">
       <picker mode="date" value="{{signupStartDate}}" bindchange="pickSignupStartDate">

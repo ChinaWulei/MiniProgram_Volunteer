@@ -42,6 +42,8 @@ Page({
     },
     activityDate: '',
     activityClock: '',
+    activityEndDate: '',
+    activityEndClock: '',
     signupStartDate: '',
     signupStartClock: '',
     deadlineDate: '',
@@ -79,6 +81,8 @@ Page({
           skillOptions,
           activityDate: datePart(String(activity.startTime || '').replace('T', ' ')),
           activityClock: timePart(String(activity.startTime || '').replace('T', ' ')),
+          activityEndDate: datePart(String(activity.endTime || '').replace('T', ' ')),
+          activityEndClock: timePart(String(activity.endTime || '').replace('T', ' ')),
           signupStartDate: datePart(String(activity.signupStartTime || '').replace('T', ' ')),
           signupStartClock: timePart(String(activity.signupStartTime || '').replace('T', ' ')),
           deadlineDate: datePart(String(activity.signupDeadline || '').replace('T', ' ')),
@@ -92,6 +96,7 @@ Page({
             coverImageUrl: activity.coverImageUrl,
             category: activity.category,
             activityTime: String(activity.startTime || '').replace('T', ' ').slice(0, 16),
+            endTime: String(activity.endTime || '').replace('T', ' ').slice(0, 16),
             signupStartTime: String(activity.signupStartTime || '').replace('T', ' ').slice(0, 16),
             signupDeadline: String(activity.signupDeadline || '').replace('T', ' ').slice(0, 16),
             checkinStartTime: String(activity.checkinStartTime || '').replace('T', ' ').slice(0, 16),
@@ -219,6 +224,14 @@ Page({
     const activityClock = e.detail.value
     this.setData({ activityClock, 'form.activityTime': combineDateTime(this.data.activityDate, activityClock) })
   },
+  pickActivityEndDate(e) {
+    const activityEndDate = e.detail.value
+    this.setData({ activityEndDate, 'form.endTime': combineDateTime(activityEndDate, this.data.activityEndClock) })
+  },
+  pickActivityEndClock(e) {
+    const activityEndClock = e.detail.value
+    this.setData({ activityEndClock, 'form.endTime': combineDateTime(this.data.activityEndDate, activityEndClock) })
+  },
   pickSignupStartDate(e) {
     const signupStartDate = e.detail.value
     this.setData({ signupStartDate, 'form.signupStartTime': combineDateTime(signupStartDate, this.data.signupStartClock) })
@@ -305,6 +318,10 @@ Page({
     const form = Object.assign({}, this.data.form, { requiredSkills: compactSkills(this.data.skillOptions) })
     if (!form.title || !form.activityTime || !form.location || !form.recruitCount || !form.serviceHours) {
       wx.showToast({ title: '请填写必填信息', icon: 'none' })
+      return
+    }
+    if (form.endTime && form.activityTime && new Date(form.endTime.replace(/-/g, '/')).getTime() <= new Date(form.activityTime.replace(/-/g, '/')).getTime()) {
+      wx.showToast({ title: '结束时间必须晚于活动时间', icon: 'none' })
       return
     }
     this.setData({ submitting: true })

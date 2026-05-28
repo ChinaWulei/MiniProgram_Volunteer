@@ -30,9 +30,12 @@ Page({
     avatarText: '志',
     skillOptions: skillNames.map(name => ({ name, selected: false })),
     selectedSkills: [],
-    editing: false
+    editing: false,
+    isAdmin: false
   },
   onShow() {
+    const user = app.globalData.user || wx.getStorageSync('user')
+    this.setData({ isAdmin: user && user.role === 'ADMIN' })
     this.loadProfile()
   },
   loadProfile() {
@@ -140,6 +143,9 @@ Page({
   },
   myRegs() {
     wx.navigateTo({ url: '/pages/my-registrations/my-registrations' })
+  },
+  goAdmin() {
+    wx.navigateTo({ url: '/pages/admin/admin' })
   },
   logout() {
     app.globalData.token = ''

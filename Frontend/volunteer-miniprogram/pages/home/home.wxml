@@ -5,6 +5,30 @@
     <view class="hero-sub">活动统筹、在线报名、人才库检索与智能匹配一体化管理</view>
   </view>
 
+  <view wx:if="{{newsList.length}}" class="news-carousel-wrap">
+    <view class="section-head carousel-head">
+      <view>
+        <view class="section-title">最新新闻稿</view>
+        <view class="section-sub">点击查看活动新闻详情</view>
+      </view>
+      <button class="text-btn" bindtap="goNews">更多</button>
+    </view>
+    <swiper class="news-carousel" indicator-dots autoplay circular interval="5000" duration="450">
+      <swiper-item wx:for="{{newsList}}" wx:key="id">
+        <view class="news-slide" bindtap="goNewsDetail" data-id="{{item.id}}">
+          <image wx:if="{{item.cover}}" class="news-slide-cover" src="{{item.cover}}" mode="aspectFill"></image>
+          <view wx:else class="news-slide-cover placeholder">新闻稿</view>
+          <view class="news-slide-mask"></view>
+          <view class="news-slide-content">
+            <view class="news-slide-title">{{item.title}}</view>
+            <view class="news-slide-meta">{{item.activityName}} · {{item.publishedText}}</view>
+            <view class="news-slide-summary">{{item.summaryText}}</view>
+          </view>
+        </view>
+      </swiper-item>
+    </swiper>
+  </view>
+
   <view class="tab-bar">
     <button class="tab-btn {{activeTab === 'hall' ? 'active' : ''}}" bindtap="goActivities">活动大厅</button>
     <button class="tab-btn" bindtap="goVolunteers">志愿者库</button>
@@ -12,6 +36,7 @@
       消息
       <view wx:if="{{unreadCount > 0}}" class="red-dot"></view>
     </button>
+    <button wx:if="{{isAdmin}}" class="tab-btn" bindtap="goAdmin">管理后台</button>
     <button class="tab-btn" bindtap="goMineOrManage">{{isAdmin ? '我的发布' : '我的报名'}}</button>
     <button class="tab-btn" bindtap="goProfile">个人中心</button>
   </view>

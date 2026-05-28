@@ -40,6 +40,14 @@ function normalizeActivity(activity) {
   })
 }
 
+function normalizeNews(item) {
+  return Object.assign({}, item, {
+    cover: item.imageUrls && item.imageUrls.length ? item.imageUrls[0] : '',
+    publishedText: formatTime(item.publishedAt),
+    summaryText: item.resultSummary || item.content || '点击查看新闻详情'
+  })
+}
+
 function formatTime(value) {
   return value ? String(value).replace('T', ' ').slice(0, 16) : ''
 }
@@ -50,6 +58,7 @@ Page({
     isAdmin: false,
     activeTab: 'home',
     showActivityHall: false,
+    newsList: [],
     activityList: [],
     recommendedActivities: [],
     keyword: '',
@@ -68,6 +77,7 @@ Page({
   onShow() {
     const user = app.globalData.user || wx.getStorageSync('user')
     this.setData({ user, isAdmin: user && user.role === 'ADMIN' })
+    this.loadNews()
     this.loadActivities()
     this.loadUnreadCount()
     this.startUnreadPolling()
@@ -79,6 +89,13 @@ Page({
     this.stopUnreadPolling()
   },
   goLogin() { wx.navigateTo({ url: '/pages/login/login' }) },
+  loadNews() {
+    request({ url: '/api/activity-news', silent: true })
+      .then(list => {
+        this.setData({ newsList: (list || []).slice(0, 4).map(normalizeNews) })
+      })
+      .catch(() => {})
+  },
   goActivities() {
     this.setData({ showActivityHall: true, activeTab: 'hall' })
     this.loadActivities()
@@ -233,6 +250,9 @@ Page({
   goVolunteers() { wx.navigateTo({ url: '/pages/volunteer-library/volunteer-library' }) },
   goMessages() { wx.navigateTo({ url: '/pages/message-center/message-center' }) },
   goNews() { wx.navigateTo({ url: '/pages/activity-news/activity-news' }) },
+  goNewsDetail(e) {
+    wx.navigateTo({ url: `/pages/activity-news-detail/activity-news-detail?id=${e.currentTarget.dataset.id}` })
+  },
   goAi() { wx.navigateTo({ url: '/pages/ai-chat/ai-chat' }) },
   goAdmin() { wx.navigateTo({ url: '/pages/admin/admin' }) },
   goActivityPublish() { wx.navigateTo({ url: '/pages/admin/activity-publish/activity-publish' }) },

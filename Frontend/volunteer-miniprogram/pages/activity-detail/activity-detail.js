@@ -322,11 +322,14 @@ Page({
         request({
           url: '/api/activity/checkin',
           method: 'POST',
+          silent: true,
           data: { activityId: this.data.id, latitude: res.latitude, longitude: res.longitude }
         }).then(checkin => {
           this.setData({ checkin })
           wx.showToast({ title: '签到成功' })
-        }).catch(() => {}).finally(() => wx.hideLoading())
+        }).catch(err => {
+          wx.showToast({ title: (err && err.message) || '签到失败，请稍后重试', icon: 'none' })
+        }).finally(() => wx.hideLoading())
       },
       fail: () => wx.showToast({ title: '定位失败，请检查授权', icon: 'none' })
     })

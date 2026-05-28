@@ -32,7 +32,10 @@ function normalizeActivity(activity) {
     startTimeText: formatTime(activity.startTime),
     endTimeText: formatTime(activity.endTime),
     statusClass: getStatusClass(activity.status),
-    reason: getRecommendReason(activity)
+    reason: getRecommendReason(activity),
+    aiExpanded: false,
+    aiLoading: false,
+    aiAnalysis: ''
   })
 }
 
@@ -188,6 +191,25 @@ Page({
   },
   goDetail(e) {
     wx.navigateTo({ url: `/pages/activity-detail/activity-detail?id=${e.currentTarget.dataset.id}` })
+  },
+  toggleAiAnalysis(e) {
+    const listName = e.currentTarget.dataset.list
+    const id = e.currentTarget.dataset.id
+    const list = this.data[listName] || []
+    const index = list.findIndex(item => String(item.id) === String(id))
+    if (index < 0) return
+    const item = list[index]
+    if (item.aiExpanded) {
+      this.setData({ [`${listName}[${index}].aiExpanded`]: false })
+      return
+    }
+    this.setData({ [`${listName}[${index}].aiExpanded`]: true })
+    if (item.aiAnalysis) return
+    this.setData({ [`${listName}[${index}].aiLoading`]: true })
+    request({ url: `/api/activities/${id}/ai-analysis`, method: 'POST', silent: true })
+      .then(data => this.setData({ [`${listName}[${index}].aiAnalysis`]: (data && data.analysis) || 'AI暂未返回分析结果' }))
+      .catch(err => this.setData({ [`${listName}[${index}].aiAnalysis`]: (err && err.message) || 'AI分析失败，请稍后重试' }))
+      .finally(() => this.setData({ [`${listName}[${index}].aiLoading`]: false }))
   },
   goMine() {
     const token = app.globalData.token || wx.getStorageSync('token')

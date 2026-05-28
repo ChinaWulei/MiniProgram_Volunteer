@@ -42,14 +42,14 @@ public class ActivityAiAnalysisServiceImpl implements ActivityAiAnalysisService 
             throw new BizException("仅志愿者可使用AI活动分析");
         }
         if (!aiModelClient.available()) {
-            throw new BizException("Gemini API未配置，无法生成AI活动分析");
+            throw new BizException("AI API未配置，无法生成AI活动分析");
         }
         Activity activity = activityMapper.findById(activityId).orElseThrow(() -> new BizException("活动不存在"));
         UserProfileVO profile = userProfileService.profile(currentUser.getId());
         List<Map<String, Object>> history = registrationMapper.aiHistory(currentUser.getId());
         String analysis = aiModelClient.chat(buildPrompt(profile, history, activity, question));
         if (analysis == null || analysis.isBlank()) {
-            throw new BizException("Gemini未返回有效分析结果");
+            throw new BizException("AI未返回有效分析结果");
         }
         return new AiActivityAnalysisVO(activityId, analysis.trim());
     }

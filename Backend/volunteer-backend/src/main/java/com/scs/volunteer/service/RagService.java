@@ -28,7 +28,7 @@ public class RagService {
 
     public RagAnswerVO answer(String question, Integer topK) {
         if (question == null || question.isBlank()) throw new BizException("请输入问题");
-        if (!aiModelClient.available()) throw new BizException("Gemini 对话模型未配置");
+        if (!aiModelClient.available()) throw new BizException("AI 对话模型未配置");
         int limit = topK == null || topK <= 0 ? properties.getTopK() : Math.min(topK, 10);
         float[] questionEmbedding = embeddingService.embed(question);
         List<RuleChunkVO> chunks = vectorSearchService.search(questionEmbedding, limit);

@@ -319,6 +319,67 @@
   font-size: 22rpx;
   text-align: center;
 }
+.activity-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14rpx;
+  margin-top: 18rpx;
+}
+.activity-actions button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 68rpx;
+  line-height: 1;
+  margin: 0;
+  border-radius: 14rpx;
+  font-size: 25rpx;
+}
+.detail-action {
+  color: #0f766e;
+  background: #eefaf7;
+}
+.ai-action {
+  color: #fff;
+  background: #0f766e;
+}
+.ai-action.active {
+  background: #115e59;
+}
+.activity-actions button::after {
+  border: 0;
+}
+.ai-panel {
+  margin-top: 18rpx;
+  padding: 18rpx;
+  border-radius: 14rpx;
+  background: #f8fbfb;
+  border: 1rpx solid #d9f3ee;
+}
+.ai-loading {
+  display: flex;
+  align-items: center;
+  gap: 14rpx;
+  color: #0f766e;
+  font-size: 25rpx;
+}
+.spinner {
+  width: 30rpx;
+  height: 30rpx;
+  border-radius: 50%;
+  border: 4rpx solid #b8eee4;
+  border-top-color: #0f766e;
+  animation: spin 0.8s linear infinite;
+}
+.ai-content {
+  white-space: pre-wrap;
+  color: #344054;
+  font-size: 25rpx;
+  line-height: 1.65;
+}
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
 
 .login-card {
   padding: 22rpx;

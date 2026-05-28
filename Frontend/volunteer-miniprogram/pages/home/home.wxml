@@ -56,7 +56,7 @@
       <button class="text-btn" bindtap="goActivities">查看全部</button>
     </view>
 
-    <view class="activity-card recommended" wx:for="{{recommendedActivities}}" wx:key="id" bindtap="goDetail" data-id="{{item.id}}">
+    <view class="activity-card recommended" wx:for="{{recommendedActivities}}" wx:key="id">
       <image wx:if="{{item.coverImageUrl}}" class="activity-cover" src="{{item.coverImageUrl}}" mode="aspectFill"></image>
       <view class="activity-top">
         <view class="activity-title">{{item.name}}</view>
@@ -67,6 +67,17 @@
       <view class="activity-bottom">
         <view class="quota">剩余 {{item.remainingSlots}} 个名额</view>
         <view class="reason">{{item.reason}}</view>
+      </view>
+      <view class="activity-actions">
+        <button class="detail-action" bindtap="goDetail" data-id="{{item.id}}">查看详情</button>
+        <button class="ai-action {{item.aiExpanded ? 'active' : ''}}" bindtap="toggleAiAnalysis" data-list="recommendedActivities" data-id="{{item.id}}">AI分析</button>
+      </view>
+      <view wx:if="{{item.aiExpanded}}" class="ai-panel">
+        <view wx:if="{{item.aiLoading}}" class="ai-loading">
+          <view class="spinner"></view>
+          <text>AI正在分析活动匹配情况...</text>
+        </view>
+        <view wx:else class="ai-content">{{item.aiAnalysis}}</view>
       </view>
     </view>
 
@@ -105,7 +116,7 @@
       </view>
     </view>
 
-    <view class="activity-card hall-card" wx:for="{{activityList}}" wx:key="id" bindtap="goDetail" data-id="{{item.id}}">
+    <view class="activity-card hall-card" wx:for="{{activityList}}" wx:key="id">
       <image wx:if="{{item.coverImageUrl}}" class="activity-cover" src="{{item.coverImageUrl}}" mode="aspectFill"></image>
       <view class="activity-top">
         <view class="activity-title">{{item.name}}</view>
@@ -116,6 +127,17 @@
       <view class="activity-bottom">
         <view class="quota">剩余 {{item.remainingSlots}} 个名额</view>
         <view class="reason">{{item.reason}}</view>
+      </view>
+      <view class="activity-actions">
+        <button class="detail-action" bindtap="goDetail" data-id="{{item.id}}">查看详情</button>
+        <button class="ai-action {{item.aiExpanded ? 'active' : ''}}" bindtap="toggleAiAnalysis" data-list="activityList" data-id="{{item.id}}">AI分析</button>
+      </view>
+      <view wx:if="{{item.aiExpanded}}" class="ai-panel">
+        <view wx:if="{{item.aiLoading}}" class="ai-loading">
+          <view class="spinner"></view>
+          <text>AI正在分析活动匹配情况...</text>
+        </view>
+        <view wx:else class="ai-content">{{item.aiAnalysis}}</view>
       </view>
     </view>
 

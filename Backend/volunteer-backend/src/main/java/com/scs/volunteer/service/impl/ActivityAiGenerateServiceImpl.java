@@ -227,7 +227,6 @@ public class ActivityAiGenerateServiceImpl implements ActivityAiGenerateService 
                   "recruitCount": 20,
                   "serviceHours": 3,
                   "tips": "活动注意事项",
-                  "promotionText": "活动宣传文案",
                   "coverUrl": ""
                 }
                 """.formatted(request.getPrompt(), objectMapper.writeValueAsString(request), mode);

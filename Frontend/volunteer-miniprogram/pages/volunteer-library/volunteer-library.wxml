@@ -32,9 +32,9 @@
     <view class="vol-main">
       <view class="name-row">
         <view class="name">{{item.displayName}}</view>
-        <view class="level">{{item.volunteerLevel}}</view>
+        <view class="level">{{item.volunteerLevelText}}</view>
       </view>
-      <view class="meta">{{item.college}} · {{item.majorClass}}</view>
+      <view class="meta">{{item.collegeText}} · {{item.majorClassText}}</view>
       <view class="stats">{{item.totalHours || 0}} 小时 · {{item.volunteerPoints || item.creditScore || 0}} 积分</view>
       <view class="tags"><text class="tag" wx:for="{{item.tags}}" wx:key="*this">{{item}}</text></view>
       <view class="recent">最近参与：{{item.recentActivity}}</view>

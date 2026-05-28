@@ -3,6 +3,26 @@ const { request, uploadFile } = require('../../utils/request')
 
 const skillNames = ['摄影', '摄像', '文案', '讲解', '物资搬运', '秩序维护', '疾病维护', '活动组织']
 
+function clean(value, fallback) {
+  if (value === null || value === undefined) return fallback
+  const text = String(value).trim()
+  if (!text || text === 'null' || text === 'undefined') return fallback
+  return text
+}
+
+function normalizeProfile(profile) {
+  return Object.assign({}, profile, {
+    nicknameText: clean(profile.nickname || profile.name, '未登录'),
+    collegeText: clean(profile.college, '数计学院'),
+    majorClassText: clean(profile.majorClass, '未填写专业班级'),
+    phoneText: clean(profile.phone, '-'),
+    availableTimeText: clean(profile.availableTime, '-'),
+    bioText: clean(profile.bio, '-'),
+    volunteerLevelText: clean(profile.volunteerLevel, 'Lv1'),
+    levelNameText: clean(profile.levelName, '新星志愿者')
+  })
+}
+
 Page({
   data: {
     profile: {},
@@ -19,6 +39,7 @@ Page({
     wx.showLoading({ title: '加载中' })
     request({ url: '/api/user/profile' })
       .then(profile => {
+        profile = normalizeProfile(profile || {})
         const selectedSkills = this.splitTags(profile.skillTags)
         profile.creditRecords = (profile.creditRecords || []).map(item => Object.assign({}, item, {
           changeText: item.changeValue > 0 ? `+${item.changeValue}` : String(item.changeValue),

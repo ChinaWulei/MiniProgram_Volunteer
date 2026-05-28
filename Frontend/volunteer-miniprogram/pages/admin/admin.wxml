@@ -95,9 +95,9 @@
     <view wx:for="{{stats.recentRegistrations}}" wx:key="id" class="review-card">
       <view class="muted">{{item.user_name}} 报名 {{item.activity_name}} · {{item.status}}</view>
       <view class="row">
-        <button size="mini" class="ghost-btn" data-id="{{item.id}}" data-status="已通过" bindtap="review">通过</button>
-        <button size="mini" class="ghost-btn" data-id="{{item.id}}" data-status="已拒绝" bindtap="review">拒绝</button>
-        <button size="mini" class="primary-btn" data-id="{{item.id}}" data-status="已完成" bindtap="review">完成</button>
+        <button wx:if="{{item.status === '待审核'}}" size="mini" class="primary-btn" data-id="{{item.id}}" data-status="已通过" bindtap="review">同意</button>
+        <button wx:if="{{item.status === '待审核'}}" size="mini" class="ghost-btn reject-btn" data-id="{{item.id}}" data-status="已拒绝" bindtap="review">拒绝</button>
+        <view wx:else class="tag">已处理</view>
       </view>
     </view>
   </view>

@@ -26,7 +26,6 @@ public class ActivityDTO {
     private String contactPhone;
     private Double serviceHours;
     private String tips;
-    private String promotionText;
     private String reviewMethod;
     private String auditMode;
     private String status;
@@ -81,8 +80,6 @@ public class ActivityDTO {
     public void setServiceHours(Double serviceHours) { this.serviceHours = serviceHours; }
     public String getTips() { return tips; }
     public void setTips(String tips) { this.tips = tips; }
-    public String getPromotionText() { return promotionText; }
-    public void setPromotionText(String promotionText) { this.promotionText = promotionText; }
     public String getReviewMethod() { return reviewMethod; }
     public void setReviewMethod(String reviewMethod) { this.reviewMethod = reviewMethod; }
     public String getAuditMode() { return auditMode; }

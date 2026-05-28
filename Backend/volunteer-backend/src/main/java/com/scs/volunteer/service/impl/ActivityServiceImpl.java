@@ -81,6 +81,7 @@ public class ActivityServiceImpl implements ActivityService {
         vo.setContactName(activity.getContactName());
         vo.setContactPhone(activity.getContactPhone());
         vo.setServiceHours(activity.getServiceHours() == null ? calcHours(activity) : activity.getServiceHours());
+        vo.setTips(activity.getTips());
         vo.setReviewMethod(activity.getReviewMethod());
         vo.setStatus(activity.getStatus());
         vo.setCreatedBy(activity.getCreatedBy());
@@ -167,6 +168,7 @@ public class ActivityServiceImpl implements ActivityService {
         a.setContactName(dto.getContactName());
         a.setContactPhone(dto.getContactPhone());
         a.setServiceHours(serviceHours);
+        a.setTips(dto.getTips());
         a.setReviewMethod(normalizeAuditMode(first(dto.getReviewMethod(), dto.getAuditMode())));
         a.setStatus(status);
         a.setPublishedAt("草稿".equals(status) ? null : LocalDateTime.now());

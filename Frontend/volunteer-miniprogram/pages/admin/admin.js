@@ -65,6 +65,8 @@ Page({
     }).then(() => {
       wx.showToast({ title: '已处理' })
       this.load()
+    }).catch(err => {
+      wx.showToast({ title: (err && err.message) || '处理失败', icon: 'none' })
     })
   },
   inputRule(e) {

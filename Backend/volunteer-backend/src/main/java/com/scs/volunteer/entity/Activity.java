@@ -24,6 +24,7 @@ public class Activity {
     private String contactName;
     private String contactPhone;
     private Double serviceHours;
+    private String tips;
     private String reviewMethod;
     private String status;
     private Long createdBy;
@@ -72,6 +73,8 @@ public class Activity {
     public void setContactPhone(String contactPhone) { this.contactPhone = contactPhone; }
     public Double getServiceHours() { return serviceHours; }
     public void setServiceHours(Double serviceHours) { this.serviceHours = serviceHours; }
+    public String getTips() { return tips; }
+    public void setTips(String tips) { this.tips = tips; }
     public String getReviewMethod() { return reviewMethod; }
     public void setReviewMethod(String reviewMethod) { this.reviewMethod = reviewMethod; }
     public String getStatus() { return status; }

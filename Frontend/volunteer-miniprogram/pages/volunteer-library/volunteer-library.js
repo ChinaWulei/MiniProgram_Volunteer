@@ -1,15 +1,26 @@
 const { request } = require('../../utils/request')
 
 function splitTags(tags) {
-  return (tags || '').split(',').map(item => item.trim()).filter(Boolean)
+  return clean(tags, '').split(',').map(item => item.trim()).filter(Boolean)
+}
+
+function clean(value, fallback) {
+  if (value === null || value === undefined) return fallback
+  const text = String(value).trim()
+  if (!text || text === 'null' || text === 'undefined') return fallback
+  return text
 }
 
 function normalize(item) {
+  const displayName = clean(item.nickname, '') || clean(item.name, '志愿者')
   return Object.assign({}, item, {
-    displayName: item.nickname || item.name || '志愿者',
-    avatarText: (item.nickname || item.name || '志').substring(0, 1),
+    displayName,
+    avatarText: displayName.substring(0, 1),
+    collegeText: clean(item.college, '未填写学院'),
+    majorClassText: clean(item.majorClass, '未填写专业班级'),
+    volunteerLevelText: clean(item.volunteerLevel, '普通志愿者'),
     tags: splitTags(item.skillTags),
-    recentActivity: item.recentActivity || '暂无最近活动'
+    recentActivity: clean(item.recentActivity, '暂无最近活动')
   })
 }
 

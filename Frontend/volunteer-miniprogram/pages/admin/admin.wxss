@@ -49,3 +49,4 @@ button::after { border: 0; }
 .rule-row { display: grid; grid-template-columns: 1fr 120rpx 110rpx; gap: 12rpx; align-items: center; padding: 12rpx 0; border-bottom: 1rpx solid #edf2f7; }
 .rule-name, .rule-score { height: 62rpx; padding: 0 14rpx; border-radius: 12rpx; background: #f8fafc; font-size: 24rpx; box-sizing: border-box; }
 .mini-btn { height: 62rpx; line-height: 62rpx; font-size: 23rpx; }
+.reject-btn { color: #dc2626; background: #fee2e2; }

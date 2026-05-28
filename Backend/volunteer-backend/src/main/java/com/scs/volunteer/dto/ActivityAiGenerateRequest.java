@@ -11,7 +11,6 @@ public class ActivityAiGenerateRequest {
     private Integer recruitCount;
     private Double serviceHours;
     private String tips;
-    private String promotionText;
 
     public String getPrompt() { return prompt; }
     public void setPrompt(String prompt) { this.prompt = prompt; }
@@ -33,6 +32,4 @@ public class ActivityAiGenerateRequest {
     public void setServiceHours(Double serviceHours) { this.serviceHours = serviceHours; }
     public String getTips() { return tips; }
     public void setTips(String tips) { this.tips = tips; }
-    public String getPromotionText() { return promotionText; }
-    public void setPromotionText(String promotionText) { this.promotionText = promotionText; }
 }

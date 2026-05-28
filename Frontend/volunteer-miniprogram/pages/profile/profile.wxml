@@ -6,16 +6,16 @@
       <view class="avatar-tip">更换</view>
     </view>
     <view class="profile-main">
-      <view class="nickname">{{profile.nickname || profile.name || '未登录'}}</view>
+      <view class="nickname">{{profile.nicknameText}}</view>
       <view class="meta">编号 {{profile.volunteerNo || '-'}}</view>
-      <view class="meta">{{profile.college || '数计学院'}} · {{profile.majorClass || '未填写专业班级'}}</view>
+      <view class="meta">{{profile.collegeText}} · {{profile.majorClassText}}</view>
     </view>
   </view>
 
   <view class="growth-card">
     <view class="level-row">
       <view>
-        <view class="level">{{profile.volunteerLevel || 'Lv1'}} {{profile.levelName || '新星志愿者'}}</view>
+        <view class="level">{{profile.volunteerLevelText}} {{profile.levelNameText}}</view>
         <view class="level-sub" wx:if="{{profile.nextLevelHours}}">距离下一等级还需 {{profile.nextLevelRemainingHours}} 小时</view>
         <view class="level-sub" wx:else>已达到最高等级</view>
       </view>
@@ -58,13 +58,13 @@
   <view class="section">
     <view class="section-title">基础资料</view>
     <view wx:if="{{!editing}}">
-      <view class="info-row"><text>昵称</text><text>{{profile.nickname || '-'}}</text></view>
-      <view class="info-row"><text>学院</text><text>{{profile.college || '-'}}</text></view>
-      <view class="info-row"><text>专业班级</text><text>{{profile.majorClass || '-'}}</text></view>
-      <view class="info-row"><text>手机号</text><text>{{profile.phone || '-'}}</text></view>
+      <view class="info-row"><text>昵称</text><text>{{profile.nicknameText}}</text></view>
+      <view class="info-row"><text>学院</text><text>{{profile.collegeText}}</text></view>
+      <view class="info-row"><text>专业班级</text><text>{{profile.majorClassText}}</text></view>
+      <view class="info-row"><text>手机号</text><text>{{profile.phoneText}}</text></view>
       <view class="info-row column"><text>技能标签</text><view><text class="tag" wx:for="{{selectedSkills}}" wx:key="*this">{{item}}</text></view></view>
-      <view class="info-row column"><text>可服务时间</text><text>{{profile.availableTime || '-'}}</text></view>
-      <view class="info-row column"><text>个人简介</text><text>{{profile.bio || '-'}}</text></view>
+      <view class="info-row column"><text>可服务时间</text><text>{{profile.availableTimeText}}</text></view>
+      <view class="info-row column"><text>个人简介</text><text>{{profile.bioText}}</text></view>
     </view>
 
     <view wx:else>

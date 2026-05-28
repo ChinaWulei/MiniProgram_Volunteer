@@ -105,6 +105,7 @@ Page({
             requiredSkills: skills,
             description: activity.description,
             requirements: activity.signupRequirement,
+            tips: activity.tips,
             contactName: activity.contactName,
             contactPhone: activity.contactPhone,
             auditMode: activity.reviewMethod === '自动通过' ? '自动通过' : '管理员审核',
@@ -173,8 +174,7 @@ Page({
       ['requirements', 'requirements'],
       ['recruitCount', 'recruitCount'],
       ['serviceHours', 'serviceHours'],
-      ['tips', 'tips'],
-      ['promotionText', 'promotionText']
+      ['tips', 'tips']
     ]
     mappings.forEach(([source, target]) => {
       if (data[source] !== undefined && data[source] !== null && data[source] !== '') {

@@ -6,10 +6,10 @@
     <button class="primary-btn" bindtap="load">搜索</button>
   </view>
   <view class="card" wx:for="{{list}}" wx:key="userId" bindtap="goVolunteer" data-id="{{item.userId}}">
-    <view class="row"><view class="title">{{item.name}}</view><view class="tag">信用 {{item.creditScore}}</view></view>
-    <view class="muted">{{item.majorClass}} · {{item.phone}}</view>
+    <view class="row"><view class="title">{{item.nameText}}</view><view class="tag">信用 {{item.creditScore || 100}}</view></view>
+    <view class="muted">{{item.majorClassText}} · {{item.phoneText}}</view>
     <view class="muted">累计 {{item.totalHours}} 小时 · 服务 {{item.serviceCount}} 次</view>
-    <view class="tag">{{item.skillTags}}</view>
-    <view class="muted">可服务：{{item.availableTime}}</view>
+    <view class="tag">{{item.skillTagsText}}</view>
+    <view class="muted">可服务：{{item.availableTimeText}}</view>
   </view>
 </view>

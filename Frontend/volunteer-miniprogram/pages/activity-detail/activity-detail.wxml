@@ -48,6 +48,11 @@
     <view class="paragraph">{{activity.signupRequirement || '暂无特殊要求'}}</view>
   </view>
 
+  <view class="detail-section">
+    <view class="section-title">活动注意事项</view>
+    <view class="paragraph">{{activity.tips || '暂无注意事项'}}</view>
+  </view>
+
   <view class="detail-section contact-section">
     <view class="section-title">联系人</view>
     <view class="info-line"><text>联系人</text><text>{{activity.contactName || '-'}}</text></view>
@@ -77,9 +82,11 @@
         <view class="reg-actions">
           <button bindtap="goVolunteer" data-userid="{{item.userId}}">资料</button>
           <button bindtap="chatVolunteer" data-userid="{{item.userId}}" data-name="{{item.userText}}">私聊</button>
-          <button wx:if="{{item.status === '待审核'}}" bindtap="reviewRegistration" data-id="{{item.id}}" data-status="已通过">通过</button>
-          <button wx:if="{{item.status === '待审核'}}" class="danger" bindtap="reviewRegistration" data-id="{{item.id}}" data-status="已拒绝">拒绝</button>
           <button class="danger" bindtap="openCancel" data-id="{{item.id}}">取消</button>
+        </view>
+        <view wx:if="{{item.status === '待审核'}}" class="reg-audit-actions">
+          <button class="approve" bindtap="reviewRegistration" data-id="{{item.id}}" data-status="已通过">同意</button>
+          <button class="reject" bindtap="reviewRegistration" data-id="{{item.id}}" data-status="已拒绝">拒绝</button>
         </view>
       </view>
     </view>
@@ -152,6 +159,7 @@
 
   <view class="bottom-bar">
     <button wx:if="{{!isAdmin}}" class="signup-btn {{buttonDisabled ? 'disabled' : ''}}" disabled="{{buttonDisabled}}" bindtap="join">{{buttonText}}</button>
+    <button wx:if="{{!isAdmin}}" class="admin-edit" bindtap="askAiAboutActivity">引用活动问AI</button>
     <button wx:if="{{!isAdmin}}" class="admin-edit" bindtap="contactAdmin">联系管理员</button>
     <button wx:if="{{isAdmin}}" class="signup-btn" bindtap="goMatch">查看推荐志愿者</button>
     <button wx:if="{{isAdmin}}" class="admin-edit" bindtap="goCheckinManage">签到管理</button>

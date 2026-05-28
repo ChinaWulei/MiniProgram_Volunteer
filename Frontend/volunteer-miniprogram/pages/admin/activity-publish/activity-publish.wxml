@@ -91,7 +91,6 @@
     <textarea class="{{generatedFields.description ? 'ai-filled' : ''}}" placeholder="活动简介" value="{{form.description}}" data-key="description" bindinput="input" maxlength="-1"></textarea>
     <textarea class="{{generatedFields.requirements ? 'ai-filled' : ''}}" placeholder="报名要求" value="{{form.requirements}}" data-key="requirements" bindinput="input" maxlength="-1"></textarea>
     <textarea class="{{generatedFields.tips ? 'ai-filled' : ''}}" placeholder="活动注意事项" value="{{form.tips}}" data-key="tips" bindinput="input" maxlength="-1"></textarea>
-    <textarea class="{{generatedFields.promotionText ? 'ai-filled' : ''}}" placeholder="宣传文案" value="{{form.promotionText}}" data-key="promotionText" bindinput="input" maxlength="-1"></textarea>
     <input placeholder="联系人" value="{{form.contactName}}" data-key="contactName" bindinput="input" />
     <input placeholder="联系电话" value="{{form.contactPhone}}" data-key="contactPhone" bindinput="input" />
 

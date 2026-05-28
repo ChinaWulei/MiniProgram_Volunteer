@@ -18,7 +18,7 @@ Page({
     list: [],
     keyword: '',
     status: '',
-    statuses: ['全部', '待审核', '已通过', '已拒绝', '已完成'],
+    statuses: ['全部', '待审核', '已通过', '已拒绝'],
     showCancel: false,
     cancelItem: null,
     cancelReason: ''

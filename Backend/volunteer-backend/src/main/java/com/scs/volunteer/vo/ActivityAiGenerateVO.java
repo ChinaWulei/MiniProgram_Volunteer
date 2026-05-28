@@ -11,7 +11,6 @@ public class ActivityAiGenerateVO {
     private Integer recruitCount;
     private Double serviceHours;
     private String tips;
-    private String promotionText;
     private String coverUrl;
 
     public String getTitle() { return title; }
@@ -30,8 +29,6 @@ public class ActivityAiGenerateVO {
     public void setServiceHours(Double serviceHours) { this.serviceHours = serviceHours; }
     public String getTips() { return tips; }
     public void setTips(String tips) { this.tips = tips; }
-    public String getPromotionText() { return promotionText; }
-    public void setPromotionText(String promotionText) { this.promotionText = promotionText; }
     public String getCoverUrl() { return coverUrl; }
     public void setCoverUrl(String coverUrl) { this.coverUrl = coverUrl; }
 }

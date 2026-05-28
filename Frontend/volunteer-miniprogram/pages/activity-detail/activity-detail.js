@@ -174,6 +174,10 @@ Page({
       .then(data => wx.navigateTo({ url: `/pages/chat-room/chat-room?conversationId=${data.conversationId}&peerId=${adminId}&peerName=${encodeURIComponent('活动管理员')}` }))
       .catch(() => {})
   },
+  askAiAboutActivity() {
+    const name = this.data.activity && (this.data.activity.name || this.data.activity.title || '当前活动')
+    wx.navigateTo({ url: `/pages/ai-chat/ai-chat?activityId=${this.data.id}&activityName=${encodeURIComponent(name)}` })
+  },
   goMatch() {
     wx.navigateTo({ url: `/pages/match/match?activityId=${this.data.id}` })
   },

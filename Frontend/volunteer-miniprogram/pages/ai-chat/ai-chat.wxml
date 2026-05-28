@@ -5,6 +5,7 @@
       <view class="quick-chip" bindtap="quickAsk" data-key="photo">摄影志愿</view>
       <view class="quick-chip" bindtap="quickAsk" data-key="points">提升积分</view>
     </view>
+    <view wx:if="{{activityId}}" class="ref-card">已引用活动：{{activityName}}</view>
 
     <view wx:for="{{messages}}" wx:key="id" id="{{item.id}}" class="message-row {{item.role === 'user' ? 'right' : 'left'}}">
       <view class="avatar {{item.role === 'user' ? 'user-avatar' : 'ai-avatar'}}">{{item.role === 'user' ? '我' : 'AI'}}</view>
@@ -13,6 +14,7 @@
           <text>{{item.content}}</text>
           <view wx:if="{{item.loading}}" class="loading-dot">...</view>
         </view>
+        <view wx:if="{{item.sourceText}}" class="source-line">来源：{{item.sourceText}}</view>
         <view wx:if="{{item.activities && item.activities.length}}" class="activity-list">
           <view class="activity-card" wx:for="{{item.activities}}" wx:for-item="activity" wx:key="id" bindtap="goDetail" data-id="{{activity.id}}">
             <view class="activity-title">{{activity.title}}</view>

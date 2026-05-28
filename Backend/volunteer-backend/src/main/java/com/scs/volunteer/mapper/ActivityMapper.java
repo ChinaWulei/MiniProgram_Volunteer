@@ -45,8 +45,8 @@ public class ActivityMapper {
             PreparedStatement ps = con.prepareStatement("""
                     insert into activity(name,cover_image_url,category,location,latitude,longitude,start_time,end_time,signup_start_time,signup_deadline,checkin_start_time,checkin_end_time,
                     recruit_number,registered_number,skill_requirements,description,signup_requirement,contact_name,
-                    contact_phone,service_hours,review_method,status,created_by,published_at)
-                    values(?,?,?,?,?,?,?,?,?,?,?,?,?,0,?,?,?,?,?,?,?,?,?,?)
+                    contact_phone,service_hours,tips,review_method,status,created_by,published_at)
+                    values(?,?,?,?,?,?,?,?,?,?,?,?,?,0,?,?,?,?,?,?,?,?,?,?,?)
                     """, Statement.RETURN_GENERATED_KEYS);
             ps.setString(1, a.getName());
             ps.setString(2, a.getCoverImageUrl());
@@ -67,10 +67,11 @@ public class ActivityMapper {
             ps.setString(17, a.getContactName());
             ps.setString(18, a.getContactPhone());
             ps.setObject(19, a.getServiceHours());
-            ps.setString(20, a.getReviewMethod());
-            ps.setString(21, a.getStatus());
-            ps.setLong(22, a.getCreatedBy());
-            ps.setObject(23, a.getPublishedAt());
+            ps.setString(20, a.getTips());
+            ps.setString(21, a.getReviewMethod());
+            ps.setString(22, a.getStatus());
+            ps.setLong(23, a.getCreatedBy());
+            ps.setObject(24, a.getPublishedAt());
             return ps;
         }, keyHolder);
         return keyHolder.getKey().longValue();
@@ -80,11 +81,11 @@ public class ActivityMapper {
         jdbcTemplate.update("""
                 update activity set name=?,cover_image_url=?,category=?,location=?,latitude=?,longitude=?,start_time=?,end_time=?,
                 signup_start_time=?,signup_deadline=?,checkin_start_time=?,checkin_end_time=?,recruit_number=?,
-                skill_requirements=?,description=?,signup_requirement=?,contact_name=?,contact_phone=?,
+                skill_requirements=?,description=?,signup_requirement=?,contact_name=?,contact_phone=?,tips=?,
                 service_hours=?,review_method=?,status=?,published_at=? where id=?
                 """, a.getName(), a.getCoverImageUrl(), a.getCategory(), a.getLocation(), a.getLatitude(), a.getLongitude(), a.getStartTime(), a.getEndTime(),
                 a.getSignupStartTime(), a.getSignupDeadline(), a.getCheckinStartTime(), a.getCheckinEndTime(), a.getRecruitNumber(), a.getSkillRequirements(), a.getDescription(), a.getSignupRequirement(),
-                a.getContactName(), a.getContactPhone(), a.getServiceHours(), a.getReviewMethod(), a.getStatus(), a.getPublishedAt(), id);
+                a.getContactName(), a.getContactPhone(), a.getTips(), a.getServiceHours(), a.getReviewMethod(), a.getStatus(), a.getPublishedAt(), id);
     }
 
     public void delete(Long id) {

@@ -11,6 +11,8 @@ Page({
     inputValue: '',
     sending: false,
     sessionId: '',
+    activityId: null,
+    activityName: '',
     scrollIntoView: '',
     messages: [
       {
@@ -19,6 +21,16 @@ Page({
         content: '你好，我是 AI 志愿助手。你可以问我周末有什么活动、哪些活动适合你、如何提升志愿积分。'
       }
     ]
+  },
+  onLoad(options) {
+    if (options && options.activityId) {
+      const activityName = decodeURIComponent(options.activityName || '当前活动')
+      this.setData({
+        activityId: options.activityId,
+        activityName,
+        inputValue: `这个活动适合我参加吗？`
+      })
+    }
   },
   input(e) {
     this.setData({ inputValue: e.detail.value })
@@ -39,15 +51,19 @@ Page({
       method: 'POST',
       data: {
         message,
-        sessionId: this.data.sessionId
+        sessionId: this.data.sessionId,
+        activityId: this.data.activityId
       }
     }).then(data => {
       const messages = this.data.messages.slice(0, -1)
       const aiMessage = {
         id: `a-${Date.now()}`,
         role: 'ai',
-        content: data.reply || '暂时无法确认，请稍后再试。',
-        activities: data.recommendedActivities || []
+        content: data.answer || data.reply || '暂时无法确认，请稍后再试。',
+        intent: data.intent,
+        sources: data.sources || [],
+        sourceText: (data.sources || []).join('；'),
+        activities: data.recommendations || data.recommendedActivities || []
       }
       this.setData({
         sessionId: data.sessionId || this.data.sessionId,

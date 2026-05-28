@@ -2,21 +2,42 @@ const app = getApp()
 const { request } = require('../../utils/request')
 
 function splitTags(tags) {
-  return (tags || '').split(',').map(item => item.trim()).filter(Boolean)
+  return clean(tags, '').split(',').map(item => item.trim()).filter(Boolean)
+}
+
+function clean(value, fallback) {
+  if (value === null || value === undefined) return fallback
+  const text = String(value).trim()
+  if (!text || text === 'null' || text === 'undefined') return fallback
+  return text
 }
 
 function normalizeHistory(item) {
   return {
     id: item.id,
-    name: item.name,
+    name: clean(item.name, '未命名活动'),
     coverImageUrl: item.cover_image_url || item.coverImageUrl,
-    category: item.category,
-    location: item.location,
-    startTime: String(item.start_time || item.startTime || '').replace('T', ' ').slice(0, 16),
-    endTime: String(item.end_time || item.endTime || '').replace('T', ' ').slice(0, 16),
+    category: clean(item.category, '未分类'),
+    location: clean(item.location, '地点待定'),
+    startTime: clean(item.start_time || item.startTime, '-').replace('T', ' ').slice(0, 16),
+    endTime: clean(item.end_time || item.endTime, '-').replace('T', ' ').slice(0, 16),
     serviceHours: item.service_hours || item.serviceHours,
-    status: item.status
+    status: clean(item.status, '-')
   }
+}
+
+function normalizeProfile(profile) {
+  const displayName = clean(profile.nickname, '') || clean(profile.name, '志愿者')
+  return Object.assign({}, profile, {
+    displayName,
+    avatarText: displayName.substring(0, 1),
+    identityText: clean(profile.identityNo || profile.volunteerNo || profile.userId, '-'),
+    collegeText: clean(profile.college, '未填写学院'),
+    majorClassText: clean(profile.majorClass, '未填写专业班级'),
+    volunteerLevelText: clean(profile.volunteerLevel, '普通志愿者'),
+    availableTimeText: clean(profile.availableTime, '-'),
+    bioText: clean(profile.bio, '这位同学暂未填写个人简介。')
+  })
 }
 
 Page({
@@ -43,11 +64,12 @@ Page({
     wx.showLoading({ title: '加载中' })
     request({ url: `/api/volunteers/${this.data.id}` })
       .then(profile => {
+        const normalizedProfile = normalizeProfile(profile || {})
         this.setData({
-          profile: Object.assign({}, profile, { displayName: profile.nickname || profile.name || '志愿者', avatarText: (profile.nickname || profile.name || '志').substring(0, 1) }),
-          skills: splitTags(profile.skillTags),
-          badges: splitTags(profile.badges),
-          historyActivities: (profile.historyActivities || []).map(normalizeHistory)
+          profile: normalizedProfile,
+          skills: splitTags(normalizedProfile.skillTags),
+          badges: splitTags(normalizedProfile.badges),
+          historyActivities: (normalizedProfile.historyActivities || []).map(normalizeHistory)
         })
         if (this.data.isAdmin) {
           this.loadActivities()

@@ -6,8 +6,8 @@
     </view>
     <view class="hero-main">
       <view class="name">{{profile.displayName}}</view>
-      <view class="no">志愿者编号 {{profile.identityNo || profile.userId}}</view>
-      <view class="school">{{profile.college}} · {{profile.majorClass}}</view>
+      <view class="no">志愿者编号 {{profile.identityText}}</view>
+      <view class="school">{{profile.collegeText}} · {{profile.majorClassText}}</view>
     </view>
   </view>
 
@@ -19,10 +19,10 @@
 
   <view class="section">
     <view class="section-title">人才画像</view>
-    <view class="level">{{profile.volunteerLevel}}</view>
+    <view class="level">{{profile.volunteerLevelText}}</view>
     <view class="tags"><text class="tag" wx:for="{{skills}}" wx:key="*this">{{item}}</text></view>
-    <view class="line"><text>可服务时间</text><text>{{profile.availableTime || '-'}}</text></view>
-    <view class="bio">{{profile.bio || '这位同学暂未填写个人简介。'}}</view>
+    <view class="line"><text>可服务时间</text><text>{{profile.availableTimeText}}</text></view>
+    <view class="bio">{{profile.bioText}}</view>
   </view>
 
   <view class="section">

@@ -64,6 +64,34 @@ public class RegistrationMapper {
                 """, userId);
     }
 
+    public Map<String, Object> monthlyStats(Long userId, java.time.LocalDateTime start, java.time.LocalDateTime end) {
+        return jdbcTemplate.queryForMap("""
+                select
+                  count(r.id) as activityCount,
+                  coalesce(sum(case when r.status='已完成' then coalesce(a.service_hours,0) else 0 end),0) as completedHours,
+                  sum(case when r.status='已完成' then 1 else 0 end) as completedCount,
+                  sum(case when r.status in ('已通过','已完成') then 1 else 0 end) as approvedCount,
+                  sum(case when c.status in ('CHECKED_IN','LATE_CHECKED_IN','MANUAL_CHECKED_IN') then 1 else 0 end) as checkedCount,
+                  sum(case when c.status='MANUAL_CHECKED_IN' then 1 else 0 end) as manualCount,
+                  sum(case when c.status='LATE_CHECKED_IN' then 1 else 0 end) as lateCount,
+                  sum(case when c.id is null and now() > a.end_time and r.status in ('已通过','已完成') then 1 else 0 end) as absentCount
+                from registration r
+                join activity a on a.id=r.activity_id
+                left join activity_checkin c on c.activity_id=r.activity_id and c.user_id=r.user_id
+                where r.user_id=? and a.start_time>=? and a.start_time<?
+                """, userId, start, end);
+    }
+
+    public List<Map<String, Object>> monthlyCategoryStats(Long userId, java.time.LocalDateTime start, java.time.LocalDateTime end) {
+        return jdbcTemplate.queryForList("""
+                select a.category,count(*) as count
+                from registration r join activity a on a.id=r.activity_id
+                where r.user_id=? and a.start_time>=? and a.start_time<?
+                group by a.category
+                order by count desc
+                """, userId, start, end);
+    }
+
     public List<Map<String, Object>> recent() {
         return jdbcTemplate.queryForList("""
                 select r.id,u.name as user_name,a.name as activity_name,r.status,r.created_at

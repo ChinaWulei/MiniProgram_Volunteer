@@ -81,9 +81,24 @@ public class DatabaseStartupCheck implements ApplicationRunner {
                         index idx_announcement_attachment(announcement_id)
                     )
                     """);
+            ensureColumn("activity", "tips", "alter table activity add column tips text null after service_hours");
             log.info("Database connection check succeeded");
         } catch (Exception e) {
             log.error("Database connection check failed", e);
+        }
+    }
+
+    private void ensureColumn(String tableName, String columnName, String ddl) {
+        Integer count = jdbcTemplate.queryForObject("""
+                select count(*)
+                from information_schema.columns
+                where table_schema = database()
+                  and table_name = ?
+                  and column_name = ?
+                """, Integer.class, tableName, columnName);
+        if (count == null || count == 0) {
+            jdbcTemplate.execute(ddl);
+            log.info("Added missing column {}.{}", tableName, columnName);
         }
     }
 }

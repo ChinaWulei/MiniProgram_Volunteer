@@ -45,7 +45,11 @@ public class RuleFileMapper {
     }
 
     public List<RuleFile> list() {
-        return jdbcTemplate.query("select * from rule_file order by created_at desc", new BeanPropertyRowMapper<>(RuleFile.class));
+        return jdbcTemplate.query("""
+                select * from rule_file
+                where s3_key not like 'announcement-content/%'
+                order by created_at desc
+                """, new BeanPropertyRowMapper<>(RuleFile.class));
     }
 
     public Optional<RuleFile> findById(Long id) {

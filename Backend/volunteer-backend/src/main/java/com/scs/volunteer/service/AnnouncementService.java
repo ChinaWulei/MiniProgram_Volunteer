@@ -17,5 +17,6 @@ public interface AnnouncementService {
     List<AnnouncementVO> adminList(CurrentUser currentUser);
     List<AnnouncementVO> published();
     AnnouncementVO detail(Long id, CurrentUser currentUser);
+    void delete(Long id, CurrentUser currentUser);
     Map<String, Object> attachmentResult(RuleFile file);
 }

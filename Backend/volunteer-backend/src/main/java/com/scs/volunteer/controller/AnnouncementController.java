@@ -56,4 +56,10 @@ public class AnnouncementController extends BaseController {
     public ApiResponse<AnnouncementVO> detail(HttpServletRequest request, @PathVariable Long id) {
         return ApiResponse.ok(announcementService.detail(id, currentUser(request)));
     }
+
+    @DeleteMapping("/api/admin/announcements/{id}")
+    public ApiResponse<Void> delete(HttpServletRequest request, @PathVariable Long id) {
+        announcementService.delete(id, currentUser(request));
+        return ApiResponse.ok(null);
+    }
 }

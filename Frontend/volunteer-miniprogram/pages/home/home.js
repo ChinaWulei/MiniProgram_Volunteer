@@ -248,6 +248,7 @@ Page({
   },
   goProfile() { wx.navigateTo({ url: '/pages/profile/profile' }) },
   goVolunteers() { wx.navigateTo({ url: '/pages/volunteer-library/volunteer-library' }) },
+  goAnnouncements() { wx.navigateTo({ url: '/pages/announcements/announcements' }) },
   goMessages() { wx.navigateTo({ url: '/pages/message-center/message-center' }) },
   goRuleFiles() { wx.navigateTo({ url: '/pages/rule-files/rule-files' }) },
   goNews() { wx.navigateTo({ url: '/pages/activity-news/activity-news' }) },

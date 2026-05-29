@@ -81,6 +81,12 @@ public class AnnouncementMapper {
                 """, new BeanPropertyRowMapper<>(AnnouncementVO.Attachment.class), id);
     }
 
+    public void delete(Long id) {
+        jdbcTemplate.update("delete from announcement_image where announcement_id=?", id);
+        jdbcTemplate.update("delete from announcement_attachment where announcement_id=?", id);
+        jdbcTemplate.update("delete from announcement where id=?", id);
+    }
+
     private void replaceImages(Long id, List<String> imageUrls) {
         jdbcTemplate.update("delete from announcement_image where announcement_id=?", id);
         if (imageUrls == null) return;

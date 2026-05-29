@@ -22,6 +22,7 @@
     <button class="ghost-btn" bindtap="volunteers">志愿者库</button>
     <button class="ghost-btn" bindtap="aiReports">AI分析报告</button>
     <button class="ghost-btn" bindtap="ruleFiles">规则文件库</button>
+    <button class="ghost-btn" bindtap="announcements">公告管理</button>
     <button class="ghost-btn" bindtap="goAnnouncement">发布公告</button>
   </view>
 

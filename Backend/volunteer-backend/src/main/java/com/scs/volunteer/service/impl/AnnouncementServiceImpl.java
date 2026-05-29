@@ -118,6 +118,17 @@ public class AnnouncementServiceImpl implements AnnouncementService {
     }
 
     @Override
+    public void delete(Long id, CurrentUser currentUser) {
+        requireAdmin(currentUser);
+        announcementMapper.find(id).orElseThrow(() -> new BizException("announcement not found"));
+        ruleFileMapper.findByS3Key("announcement-content/" + id).ifPresent(file -> {
+            vectorSearchService.deleteChunks(file.getId());
+            ruleFileMapper.delete(file.getId());
+        });
+        announcementMapper.delete(id);
+    }
+
+    @Override
     public Map<String, Object> attachmentResult(RuleFile file) {
         return Map.of(
                 "id", file.getId(),

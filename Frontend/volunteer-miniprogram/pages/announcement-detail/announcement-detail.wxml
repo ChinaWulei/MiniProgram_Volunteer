@@ -7,7 +7,7 @@
     <view class="section-title">附件</view>
     <view class="file-row" wx:for="{{detail.attachments}}" wx:key="ruleFileId" bindtap="openAttachment" data-url="{{item.url}}">
       <view class="file-name">{{item.fileName}}</view>
-      <view class="muted">{{item.fileType}} · 点击复制链接</view>
+      <view class="muted">{{item.fileType}} · 点击打开附件</view>
     </view>
   </view>
 </view>

@@ -1,6 +1,6 @@
 .page { min-height: 100vh; padding: 24rpx; background: #f5f7fb; box-sizing: border-box; }
 .filter-panel, .record-card { padding: 22rpx; margin-bottom: 16rpx; border-radius: 18rpx; background: #fff; box-shadow: 0 8rpx 24rpx rgba(16,24,40,.06); }
-.filter-panel { display: grid; grid-template-columns: 1fr 180rpx 120rpx; gap: 12rpx; align-items: center; }
+.filter-panel { display: grid; grid-template-columns: 1fr 170rpx 92rpx; gap: 12rpx; align-items: center; }
 input, textarea { width: 100%; padding: 0 16rpx; border-radius: 14rpx; background: #f8fafc; font-size: 24rpx; box-sizing: border-box; }
 input { height: 68rpx; }
 textarea { min-height: 140rpx; padding-top: 16rpx; margin-top: 14rpx; }
@@ -17,6 +17,13 @@ textarea { min-height: 140rpx; padding-top: 16rpx; margin-top: 14rpx; }
 .primary-btn, .ghost-btn { display: flex; align-items: center; justify-content: center; height: 68rpx; line-height: 1; margin: 14rpx 0 0; padding: 0; border-radius: 14rpx; font-size: 25rpx; box-sizing: border-box; }
 .primary-btn { color: #fff; background: #0f766e; }
 .ghost-btn { color: #0f766e; background: #eefaf7; }
+.filter-panel .primary-btn {
+  height: 56rpx;
+  line-height: 56rpx;
+  margin: 0;
+  border-radius: 12rpx;
+  font-size: 22rpx;
+}
 button::after { border: 0; }
 .empty { padding: 36rpx; border-radius: 18rpx; color: #667085; background: #fff; text-align: center; }
 .mask { position: fixed; left: 0; right: 0; top: 0; bottom: 0; z-index: 30; background: rgba(0,0,0,.35); }

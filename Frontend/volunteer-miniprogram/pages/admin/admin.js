@@ -48,6 +48,7 @@ Page({
   checkinAdjustments() { wx.navigateTo({ url: '/pages/admin/checkin-adjustments/checkin-adjustments' }) },
   aiReports() { wx.navigateTo({ url: '/pages/report-center/report-center' }) },
   ruleFiles() { wx.navigateTo({ url: '/pages/rule-files/rule-files' }) },
+  announcements() { wx.navigateTo({ url: '/pages/announcements/announcements' }) },
   goAnnouncement() { wx.navigateTo({ url: '/pages/admin/announcement-edit/announcement-edit' }) },
   goStat(e) {
     const type = e.currentTarget.dataset.type

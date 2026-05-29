@@ -16,6 +16,22 @@ Page({
   openAttachment(e) {
     const url = e.currentTarget.dataset.url
     if (!url) return
-    wx.setClipboardData({ data: url })
+    wx.showLoading({ title: '打开中' })
+    wx.downloadFile({
+      url,
+      success: res => {
+        if (res.statusCode === 200) {
+          wx.openDocument({
+            filePath: res.tempFilePath,
+            showMenu: true,
+            fail: () => wx.setClipboardData({ data: url })
+          })
+        } else {
+          wx.setClipboardData({ data: url })
+        }
+      },
+      fail: () => wx.setClipboardData({ data: url }),
+      complete: () => wx.hideLoading()
+    })
   }
 })

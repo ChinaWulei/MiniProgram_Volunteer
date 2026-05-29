@@ -17,7 +17,7 @@
       <swiper-item wx:for="{{newsList}}" wx:key="id">
         <view class="news-slide" bindtap="goNewsDetail" data-id="{{item.id}}">
           <image wx:if="{{item.cover}}" class="news-slide-cover" src="{{item.cover}}" mode="aspectFill"></image>
-          <view wx:else class="news-slide-cover placeholder">新闻稿</view>
+          <view wx:else class="news-slide-cover placeholder"></view>
           <view class="news-slide-mask"></view>
           <view class="news-slide-content">
             <view class="news-slide-title">{{item.title}}</view>

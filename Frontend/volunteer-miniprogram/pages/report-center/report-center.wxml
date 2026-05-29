@@ -1,0 +1,73 @@
+<view class="report-page">
+  <view class="hero">
+    <view>
+      <view class="kicker">{{isAdmin ? 'ADMIN DATA CENTER' : 'VOLUNTEER GROWTH'}}</view>
+      <view class="title">AI Report Center</view>
+      <view class="sub">{{isAdmin ? 'Platform operations dashboard and AI PDF report' : 'Personal service dashboard and AI PDF report'}}</view>
+    </view>
+    <button class="hero-btn" bindtap="generateReport" loading="{{generating}}">Generate</button>
+  </view>
+
+  <view class="actions">
+    <button class="primary-btn" bindtap="generateReport" loading="{{generating}}">Generate AI Report</button>
+    <button class="ghost-btn" bindtap="exportPdf" loading="{{exporting}}" disabled="{{!current.id}}">Export PDF</button>
+  </view>
+
+  <view class="stats-grid">
+    <view class="stat-card" wx:for="{{cards}}" wx:key="label">
+      <view class="stat-value">{{item.value}}</view>
+      <view class="stat-label">{{item.label}}</view>
+    </view>
+  </view>
+
+  <view class="panel">
+    <view class="panel-title">{{isAdmin ? 'Activity Analysis' : 'Service Trend'}}</view>
+    <view class="trend-chart" wx:if="{{trend.length}}">
+      <view class="trend-item" wx:for="{{trend}}" wx:key="label">
+        <view class="bar hours" style="height: {{item.hoursHeight}}rpx;"></view>
+        <view class="bar count" style="height: {{item.countHeight}}rpx;"></view>
+        <view class="trend-label">{{item.label}}</view>
+      </view>
+    </view>
+    <view class="rank-row" wx:for="{{rankList}}" wx:key="name">
+      <view class="rank-name">{{item.name}}</view>
+      <view class="rank-track"><view class="rank-fill" style="width: {{item.percent}}%;"></view></view>
+      <view class="rank-value">{{item.value}}</view>
+    </view>
+    <view wx:if="{{!trend.length && !rankList.length}}" class="empty-mini">No chart data</view>
+  </view>
+
+  <view class="panel">
+    <view class="panel-title">{{isAdmin ? 'Activity Type Distribution' : 'Activity Type Analysis'}}</view>
+    <view class="type-row" wx:for="{{categoryStats}}" wx:key="category">
+      <view class="type-dot" style="background: {{item.color}};"></view>
+      <view class="type-name">{{item.category}}</view>
+      <view class="type-track"><view class="type-fill" style="width: {{item.percent}}%; background: {{item.color}};"></view></view>
+      <view class="type-count">{{item.count}}</view>
+    </view>
+    <view wx:if="{{!categoryStats.length}}" class="empty-mini">No category data</view>
+  </view>
+
+  <view class="panel">
+    <view class="panel-title">{{isAdmin ? 'AI Operations Analysis' : 'AI Growth Analysis'}}</view>
+    <view class="ai-text">{{current.aiAnalysis || 'Generate an AI report to view analysis.'}}</view>
+  </view>
+
+  <view class="panel">
+    <view class="panel-head">
+      <view class="panel-title">History Reports</view>
+      <button class="tiny-btn" bindtap="loadHistory">Refresh</button>
+    </view>
+    <view class="history-card" wx:for="{{history}}" wx:key="id" bindtap="selectHistory" data-id="{{item.id}}">
+      <view>
+        <view class="history-title">{{item.reportNo}}</view>
+        <view class="history-meta">{{item.reportType}} · {{item.createdText}}</view>
+      </view>
+      <view class="history-actions">
+        <button size="mini" data-id="{{item.id}}" catchtap="openHistoryPdf">PDF</button>
+        <button size="mini" class="danger-mini" data-id="{{item.id}}" catchtap="deleteHistory">Delete</button>
+      </view>
+    </view>
+    <view wx:if="{{!history.length}}" class="empty-mini">No history reports</view>
+  </view>
+</view>

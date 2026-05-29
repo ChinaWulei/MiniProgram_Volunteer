@@ -147,6 +147,9 @@ Page({
   goAdmin() {
     wx.navigateTo({ url: '/pages/admin/admin' })
   },
+  goReport() {
+    wx.navigateTo({ url: '/pages/report-center/report-center' })
+  },
   logout() {
     app.globalData.token = ''
     app.globalData.user = null

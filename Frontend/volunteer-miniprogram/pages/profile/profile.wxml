@@ -83,6 +83,7 @@
   <view class="actions">
     <button wx:if="{{isAdmin && !editing}}" class="primary-btn" bindtap="goAdmin">管理后台</button>
     <button wx:if="{{!isAdmin && !editing}}" class="ghost-btn" bindtap="myRegs">我的报名</button>
+    <button wx:if="{{!editing}}" class="ghost-btn" bindtap="goReport">AI服务报告</button>
     <button wx:if="{{!editing}}" class="primary-btn" bindtap="startEdit">编辑资料</button>
     <button wx:if="{{editing}}" class="ghost-btn" bindtap="cancelEdit">取消</button>
     <button wx:if="{{editing}}" class="primary-btn" bindtap="saveProfile">保存资料</button>

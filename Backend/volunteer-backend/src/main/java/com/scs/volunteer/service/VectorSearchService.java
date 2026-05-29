@@ -21,6 +21,10 @@ public class VectorSearchService {
         }
     }
 
+    public void deleteChunks(Long fileId) {
+        ruleVectorMapper.deleteByFileId(fileId);
+    }
+
     public List<RuleChunkVO> search(float[] questionEmbedding, int topK) {
         return ruleVectorMapper.search(questionEmbedding, topK);
     }

@@ -144,6 +144,7 @@
 
 .tab-bar {
   display: flex;
+  flex-wrap: wrap;
   gap: 12rpx;
   margin: 22rpx 0;
   padding: 8rpx;
@@ -153,6 +154,7 @@
 
 .tab-btn {
   flex: 1;
+  flex-basis: 190rpx;
   min-width: 0;
   height: 70rpx;
   line-height: 70rpx;
@@ -196,12 +198,14 @@
 
 .admin-shortcuts {
   display: flex;
+  flex-wrap: wrap;
   gap: 12rpx;
   margin-bottom: 22rpx;
 }
 
 .admin-action {
   flex: 1;
+  flex-basis: 180rpx;
   min-width: 0;
   height: 68rpx;
   line-height: 68rpx;

@@ -1,0 +1,142 @@
+.rule-page {
+  min-height: 100vh;
+  padding: 24rpx;
+  background: #f5f7fb;
+  box-sizing: border-box;
+}
+.top-band {
+  padding: 30rpx;
+  border-radius: 18rpx;
+  color: #fff;
+  background: linear-gradient(135deg, #0f766e, #2563eb);
+  box-shadow: 0 14rpx 32rpx rgba(15, 118, 110, .18);
+}
+.kicker {
+  font-size: 22rpx;
+  opacity: .9;
+}
+.title {
+  margin-top: 8rpx;
+  font-size: 38rpx;
+  font-weight: 900;
+}
+.sub {
+  margin-top: 10rpx;
+  font-size: 24rpx;
+  line-height: 1.45;
+  opacity: .92;
+}
+.summary {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16rpx;
+  margin-top: 20rpx;
+}
+.summary-item {
+  padding: 22rpx;
+  border-radius: 16rpx;
+  background: #fff;
+  box-shadow: 0 8rpx 24rpx rgba(16, 24, 40, .06);
+}
+.summary-num {
+  color: #0f766e;
+  font-size: 38rpx;
+  font-weight: 900;
+}
+.summary-label {
+  margin-top: 4rpx;
+  color: #667085;
+  font-size: 23rpx;
+}
+.file-card {
+  margin-top: 18rpx;
+  padding: 24rpx;
+  border-radius: 16rpx;
+  background: #fff;
+  box-shadow: 0 8rpx 24rpx rgba(16, 24, 40, .06);
+}
+.file-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16rpx;
+}
+.file-type,
+.status {
+  flex: 0 0 auto;
+  padding: 7rpx 14rpx;
+  border-radius: 999rpx;
+  font-size: 22rpx;
+  font-weight: 800;
+}
+.file-type {
+  color: #0f766e;
+  background: #e6fffb;
+}
+.status {
+  color: #475467;
+  background: #f2f4f7;
+}
+.status.ready {
+  color: #15803d;
+  background: #dcfce7;
+}
+.status.processing {
+  color: #a16207;
+  background: #fef9c3;
+}
+.status.failed {
+  color: #b91c1c;
+  background: #fee2e2;
+}
+.file-name {
+  margin-top: 16rpx;
+  color: #172033;
+  font-size: 31rpx;
+  font-weight: 850;
+  line-height: 1.35;
+  word-break: break-all;
+}
+.file-meta {
+  margin-top: 10rpx;
+  color: #667085;
+  font-size: 23rpx;
+  line-height: 1.4;
+}
+.actions {
+  display: grid;
+  grid-template-columns: 1fr 150rpx;
+  gap: 14rpx;
+  margin-top: 20rpx;
+}
+.actions.single {
+  grid-template-columns: 1fr;
+}
+.actions button {
+  height: 70rpx;
+  line-height: 70rpx;
+  margin: 0;
+  padding: 0;
+  border-radius: 12rpx;
+  font-size: 25rpx;
+}
+.actions button::after {
+  border: 0;
+}
+.ghost-btn {
+  color: #0f766e;
+  background: #eefaf7;
+}
+.danger-btn {
+  color: #dc2626;
+  background: #fff1f2;
+}
+.empty {
+  margin-top: 28rpx;
+  padding: 34rpx;
+  border-radius: 16rpx;
+  background: #fff;
+  color: #667085;
+  text-align: center;
+  font-size: 26rpx;
+}

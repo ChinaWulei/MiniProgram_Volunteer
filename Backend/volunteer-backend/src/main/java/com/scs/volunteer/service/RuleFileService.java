@@ -70,11 +70,19 @@ public class RuleFileService {
     }
 
     public RuleFile detail(Long id) {
-        return ruleFileMapper.findById(id).orElseThrow(() -> new BizException("规则文件不存在"));
+        return ruleFileMapper.findById(id).orElseThrow(() -> new BizException("Rule file not found"));
+    }
+
+    public void delete(Long id, CurrentUser user) {
+        requireAdmin(user);
+        detail(id);
+        vectorSearchService.deleteChunks(id);
+        ruleFileMapper.deleteAnnouncementRefs(id);
+        ruleFileMapper.delete(id);
     }
 
     private void requireAdmin(CurrentUser user) {
-        if (user == null || !"ADMIN".equals(user.getRole())) throw new BizException("仅管理员可上传规则文件");
+        if (user == null || !"ADMIN".equals(user.getRole())) throw new BizException("Only admins can manage rule files");
     }
 
     private String extension(String filename) {

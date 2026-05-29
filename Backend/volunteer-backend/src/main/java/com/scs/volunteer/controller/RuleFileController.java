@@ -4,6 +4,7 @@ import com.scs.volunteer.common.ApiResponse;
 import com.scs.volunteer.entity.RuleFile;
 import com.scs.volunteer.service.RuleFileService;
 import jakarta.servlet.http.HttpServletRequest;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -38,5 +39,11 @@ public class RuleFileController extends BaseController {
     public ApiResponse<Map<String, String>> download(@PathVariable Long id) {
         RuleFile file = ruleFileService.detail(id);
         return ApiResponse.ok(Map.of("url", file.getS3Url(), "fileName", file.getOriginalName()));
+    }
+
+    @DeleteMapping("/{id}")
+    public ApiResponse<Void> delete(HttpServletRequest request, @PathVariable Long id) {
+        ruleFileService.delete(id, currentUser(request));
+        return ApiResponse.ok(null);
     }
 }

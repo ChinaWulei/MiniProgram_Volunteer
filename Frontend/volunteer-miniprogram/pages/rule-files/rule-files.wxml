@@ -1,0 +1,36 @@
+<view class="rule-page">
+  <view class="top-band">
+    <view>
+      <view class="kicker">Volunteer Rules</view>
+      <view class="title">Rule File Library</view>
+      <view class="sub">Files shown here are available to the rule Q&amp;A retrieval system when their status is ready.</view>
+    </view>
+  </view>
+
+  <view class="summary">
+    <view class="summary-item">
+      <view class="summary-num">{{readyCount}}</view>
+      <view class="summary-label">Ready</view>
+    </view>
+    <view class="summary-item">
+      <view class="summary-num">{{list.length}}</view>
+      <view class="summary-label">Total Files</view>
+    </view>
+  </view>
+
+  <view class="file-card" wx:for="{{list}}" wx:key="id">
+    <view class="file-head">
+      <view class="file-type">{{item.fileTypeText}}</view>
+      <view class="status {{item.statusClass}}">{{item.statusText}}</view>
+    </view>
+    <view class="file-name">{{item.originalName}}</view>
+    <view class="file-meta">{{item.sizeText}} - {{item.chunkCount || 0}} chunks - {{item.createdText}}</view>
+    <view class="actions {{isAdmin ? '' : 'single'}}">
+      <button class="ghost-btn" bindtap="openFile" data-id="{{item.id}}">Open / Copy Link</button>
+      <button wx:if="{{isAdmin}}" class="danger-btn" bindtap="deleteFile" data-id="{{item.id}}" data-name="{{item.originalName}}">Delete</button>
+    </view>
+  </view>
+
+  <view wx:if="{{list.length === 0 && !loading}}" class="empty">No rule files yet</view>
+  <view wx:if="{{loading}}" class="empty">Loading...</view>
+</view>

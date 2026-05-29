@@ -36,6 +36,7 @@
       消息
       <view wx:if="{{unreadCount > 0}}" class="red-dot"></view>
     </button>
+    <button class="tab-btn" bindtap="goRuleFiles">规则文件</button>
     <button wx:if="{{isAdmin}}" class="tab-btn" bindtap="goAdmin">管理后台</button>
     <button class="tab-btn" bindtap="goMineOrManage">{{isAdmin ? '我的发布' : '我的报名'}}</button>
     <button class="tab-btn" bindtap="goProfile">个人中心</button>
@@ -53,6 +54,7 @@
     <view wx:if="{{isAdmin}}" class="admin-shortcuts">
       <button class="admin-action primary" bindtap="goActivityPublish">发布活动</button>
       <button class="admin-action" bindtap="goActivityManage">活动管理</button>
+      <button class="admin-action" bindtap="goRuleFiles">规则文件</button>
       <button class="admin-action" bindtap="goAdmin">管理后台</button>
     </view>
 

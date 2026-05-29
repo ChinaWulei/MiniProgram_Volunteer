@@ -249,6 +249,7 @@ Page({
   goProfile() { wx.navigateTo({ url: '/pages/profile/profile' }) },
   goVolunteers() { wx.navigateTo({ url: '/pages/volunteer-library/volunteer-library' }) },
   goMessages() { wx.navigateTo({ url: '/pages/message-center/message-center' }) },
+  goRuleFiles() { wx.navigateTo({ url: '/pages/rule-files/rule-files' }) },
   goNews() { wx.navigateTo({ url: '/pages/activity-news/activity-news' }) },
   goNewsDetail(e) {
     wx.navigateTo({ url: `/pages/activity-news-detail/activity-news-detail?id=${e.currentTarget.dataset.id}` })

@@ -19,6 +19,7 @@
     "pages/volunteer-library/volunteer-library",
     "pages/volunteer-detail/volunteer-detail",
     "pages/message-center/message-center",
+    "pages/rule-files/rule-files",
     "pages/chat-room/chat-room",
     "pages/activity-news/activity-news",
     "pages/activity-news-detail/activity-news-detail",
@@ -27,14 +28,14 @@
     "pages/ai-chat/ai-chat"
   ],
   "window": {
-    "navigationBarTitleText": "数计志愿服务",
+    "navigationBarTitleText": "\u6570\u8ba1\u5fd7\u613f\u670d\u52a1",
     "navigationBarBackgroundColor": "#0f766e",
     "navigationBarTextStyle": "white",
     "backgroundColor": "#f6f8fb"
   },
   "permission": {
     "scope.userLocation": {
-      "desc": "用于选择活动签到地点和志愿者定位签到"
+      "desc": "Used to select activity check-in locations and volunteer location check-ins"
     }
   },
   "requiredPrivateInfos": [

@@ -57,4 +57,12 @@ public class RuleFileMapper {
         List<RuleFile> list = jdbcTemplate.query("select * from rule_file where s3_key=?", new BeanPropertyRowMapper<>(RuleFile.class), s3Key);
         return list.stream().findFirst();
     }
+
+    public void deleteAnnouncementRefs(Long id) {
+        jdbcTemplate.update("delete from announcement_attachment where rule_file_id=?", id);
+    }
+
+    public void delete(Long id) {
+        jdbcTemplate.update("delete from rule_file where id=?", id);
+    }
 }

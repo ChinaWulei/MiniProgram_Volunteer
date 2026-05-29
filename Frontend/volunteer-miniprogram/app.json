@@ -36,7 +36,7 @@
   },
   "permission": {
     "scope.userLocation": {
-      "desc": "Used to select activity check-in locations and volunteer location check-ins"
+      "desc": "用于活动定位签到"
     }
   },
   "requiredPrivateInfos": [

@@ -13,6 +13,7 @@ FROM eclipse-temurin:17-jdk
 WORKDIR /app
 
 ENV TZ=Asia/Shanghai
+ENV REPORT_PDF_FONT_PATH=/usr/share/fonts/opentype/noto/NotoSansCJK-Regular.ttc
 
 RUN apt-get update \
     && apt-get install -y --no-install-recommends fonts-noto-cjk \

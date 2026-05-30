@@ -115,11 +115,19 @@
   </view>
 
   <view class="panel">
-    <view class="panel-title">信用分规则配置</view>
+    <view class="panel-head">
+      <view class="panel-title no-margin">信用分规则配置</view>
+      <button class="info-btn" bindtap="showCreditHelp">?</button>
+    </view>
     <view class="rule-row" wx:for="{{creditRules}}" wx:key="id">
       <input class="rule-name" value="{{item.name}}" data-index="{{index}}" data-key="name" bindinput="inputRule" />
-      <input class="rule-score" type="number" value="{{item.changeValue}}" data-index="{{index}}" data-key="changeValue" bindinput="inputRule" />
-      <button class="ghost-btn mini-btn" data-index="{{index}}" bindtap="saveRule">保存</button>
+      <view class="rule-bottom">
+        <view class="score-wrap">
+          <view class="score-label">分值</view>
+          <input class="rule-score" type="number" value="{{item.changeValue}}" data-index="{{index}}" data-key="changeValue" bindinput="inputRule" />
+        </view>
+        <button class="ghost-btn mini-btn" data-index="{{index}}" bindtap="saveRule">保存</button>
+      </view>
     </view>
   </view>
 

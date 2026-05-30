@@ -11,10 +11,14 @@ import org.apache.pdfbox.pdmodel.font.PDFont;
 import org.apache.pdfbox.pdmodel.font.PDType0Font;
 import org.apache.pdfbox.pdmodel.font.PDType1Font;
 import org.apache.pdfbox.pdmodel.font.Standard14Fonts;
+import org.apache.fontbox.ttf.TrueTypeCollection;
+import org.apache.fontbox.ttf.TrueTypeFont;
 import org.springframework.stereotype.Service;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -172,22 +176,78 @@ public class ReportPdfService {
                 "C:/Windows/Fonts/simfang.ttf",
                 "C:/Windows/Fonts/simkai.ttf",
                 "C:/Windows/Fonts/simsun.ttc",
+                "C:/Windows/Fonts/msyh.ttc",
                 "/usr/share/fonts/opentype/noto/NotoSansCJK-Regular.ttc",
                 "/usr/share/fonts/opentype/noto/NotoSansCJK-Regular.otf",
-                "/usr/share/fonts/opentype/noto/NotoSansCJK-Regular.ttc",
+                "/usr/share/fonts/opentype/noto/NotoSansCJKsc-Regular.otf",
+                "/usr/share/fonts/opentype/noto/NotoSansCJKsc-Regular.ttf",
                 "/usr/share/fonts/truetype/noto/NotoSansCJK-Regular.otf",
                 "/usr/share/fonts/truetype/wqy/wqy-microhei.ttc",
                 "/usr/share/fonts/truetype/wqy/wqy-zenhei.ttc",
                 "/usr/share/fonts/truetype/arphic/uming.ttc"
         ));
+        paths.addAll(discoverFontPaths());
         for (String path : paths) {
             try {
                 File file = new File(path);
-                if (file.exists()) return new FontPack(PDType0Font.load(document, file), true);
+                if (file.exists()) {
+                    PDFont loaded = loadPdfFont(document, file);
+                    if (loaded != null) return new FontPack(loaded, true);
+                }
             } catch (Exception ignored) {
             }
         }
         return new FontPack(new PDType1Font(Standard14Fonts.FontName.HELVETICA), false);
+    }
+
+    private PDFont loadPdfFont(PDDocument document, File file) throws Exception {
+        String name = file.getName().toLowerCase();
+        if (name.endsWith(".ttc")) {
+            TrueTypeFont[] selected = new TrueTypeFont[1];
+            try (TrueTypeCollection collection = new TrueTypeCollection(file)) {
+                collection.processAllFonts(font -> {
+                    if (selected[0] == null) {
+                        selected[0] = font;
+                    }
+                });
+            }
+            if (selected[0] != null) {
+                return PDType0Font.load(document, selected[0], true);
+            }
+            return null;
+        }
+        return PDType0Font.load(document, file);
+    }
+
+    private List<String> discoverFontPaths() {
+        List<String> roots = List.of(
+                "C:/Windows/Fonts",
+                "/usr/share/fonts",
+                "/usr/local/share/fonts",
+                "/app/fonts"
+        );
+        List<String> keywords = List.of(
+                "noto", "cjk", "sourcehan", "wqy", "wenquanyi",
+                "simhei", "simsun", "simfang", "deng", "msyh"
+        );
+        List<String> result = new ArrayList<>();
+        for (String root : roots) {
+            Path rootPath = Path.of(root);
+            if (!Files.exists(rootPath)) continue;
+            try (var stream = Files.walk(rootPath, 5)) {
+                stream
+                        .filter(Files::isRegularFile)
+                        .map(Path::toString)
+                        .filter(path -> {
+                            String lower = path.toLowerCase();
+                            return (lower.endsWith(".ttf") || lower.endsWith(".otf") || lower.endsWith(".ttc"))
+                                    && keywords.stream().anyMatch(lower::contains);
+                        })
+                        .forEach(result::add);
+            } catch (Exception ignored) {
+            }
+        }
+        return result;
     }
 
     private record FontPack(PDFont font, boolean unicode) {}

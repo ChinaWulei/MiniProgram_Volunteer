@@ -170,5 +170,13 @@ Page({
     request({ url: '/api/admin/credit-rules', method: 'POST', data: rule })
       .then(() => wx.showToast({ title: '规则已保存' }))
       .catch(() => {})
+  },
+  showCreditHelp() {
+    wx.showModal({
+      title: '信用分规则说明',
+      content: '信用分用于记录志愿者服务履约情况。正分规则用于奖励优秀评价或管理员修复，负分规则用于记录缺勤、迟到、低分评价等情况。修改分值后会影响后续产生的信用记录，不会自动重算历史记录。',
+      showCancel: false,
+      confirmText: '知道了'
+    })
   }
 })

@@ -13,10 +13,10 @@ FROM eclipse-temurin:17-jdk
 WORKDIR /app
 
 ENV TZ=Asia/Shanghai
-ENV REPORT_PDF_FONT_PATH=/usr/share/fonts/opentype/noto/NotoSansCJK-Regular.ttc
+ENV REPORT_PDF_FONT_PATH=/usr/share/fonts/truetype/wqy/wqy-zenhei.ttc
 
 RUN apt-get update \
-    && apt-get install -y --no-install-recommends fonts-noto-cjk \
+    && apt-get install -y --no-install-recommends fonts-wqy-zenhei fonts-wqy-microhei \
     && rm -rf /var/lib/apt/lists/*
 
 COPY --from=builder /app/target/*.jar app.jar

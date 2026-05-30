@@ -177,14 +177,11 @@ public class ReportPdfService {
                 "C:/Windows/Fonts/simkai.ttf",
                 "C:/Windows/Fonts/simsun.ttc",
                 "C:/Windows/Fonts/msyh.ttc",
-                "/usr/share/fonts/opentype/noto/NotoSansCJK-Regular.ttc",
-                "/usr/share/fonts/opentype/noto/NotoSansCJK-Regular.otf",
-                "/usr/share/fonts/opentype/noto/NotoSansCJKsc-Regular.otf",
-                "/usr/share/fonts/opentype/noto/NotoSansCJKsc-Regular.ttf",
-                "/usr/share/fonts/truetype/noto/NotoSansCJK-Regular.otf",
                 "/usr/share/fonts/truetype/wqy/wqy-microhei.ttc",
                 "/usr/share/fonts/truetype/wqy/wqy-zenhei.ttc",
-                "/usr/share/fonts/truetype/arphic/uming.ttc"
+                "/usr/share/fonts/truetype/arphic/uming.ttc",
+                "/usr/share/fonts/opentype/noto/NotoSansCJK-Regular.ttc",
+                "/usr/share/fonts/opentype/noto/NotoSansCJKsc-Regular.ttc"
         ));
         paths.addAll(discoverFontPaths());
         for (String path : paths) {
@@ -212,11 +209,11 @@ public class ReportPdfService {
                 });
             }
             if (selected[0] != null) {
-                return PDType0Font.load(document, selected[0], true);
+                return PDType0Font.load(document, selected[0], false);
             }
             return null;
         }
-        return PDType0Font.load(document, file);
+        return PDType0Font.load(document, file, false);
     }
 
     private List<String> discoverFontPaths() {
@@ -240,7 +237,7 @@ public class ReportPdfService {
                         .map(Path::toString)
                         .filter(path -> {
                             String lower = path.toLowerCase();
-                            return (lower.endsWith(".ttf") || lower.endsWith(".otf") || lower.endsWith(".ttc"))
+                            return (lower.endsWith(".ttf") || lower.endsWith(".ttc"))
                                     && keywords.stream().anyMatch(lower::contains);
                         })
                         .forEach(result::add);

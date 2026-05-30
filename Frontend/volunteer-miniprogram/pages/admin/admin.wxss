@@ -65,7 +65,7 @@ button::after { border: 0; }
 .legend-value { color: #0f766e; font-size: 22rpx; font-weight: 700; }
 .empty-mini { color: #98a2b3; font-size: 24rpx; padding: 18rpx 0; }
 .review-card { padding: 18rpx; margin-top: 14rpx; }
-.rule-row { display: grid; grid-template-columns: 1fr 120rpx 110rpx; gap: 12rpx; align-items: center; padding: 12rpx 0; border-bottom: 1rpx solid #edf2f7; }
-.rule-name, .rule-score { height: 62rpx; padding: 0 14rpx; border-radius: 12rpx; background: #f8fafc; font-size: 24rpx; box-sizing: border-box; }
-.mini-btn { height: 62rpx; line-height: 1; font-size: 23rpx; }
+.rule-row { display: grid; grid-template-columns: minmax(0,1fr) 120rpx 136rpx; gap: 12rpx; align-items: center; padding: 12rpx 0; border-bottom: 1rpx solid #edf2f7; }
+.rule-name, .rule-score { width: 100%; min-width: 0; height: 62rpx; padding: 0 14rpx; border-radius: 12rpx; background: #f8fafc; font-size: 24rpx; box-sizing: border-box; }
+.mini-btn { width: 136rpx; height: 62rpx; line-height: 62rpx; padding: 0; font-size: 23rpx; white-space: nowrap; overflow: visible; }
 .reject-btn { color: #dc2626; background: #fee2e2; }

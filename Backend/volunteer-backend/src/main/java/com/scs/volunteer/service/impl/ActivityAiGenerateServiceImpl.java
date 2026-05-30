@@ -116,7 +116,7 @@ public class ActivityAiGenerateServiceImpl implements ActivityAiGenerateService 
         }
         String baseUrl = blank(aiProperties.getImageBaseUrl()) ? GEMINI_BASE_URL : aiProperties.getImageBaseUrl();
         String model = blank(aiProperties.getImageModel()) ? IMAGEN_MODEL : aiProperties.getImageModel();
-        String url = trimTrailingSlash(baseUrl) + "/v1beta/models/" + model + ":predict";
+        String url = trimTrailingSlash(baseUrl) + "/v1beta/models/" + model + ":generateContent";
 
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);

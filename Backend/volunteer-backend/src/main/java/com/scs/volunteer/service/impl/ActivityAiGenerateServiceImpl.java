@@ -121,6 +121,20 @@ public class ActivityAiGenerateServiceImpl implements ActivityAiGenerateService 
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
         headers.set("x-goog-api-key", apiKey);
+        Map<String, Object> body = model.toLowerCase().startsWith("imagen")
+                ? imagenRequest(imagePrompt)
+                : geminiImageRequest(imagePrompt);
+        ResponseEntity<Map> response = restTemplate.exchange(url, HttpMethod.POST, new HttpEntity<>(body, headers), Map.class);
+        Map<String, Object> responseBody = response.getBody();
+        log.info("AI activity cover generation model={}, response keys={}", model, responseBody == null ? "null" : responseBody.keySet());
+        String base64 = model.toLowerCase().startsWith("imagen")
+                ? extractImagenBase64(responseBody)
+                : extractGeminiImageBase64(responseBody);
+        byte[] imageBytes = Base64.getDecoder().decode(base64);
+        return s3StorageService.uploadActivityCoverBytes(imageBytes, "png", MediaType.IMAGE_PNG_VALUE);
+    }
+
+    private Map<String, Object> imagenRequest(String imagePrompt) {
         Map<String, Object> body = Map.of(
                 "instances", List.of(Map.of("prompt", imagePrompt)),
                 "parameters", Map.of(
@@ -129,15 +143,22 @@ public class ActivityAiGenerateServiceImpl implements ActivityAiGenerateService 
                         "outputOptions", Map.of("mimeType", "image/png")
                 )
         );
-        ResponseEntity<Map> response = restTemplate.exchange(url, HttpMethod.POST, new HttpEntity<>(body, headers), Map.class);
-        Map<String, Object> responseBody = response.getBody();
-        log.info("AI activity cover generation response keys={}", responseBody == null ? "null" : responseBody.keySet());
-        String base64 = extractImageBase64(responseBody);
-        byte[] imageBytes = Base64.getDecoder().decode(base64);
-        return s3StorageService.uploadActivityCoverBytes(imageBytes, "png", MediaType.IMAGE_PNG_VALUE);
+        return body;
     }
 
-    private String extractImageBase64(Map<String, Object> body) {
+    private Map<String, Object> geminiImageRequest(String imagePrompt) {
+        return Map.of(
+                "contents", List.of(Map.of(
+                        "role", "user",
+                        "parts", List.of(Map.of("text", imagePrompt))
+                )),
+                "generationConfig", Map.of(
+                        "responseModalities", List.of("TEXT", "IMAGE")
+                )
+        );
+    }
+
+    private String extractImagenBase64(Map<String, Object> body) {
         if (body == null) {
             throw new BizException("AI图片生成结果为空");
         }
@@ -157,6 +178,35 @@ public class ActivityAiGenerateServiceImpl implements ActivityAiGenerateService 
             throw new BizException("AI图片生成结果缺少图片数据");
         }
         return bytes.toString();
+    }
+
+    private String extractGeminiImageBase64(Map<String, Object> body) {
+        if (body == null) {
+            throw new BizException("AI图片生成结果为空");
+        }
+        Object candidatesValue = body.get("candidates");
+        if (!(candidatesValue instanceof List<?> candidates) || candidates.isEmpty()) {
+            throw new BizException("AI图片生成结果为空");
+        }
+        for (Object candidateValue : candidates) {
+            if (!(candidateValue instanceof Map<?, ?> candidate)) continue;
+            Object contentValue = candidate.get("content");
+            if (!(contentValue instanceof Map<?, ?> content)) continue;
+            Object partsValue = content.get("parts");
+            if (!(partsValue instanceof List<?> parts)) continue;
+            for (Object partValue : parts) {
+                if (!(partValue instanceof Map<?, ?> part)) continue;
+                Object inlineData = part.get("inlineData");
+                if (inlineData == null) inlineData = part.get("inline_data");
+                if (!(inlineData instanceof Map<?, ?> data)) continue;
+                Object imageData = data.get("data");
+                if (imageData == null) imageData = data.get("bytesBase64Encoded");
+                if (imageData != null && !imageData.toString().isBlank()) {
+                    return imageData.toString();
+                }
+            }
+        }
+        throw new BizException("AI图片生成结果缺少图片数据");
     }
 
     private ActivityAiGenerateVO parseJson(String text, boolean normalizeDefaults) throws JsonProcessingException {

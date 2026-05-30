@@ -3,8 +3,24 @@
     <view>
       <view class="hero-kicker">管理员 Dashboard</view>
       <view class="hero-title">数计志愿服务管理</view>
+      <view class="hero-sub">{{rangeText}}</view>
     </view>
     <button class="hero-btn" bindtap="create">发布活动</button>
+  </view>
+
+  <view class="filter-panel">
+    <view class="range-tabs">
+      <button wx:for="{{rangeOptions}}" wx:key="key" class="range-tab {{rangeMode === item.key ? 'active' : ''}}" data-key="{{item.key}}" bindtap="selectRange">{{item.label}}</button>
+    </view>
+    <view class="date-row">
+      <picker mode="date" value="{{startDate}}" bindchange="pickStart">
+        <view class="date-field">{{startDate || '开始日期'}}</view>
+      </picker>
+      <view class="date-sep">至</view>
+      <picker mode="date" value="{{endDate}}" bindchange="pickEnd">
+        <view class="date-field">{{endDate || '结束日期'}}</view>
+      </picker>
+    </view>
   </view>
 
   <view class="stats-grid">
@@ -80,8 +96,21 @@
 
   <view class="panel">
     <view class="panel-title">活动类别统计</view>
-    <view class="row" wx:for="{{stats.categoryStats}}" wx:key="category">
-      <view class="muted">{{item.category}}</view><view class="tag">{{item.count}}</view>
+    <view class="pie-section">
+      <view class="pie-chart" style="background: {{stats.categoryPieGradient}};">
+        <view class="pie-hole">
+          <view class="pie-total">{{stats.categoryTotal || 0}}</view>
+          <view class="pie-label">活动</view>
+        </view>
+      </view>
+      <view class="pie-legend">
+        <view class="legend-row" wx:for="{{stats.categoryStats}}" wx:key="category">
+          <view class="legend-dot" style="background: {{item.color}};"></view>
+          <view class="legend-name">{{item.category}}</view>
+          <view class="legend-value">{{item.count}} · {{item.percent}}%</view>
+        </view>
+        <view wx:if="{{!stats.categoryStats || stats.categoryStats.length === 0}}" class="empty-mini">当前范围暂无活动数据</view>
+      </view>
     </view>
   </view>
 

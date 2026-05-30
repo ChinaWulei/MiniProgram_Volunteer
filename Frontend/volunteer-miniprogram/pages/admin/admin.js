@@ -1,15 +1,51 @@
 const { request } = require('../../utils/request')
 
+const PIE_COLORS = ['#0f766e', '#2563eb', '#f59e0b', '#ef4444', '#8b5cf6', '#14b8a6', '#64748b', '#22c55e']
+
+function pad(number) {
+  return number < 10 ? `0${number}` : `${number}`
+}
+
+function formatDate(date) {
+  return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`
+}
+
+function addDays(date, days) {
+  const next = new Date(date)
+  next.setDate(next.getDate() + days)
+  return next
+}
+
+function monthStart(date) {
+  return new Date(date.getFullYear(), date.getMonth(), 1)
+}
+
 Page({
   data: {
     stats: {},
-    creditRules: []
+    creditRules: [],
+    rangeMode: '30d',
+    rangeText: '',
+    startDate: '',
+    endDate: '',
+    rangeOptions: [
+      { key: '30d', label: '近30天' },
+      { key: 'month', label: '本月' },
+      { key: 'all', label: '全部' }
+    ]
   },
   onShow() {
+    if (!this.data.startDate && !this.data.endDate) this.applyRange('30d', false)
     this.load()
   },
   load() {
-    request({ url: '/api/admin/statistics' }).then(stats => this.setData({ stats: this.prepareCharts(stats || {}) }))
+    request({
+      url: '/api/admin/statistics',
+      data: {
+        startDate: this.data.startDate,
+        endDate: this.data.endDate
+      }
+    }).then(stats => this.setData({ stats: this.prepareCharts(stats || {}) }))
     request({ url: '/api/admin/credit-rules', silent: true })
       .then(creditRules => this.setData({ creditRules: creditRules || [] }))
       .catch(() => {})
@@ -39,7 +75,58 @@ Page({
     stats.checkinStats = checkins.map(item => Object.assign({}, item, {
       rate: Number(item.checkinRate) || 0
     }))
+
+    const categories = stats.categoryStats || []
+    const total = categories.reduce((sum, item) => sum + (Number(item.count) || 0), 0)
+    let cursor = 0
+    const segments = []
+    stats.categoryStats = categories.map((item, index) => {
+      const count = Number(item.count) || 0
+      const percent = total ? Math.round(count * 1000 / total) / 10 : 0
+      const start = cursor
+      const end = total ? cursor + count * 100 / total : cursor
+      cursor = end
+      const color = PIE_COLORS[index % PIE_COLORS.length]
+      segments.push(`${color} ${start}% ${end}%`)
+      return Object.assign({}, item, { percent, color })
+    })
+    stats.categoryPieGradient = segments.length ? `conic-gradient(${segments.join(',')})` : 'conic-gradient(#e5e7eb 0% 100%)'
+    stats.categoryTotal = total
     return stats
+  },
+  applyRange(mode, shouldLoad = true) {
+    const today = new Date()
+    let startDate = ''
+    let endDate = ''
+    let rangeText = '全部数据'
+    if (mode === '30d') {
+      startDate = formatDate(addDays(today, -29))
+      endDate = formatDate(today)
+      rangeText = `${startDate} 至 ${endDate}`
+    } else if (mode === 'month') {
+      startDate = formatDate(monthStart(today))
+      endDate = formatDate(today)
+      rangeText = `${startDate} 至 ${endDate}`
+    }
+    this.setData({ rangeMode: mode, startDate, endDate, rangeText })
+    if (shouldLoad) this.load()
+  },
+  selectRange(e) {
+    this.applyRange(e.currentTarget.dataset.key)
+  },
+  pickStart(e) {
+    this.setData({ rangeMode: 'custom', startDate: e.detail.value })
+    this.updateCustomRange()
+  },
+  pickEnd(e) {
+    this.setData({ rangeMode: 'custom', endDate: e.detail.value })
+    this.updateCustomRange()
+  },
+  updateCustomRange() {
+    const start = this.data.startDate
+    const end = this.data.endDate
+    this.setData({ rangeText: start || end ? `${start || '不限'} 至 ${end || '不限'}` : '全部数据' })
+    this.load()
   },
   create() { wx.navigateTo({ url: '/pages/admin/activity-publish/activity-publish' }) },
   manageActivities() { wx.navigateTo({ url: '/pages/admin/activity-manage/activity-manage' }) },

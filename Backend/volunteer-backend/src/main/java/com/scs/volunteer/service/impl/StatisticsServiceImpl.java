@@ -18,9 +18,14 @@ public class StatisticsServiceImpl implements StatisticsService {
 
     @Override
     public Map<String, Object> overview(CurrentUser currentUser) {
+        return overview(currentUser, null, null);
+    }
+
+    @Override
+    public Map<String, Object> overview(CurrentUser currentUser, String startDate, String endDate) {
         if (!"ADMIN".equals(currentUser.getRole())) {
             throw new BizException("仅管理员可查看统计");
         }
-        return statisticsMapper.overview();
+        return statisticsMapper.overview(startDate, endDate);
     }
 }

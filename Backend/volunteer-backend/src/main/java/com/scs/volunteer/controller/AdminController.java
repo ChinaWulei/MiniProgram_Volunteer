@@ -48,8 +48,10 @@ public class AdminController extends BaseController {
     }
 
     @GetMapping("/statistics")
-    public ApiResponse<Map<String, Object>> statistics(HttpServletRequest request) {
-        return ApiResponse.ok(statisticsService.overview(currentUser(request)));
+    public ApiResponse<Map<String, Object>> statistics(HttpServletRequest request,
+                                                       @RequestParam(required = false) String startDate,
+                                                       @RequestParam(required = false) String endDate) {
+        return ApiResponse.ok(statisticsService.overview(currentUser(request), startDate, endDate));
     }
 
     @GetMapping("/credit-rules")

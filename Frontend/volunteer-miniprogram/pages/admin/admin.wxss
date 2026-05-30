@@ -2,7 +2,15 @@
 .dash-hero { display: flex; align-items: center; justify-content: space-between; padding: 30rpx; border-radius: 20rpx; color: #fff; background: linear-gradient(135deg,#0f766e,#14b8a6); box-shadow: 0 14rpx 32rpx rgba(15,118,110,.22); }
 .hero-kicker { font-size: 22rpx; opacity: .9; }
 .hero-title { margin-top: 8rpx; font-size: 38rpx; font-weight: 800; }
+.hero-sub { margin-top: 8rpx; font-size: 22rpx; opacity: .86; }
 .hero-btn { display: flex; align-items: center; justify-content: center; width: 150rpx; height: 62rpx; line-height: 1; margin: 0; padding: 0; border-radius: 31rpx; color: #0f766e; background: #fff; font-size: 24rpx; box-sizing: border-box; }
+.filter-panel { margin-top: 18rpx; padding: 18rpx; border-radius: 18rpx; background: #fff; box-shadow: 0 8rpx 24rpx rgba(16,24,40,.06); }
+.range-tabs { display: grid; grid-template-columns: repeat(3,1fr); gap: 12rpx; }
+.range-tab { display: flex; align-items: center; justify-content: center; height: 62rpx; line-height: 1; margin: 0; padding: 0; border-radius: 14rpx; color: #475467; background: #f2f4f7; font-size: 24rpx; box-sizing: border-box; }
+.range-tab.active { color: #fff; background: #0f766e; }
+.date-row { display: grid; grid-template-columns: 1fr 46rpx 1fr; gap: 10rpx; align-items: center; margin-top: 14rpx; }
+.date-field { display: flex; align-items: center; justify-content: center; height: 62rpx; border-radius: 14rpx; color: #344054; background: #f8fafc; font-size: 24rpx; }
+.date-sep { color: #667085; font-size: 24rpx; text-align: center; }
 .stats-grid, .action-grid { display: grid; grid-template-columns: repeat(2,1fr); gap: 14rpx; margin-top: 18rpx; }
 .stat-card, .panel, .chart-panel, .review-card { background: #fff; border-radius: 18rpx; box-shadow: 0 8rpx 24rpx rgba(16,24,40,.06); }
 .stat-card { padding: 22rpx; }
@@ -45,6 +53,17 @@ button::after { border: 0; }
 .rank-main .bar-track { margin-top: 8rpx; }
 .rank-name { flex: 1; min-width: 0; color: #172033; font-size: 24rpx; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
 .rank-value, .tag { flex: 0 0 auto; padding: 6rpx 12rpx; border-radius: 999rpx; color: #0f766e; background: #e6fffb; font-size: 22rpx; }
+.pie-section { display: grid; grid-template-columns: 230rpx 1fr; gap: 22rpx; align-items: center; }
+.pie-chart { width: 220rpx; height: 220rpx; border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: inset 0 0 0 1rpx rgba(15,23,42,.05); }
+.pie-hole { width: 118rpx; height: 118rpx; border-radius: 50%; display: flex; flex-direction: column; align-items: center; justify-content: center; background: #fff; box-shadow: 0 4rpx 12rpx rgba(15,23,42,.08); }
+.pie-total { color: #172033; font-size: 34rpx; font-weight: 800; line-height: 1; }
+.pie-label { margin-top: 6rpx; color: #667085; font-size: 20rpx; }
+.pie-legend { min-width: 0; }
+.legend-row { display: grid; grid-template-columns: 18rpx 1fr auto; gap: 10rpx; align-items: center; padding: 8rpx 0; }
+.legend-dot { width: 16rpx; height: 16rpx; border-radius: 50%; }
+.legend-name { min-width: 0; color: #344054; font-size: 24rpx; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
+.legend-value { color: #0f766e; font-size: 22rpx; font-weight: 700; }
+.empty-mini { color: #98a2b3; font-size: 24rpx; padding: 18rpx 0; }
 .review-card { padding: 18rpx; margin-top: 14rpx; }
 .rule-row { display: grid; grid-template-columns: 1fr 120rpx 110rpx; gap: 12rpx; align-items: center; padding: 12rpx 0; border-bottom: 1rpx solid #edf2f7; }
 .rule-name, .rule-score { height: 62rpx; padding: 0 14rpx; border-radius: 12rpx; background: #f8fafc; font-size: 24rpx; box-sizing: border-box; }

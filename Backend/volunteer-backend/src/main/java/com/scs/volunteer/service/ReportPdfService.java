@@ -17,6 +17,7 @@ import org.springframework.stereotype.Service;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.LocalDateTime;
@@ -213,7 +214,9 @@ public class ReportPdfService {
             }
             return null;
         }
-        return PDType0Font.load(document, file, false);
+        try (InputStream input = Files.newInputStream(file.toPath())) {
+            return PDType0Font.load(document, input, false);
+        }
     }
 
     private List<String> discoverFontPaths() {

@@ -161,13 +161,25 @@ public class ReportPdfService {
     }
 
     private FontPack loadFont(PDDocument document) {
-        List<String> paths = List.of(
+        List<String> paths = new ArrayList<>();
+        String configuredFont = System.getenv("REPORT_PDF_FONT_PATH");
+        if (configuredFont != null && !configuredFont.isBlank()) {
+            paths.add(configuredFont);
+        }
+        paths.addAll(List.of(
                 "C:/Windows/Fonts/simhei.ttf",
-                "C:/Windows/Fonts/msyh.ttf",
+                "C:/Windows/Fonts/Deng.ttf",
+                "C:/Windows/Fonts/simfang.ttf",
+                "C:/Windows/Fonts/simkai.ttf",
                 "C:/Windows/Fonts/simsun.ttc",
                 "/usr/share/fonts/opentype/noto/NotoSansCJK-Regular.ttc",
-                "/usr/share/fonts/truetype/noto/NotoSansCJK-Regular.ttc"
-        );
+                "/usr/share/fonts/opentype/noto/NotoSansCJK-Regular.otf",
+                "/usr/share/fonts/opentype/noto/NotoSansCJK-Regular.ttc",
+                "/usr/share/fonts/truetype/noto/NotoSansCJK-Regular.otf",
+                "/usr/share/fonts/truetype/wqy/wqy-microhei.ttc",
+                "/usr/share/fonts/truetype/wqy/wqy-zenhei.ttc",
+                "/usr/share/fonts/truetype/arphic/uming.ttc"
+        ));
         for (String path : paths) {
             try {
                 File file = new File(path);
@@ -219,7 +231,7 @@ public class ReportPdfService {
                 stream.beginText();
                 stream.setFont(font, size);
                 stream.newLineAtOffset(left, y);
-                stream.showText(unicode ? line : line.replaceAll("[^\\x20-\\x7E]", "?"));
+                stream.showText(renderText(line));
                 stream.endText();
                 y -= size + 7;
             }
@@ -267,7 +279,7 @@ public class ReportPdfService {
                 Map<String, Object> row = view.get(i);
                 double value = number(row.get(valueKey));
                 float rowY = chartY - i * 24;
-                tinyText(shortText(row.get(labelKey), 18), chartX, rowY, 8, Color.DARK_GRAY);
+                tinyText(chartLabel(row.get(labelKey), i, "Activity"), chartX, rowY, 8, Color.DARK_GRAY);
                 stream.setNonStrokingColor(new Color(229, 231, 235));
                 stream.addRect(chartX + labelW, rowY - 2, barW, 10);
                 stream.fill();
@@ -309,7 +321,7 @@ public class ReportPdfService {
                 stream.setNonStrokingColor(CHART_COLORS[i % CHART_COLORS.length]);
                 stream.addRect(legendX, itemY - 8, 9, 9);
                 stream.fill();
-                tinyText(shortText(row.get(labelKey), 22) + "  " + trimNumber(value) + " (" + trimNumber(percent) + "%)", legendX + 16, itemY - 1, 8, Color.DARK_GRAY);
+                tinyText(chartLabel(row.get(labelKey), i, "Category") + "  " + trimNumber(value) + " (" + trimNumber(percent) + "%)", legendX + 16, itemY - 1, 8, Color.DARK_GRAY);
             }
             y -= 166;
         }
@@ -344,7 +356,7 @@ public class ReportPdfService {
             stream.setFont(font, size);
             stream.setNonStrokingColor(color);
             stream.newLineAtOffset(x, y);
-            stream.showText(unicode ? text : text.replaceAll("[^\\x20-\\x7E]", "?"));
+            stream.showText(renderText(text));
             stream.endText();
             stream.setNonStrokingColor(Color.BLACK);
         }
@@ -377,9 +389,35 @@ public class ReportPdfService {
             return text.replace("2026-", "");
         }
 
+        private String chartLabel(Object value, int index, String prefix) {
+            String text = shortText(value, 18);
+            if (!unicode && containsNonAscii(text)) {
+                return prefix + " " + (index + 1);
+            }
+            return text;
+        }
+
         private String shortText(Object value, int limit) {
             String text = value == null ? "-" : String.valueOf(value);
             return text.length() > limit ? text.substring(0, limit - 1) + "." : text;
+        }
+
+        private String renderText(String text) {
+            if (unicode) return text == null ? "" : text;
+            return asciiFallback(text);
+        }
+
+        private boolean containsNonAscii(String text) {
+            if (text == null) return false;
+            for (int i = 0; i < text.length(); i++) {
+                if (text.charAt(i) > 0x7E) return true;
+            }
+            return false;
+        }
+
+        private String asciiFallback(String text) {
+            if (text == null || text.isBlank()) return "";
+            return text.replaceAll("[^\\x20-\\x7E]+", " ").replaceAll("\\s+", " ").trim();
         }
 
         void gap(float value) {

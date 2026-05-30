@@ -73,11 +73,6 @@ Page({
   },
   openHistoryPdf(e) {
     const id = e.currentTarget.dataset.id
-    const item = this.data.history.find(row => String(row.id) === String(id))
-    if (item && item.pdfUrl) {
-      this.openPdf(item.pdfUrl)
-      return
-    }
     request({ url: '/api/report/export', method: 'POST', data: { reportId: id } })
       .then(report => {
         this.openPdf(report.pdfUrl)

@@ -84,7 +84,7 @@ public class StatisticsMapper {
                 where u.role='VOLUNTEER'
                 order by p.total_hours desc,p.credit_score desc
                 limit 8
-                """));
+                """);
         }
         return jdbcTemplate.queryForList("""
                 select u.id as userId,coalesce(u.nickname,u.name) as name,p.major_class as majorClass,

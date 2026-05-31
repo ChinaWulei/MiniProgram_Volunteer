@@ -9,6 +9,7 @@ drop table if exists registration;
 drop table if exists chat_message;
 drop table if exists chat_conversation;
 drop table if exists notification;
+drop table if exists user_activity_subscription;
 drop table if exists activity_news_image;
 drop table if exists activity_news;
 drop table if exists activity;
@@ -22,6 +23,7 @@ create table user (
     name varchar(50) not null,
     nickname varchar(50),
     avatar_url varchar(500),
+    openid varchar(80) unique,
     identity_no varchar(30) not null comment '学号/工号',
     phone varchar(20),
     role varchar(20) not null comment 'VOLUNTEER/ADMIN',
@@ -188,3 +190,13 @@ create table notification (
     created_at datetime not null default current_timestamp,
     constraint fk_notice_user foreign key(user_id) references user(id) on delete cascade
 ) comment='系统与报名审核通知';
+create table user_activity_subscription (
+    id bigint primary key auto_increment,
+    user_id bigint not null,
+    category varchar(50) not null,
+    enabled tinyint(1) not null default 1,
+    created_at datetime not null default current_timestamp,
+    updated_at datetime not null default current_timestamp on update current_timestamp,
+    unique key uk_user_category(user_id, category),
+    constraint fk_subscription_user foreign key(user_id) references user(id) on delete cascade
+) comment='用户活动类型订阅';

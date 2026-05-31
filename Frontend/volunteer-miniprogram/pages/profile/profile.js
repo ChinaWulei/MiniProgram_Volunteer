@@ -1,6 +1,19 @@
 const app = getApp()
 const { request, uploadFile } = require('../../utils/request')
 
+const activityCategories = ['迎新服务', '赛事保障', '校园讲解', '社区服务', '校园服务']
+const activityReminderTemplateId = '3MyIDa1qmvqiDyydT6aQrnCrYrKvz8aq92raqwL0Qq4'
+
+function bindWechatOpenid() {
+  if (!wx.login) return
+  wx.login({
+    success(res) {
+      if (!res.code) return
+      request({ url: '/api/user/wechat-openid', method: 'POST', data: { code: res.code }, silent: true }).catch(() => {})
+    }
+  })
+}
+
 const skillNames = ['摄影', '摄像', '文案', '讲解', '物资搬运', '秩序维护', '疾病维护', '活动组织']
 
 function clean(value, fallback) {
@@ -30,6 +43,9 @@ Page({
     avatarText: '志',
     skillOptions: skillNames.map(name => ({ name, selected: false })),
     selectedSkills: [],
+    activityCategoryOptions: activityCategories.map(name => ({ name, selected: false })),
+    selectedActivityCategories: [],
+    subscriptionEnabled: false,
     editing: false,
     isAdmin: false
   },
@@ -37,6 +53,9 @@ Page({
     const user = app.globalData.user || wx.getStorageSync('user')
     this.setData({ isAdmin: user && user.role === 'ADMIN' })
     this.loadProfile()
+    if (!user || user.role !== 'ADMIN') {
+      this.loadActivitySubscription()
+    }
   },
   loadProfile() {
     wx.showLoading({ title: '加载中' })
@@ -70,6 +89,21 @@ Page({
   },
   buildSkillOptions(selectedSkills) {
     return skillNames.map(name => ({ name, selected: selectedSkills.indexOf(name) >= 0 }))
+  },
+  buildActivityCategoryOptions(selectedCategories) {
+    return activityCategories.map(name => ({ name, selected: selectedCategories.indexOf(name) >= 0 }))
+  },
+  loadActivitySubscription() {
+    request({ url: '/api/activity-subscriptions', silent: true })
+      .then(data => {
+        const selected = data && data.categories ? data.categories : []
+        this.setData({
+          selectedActivityCategories: selected,
+          activityCategoryOptions: this.buildActivityCategoryOptions(selected),
+          subscriptionEnabled: !!(data && data.enabled)
+        })
+      })
+      .catch(() => {})
   },
   chooseAvatar() {
     const handlePath = filePath => {
@@ -121,6 +155,50 @@ Page({
       selected.push(skill)
     }
     this.setData({ selectedSkills: selected, skillOptions: this.buildSkillOptions(selected), 'form.skillTags': selected.join(',') })
+  },
+  toggleActivityCategory(e) {
+    const category = e.currentTarget.dataset.category
+    const selected = this.data.selectedActivityCategories.slice()
+    const index = selected.indexOf(category)
+    if (index >= 0) {
+      selected.splice(index, 1)
+    } else {
+      selected.push(category)
+    }
+    this.setData({
+      selectedActivityCategories: selected,
+      activityCategoryOptions: this.buildActivityCategoryOptions(selected),
+      subscriptionEnabled: selected.length > 0
+    })
+  },
+  saveActivityReminder() {
+    const categories = this.data.selectedActivityCategories.slice()
+    bindWechatOpenid()
+    if (!categories.length) {
+      request({ url: '/api/activity-subscriptions', method: 'PUT', data: { enabled: false, categories: [] } })
+        .then(() => {
+          this.setData({ subscriptionEnabled: false })
+          wx.showToast({ title: '已关闭活动提醒', icon: 'none' })
+        })
+        .catch(() => {})
+      return
+    }
+    const save = () => {
+      request({ url: '/api/activity-subscriptions', method: 'PUT', data: { enabled: true, categories } })
+        .then(() => {
+          this.setData({ subscriptionEnabled: true })
+          wx.showToast({ title: '已保存提醒设置', icon: 'success' })
+        })
+        .catch(() => {})
+    }
+    if (!wx.requestSubscribeMessage) {
+      save()
+      return
+    }
+    wx.requestSubscribeMessage({
+      tmplIds: [activityReminderTemplateId],
+      complete: save
+    })
   },
   saveProfile() {
     const form = Object.assign({}, this.data.form, { skillTags: this.data.selectedSkills.join(',') })

@@ -8,6 +8,7 @@ import com.scs.volunteer.mapper.ActivityMapper;
 import com.scs.volunteer.mapper.RegistrationMapper;
 import com.scs.volunteer.mapper.VolunteerMapper;
 import com.scs.volunteer.service.ActivityService;
+import com.scs.volunteer.service.ActivitySubscriptionService;
 import com.scs.volunteer.vo.ActivityDetailVO;
 import com.scs.volunteer.vo.VolunteerVO;
 import org.springframework.stereotype.Service;
@@ -23,11 +24,14 @@ public class ActivityServiceImpl implements ActivityService {
     private final ActivityMapper activityMapper;
     private final RegistrationMapper registrationMapper;
     private final VolunteerMapper volunteerMapper;
+    private final ActivitySubscriptionService activitySubscriptionService;
 
-    public ActivityServiceImpl(ActivityMapper activityMapper, RegistrationMapper registrationMapper, VolunteerMapper volunteerMapper) {
+    public ActivityServiceImpl(ActivityMapper activityMapper, RegistrationMapper registrationMapper, VolunteerMapper volunteerMapper,
+                               ActivitySubscriptionService activitySubscriptionService) {
         this.activityMapper = activityMapper;
         this.registrationMapper = registrationMapper;
         this.volunteerMapper = volunteerMapper;
+        this.activitySubscriptionService = activitySubscriptionService;
     }
 
     @Override
@@ -94,7 +98,12 @@ public class ActivityServiceImpl implements ActivityService {
         requireAdmin(currentUser);
         Activity a = toEntity(dto);
         a.setCreatedBy(currentUser.getId());
-        return activityMapper.insert(a);
+        Long id = activityMapper.insert(a);
+        a.setId(id);
+        if (a.getPublishedAt() != null) {
+            activitySubscriptionService.notifyActivityPublished(a);
+        }
+        return id;
     }
 
     @Override

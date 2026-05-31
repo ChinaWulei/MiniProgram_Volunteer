@@ -40,6 +40,10 @@ app:
     image-model: ${AI_IMAGE_MODEL:imagen-3.0-generate-002}
   checkin:
     adjustment-apply-limit-hours: ${CHECKIN_ADJUSTMENT_APPLY_LIMIT_HOURS:24}
+  wechat:
+    appid: ${WECHAT_MINIAPP_APPID:wx0a33c2af7b3e97e8}
+    secret: ${WECHAT_MINIAPP_SECRET:}
+    activity-reminder-template-id: ${WECHAT_ACTIVITY_REMINDER_TEMPLATE_ID:3MyIDa1qmvqiDyydT6aQrnCrYrKvz8aq92raqwL0Qq4}
   rag:
     vector:
       url: ${RAG_VECTOR_DATASOURCE_URL:jdbc:postgresql://localhost:5432/volunteer_rag}

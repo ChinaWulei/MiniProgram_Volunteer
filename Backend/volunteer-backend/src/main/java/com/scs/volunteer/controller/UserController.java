@@ -3,7 +3,9 @@ package com.scs.volunteer.controller;
 import com.scs.volunteer.common.ApiResponse;
 import com.scs.volunteer.common.CurrentUser;
 import com.scs.volunteer.dto.UserProfileDTO;
+import com.scs.volunteer.dto.WechatCodeDTO;
 import com.scs.volunteer.service.UserProfileService;
+import com.scs.volunteer.service.WechatMiniProgramService;
 import com.scs.volunteer.vo.UserProfileVO;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -21,9 +23,11 @@ import java.util.Map;
 @RequestMapping("/api/user")
 public class UserController extends BaseController {
     private final UserProfileService userProfileService;
+    private final WechatMiniProgramService wechatMiniProgramService;
 
-    public UserController(UserProfileService userProfileService) {
+    public UserController(UserProfileService userProfileService, WechatMiniProgramService wechatMiniProgramService) {
         this.userProfileService = userProfileService;
+        this.wechatMiniProgramService = wechatMiniProgramService;
     }
 
     @GetMapping("/profile")
@@ -40,5 +44,11 @@ public class UserController extends BaseController {
     public ApiResponse<Map<String, String>> avatar(@RequestParam("file") MultipartFile file, HttpServletRequest request) {
         CurrentUser user = currentUser(request);
         return ApiResponse.ok(Map.of("avatarUrl", userProfileService.updateAvatar(user.getId(), file)));
+    }
+
+    @PostMapping("/wechat-openid")
+    public ApiResponse<Void> bindWechatOpenid(@RequestBody WechatCodeDTO dto, HttpServletRequest request) {
+        wechatMiniProgramService.bindOpenid(currentUser(request).getId(), dto == null ? null : dto.getCode());
+        return ApiResponse.ok(null);
     }
 }

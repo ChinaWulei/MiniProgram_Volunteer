@@ -80,6 +80,15 @@
     </view>
   </view>
 
+  <view class="section" wx:if="{{!isAdmin}}">
+    <view class="section-title">活动提醒设置</view>
+    <view class="reminder-status">{{subscriptionEnabled ? '已开启关注类型提醒' : '未开启活动提醒'}}</view>
+    <view class="category-grid">
+      <view wx:for="{{activityCategoryOptions}}" wx:key="name" class="category-option {{item.selected ? 'active' : ''}}" data-category="{{item.name}}" bindtap="toggleActivityCategory">{{item.name}}</view>
+    </view>
+    <button class="reminder-btn" bindtap="saveActivityReminder">保存并订阅微信提醒</button>
+  </view>
+
   <view class="actions">
     <button wx:if="{{isAdmin && !editing}}" class="primary-btn" bindtap="goAdmin">管理后台</button>
     <button wx:if="{{!isAdmin && !editing}}" class="ghost-btn" bindtap="myRegs">我的报名</button>

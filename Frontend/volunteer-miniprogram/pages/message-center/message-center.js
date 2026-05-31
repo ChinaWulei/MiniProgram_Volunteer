@@ -71,7 +71,7 @@ Page({
       .then(list => {
         const notices = (list || []).map(item => ({
           id: item.id,
-          type: item.type === 'REGISTRATION_REVIEW' ? '报名审核通知' : item.type === 'ACTIVITY_NEWS' ? '新闻发布通知' : item.type === 'ANNOUNCEMENT' ? '公告通知' : '系统通知',
+          type: item.type === 'REGISTRATION_REVIEW' ? '报名审核通知' : item.type === 'ACTIVITY_NEWS' ? '新闻发布通知' : item.type === 'ANNOUNCEMENT' ? '公告通知' : item.type === 'ACTIVITY_SUBSCRIBE' ? '活动提醒' : '系统通知',
           title: item.title,
           summary: item.content,
           targetType: item.targetType,

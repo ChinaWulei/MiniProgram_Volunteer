@@ -85,6 +85,10 @@ public class UserMapper {
         jdbcTemplate.update("update user set avatar_url=? where id=?", avatarUrl, userId);
     }
 
+    public void bindOpenid(Long userId, String openid) {
+        jdbcTemplate.update("update user set openid=? where id=?", openid, userId);
+    }
+
     public int campusRank(Long userId) {
         Integer rank = jdbcTemplate.queryForObject("""
                 select count(*) + 1

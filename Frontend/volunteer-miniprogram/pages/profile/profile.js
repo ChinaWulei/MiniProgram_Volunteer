@@ -197,7 +197,14 @@ Page({
     }
     wx.requestSubscribeMessage({
       tmplIds: [activityReminderTemplateId],
-      complete: save
+      success: res => {
+        if (res[activityReminderTemplateId] === 'accept') {
+          save()
+        } else {
+          wx.showToast({ title: '未授权微信提醒', icon: 'none' })
+        }
+      },
+      fail: () => wx.showToast({ title: '订阅授权失败', icon: 'none' })
     })
   },
   saveProfile() {

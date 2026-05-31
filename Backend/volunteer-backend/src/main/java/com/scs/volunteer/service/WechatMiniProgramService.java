@@ -9,6 +9,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StreamUtils;
 import org.springframework.web.client.RestClient;
 
 import java.net.URLEncoder;
@@ -74,17 +75,28 @@ public class WechatMiniProgramService {
                     "thing6", Map.of("value", limit(activity.getLocation(), 20)),
                     "thing7", Map.of("value", limit(reminderText(activity), 20))
             ));
-            String body = restClient.post()
+            String requestBody = objectMapper.writeValueAsString(payload);
+            WechatResponse response = restClient.post()
                     .uri("https://api.weixin.qq.com/cgi-bin/message/subscribe/send?access_token=" + accessToken())
                     .contentType(MediaType.APPLICATION_JSON)
-                    .body(payload)
-                    .retrieve()
-                    .body(String.class);
+                    .accept(MediaType.APPLICATION_JSON)
+                    .body(requestBody)
+                    .exchange((request, clientResponse) -> new WechatResponse(
+                            clientResponse.getStatusCode().value(),
+                            StreamUtils.copyToString(clientResponse.getBody(), StandardCharsets.UTF_8)
+                    ));
+            String body = response.body();
+            if (response.statusCode() < 200 || response.statusCode() >= 300) {
+                log.warn("Wechat subscribe HTTP failed, status={}, body={}, templateId={}, openidTail={}, activityId={}, payload={}",
+                        response.statusCode(), body, properties.getActivityReminderTemplateId(), tail(openid), activity.getId(), requestBody);
+                return false;
+            }
             Map<String, Object> result = parse(body);
             Object errcode = result.get("errcode");
             boolean ok = errcode instanceof Number number && number.intValue() == 0;
             if (!ok) {
-                log.warn("Wechat subscribe message failed: {}", body);
+                log.warn("Wechat subscribe message failed, body={}, templateId={}, openidTail={}, activityId={}, payload={}",
+                        body, properties.getActivityReminderTemplateId(), tail(openid), activity.getId(), requestBody);
             }
             return ok;
         } catch (Exception e) {
@@ -136,7 +148,7 @@ public class WechatMiniProgramService {
         if (value == null) {
             return "";
         }
-        String text = value.trim();
+        String text = value.replaceAll("[\\r\\n\\t]+", " ").trim();
         return text.length() <= max ? text : text.substring(0, max);
     }
 
@@ -150,5 +162,15 @@ public class WechatMiniProgramService {
 
     private String enc(String value) {
         return URLEncoder.encode(value == null ? "" : value, StandardCharsets.UTF_8);
+    }
+
+    private String tail(String value) {
+        if (blank(value)) {
+            return "";
+        }
+        return value.length() <= 6 ? value : value.substring(value.length() - 6);
+    }
+
+    private record WechatResponse(int statusCode, String body) {
     }
 }

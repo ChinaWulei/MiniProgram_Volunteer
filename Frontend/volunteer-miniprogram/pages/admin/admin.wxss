@@ -47,9 +47,9 @@ button::after { border: 0; }
 .hour-fill { background: linear-gradient(90deg,#f59e0b,#ef4444); }
 .bar-num { color: #0f766e; font-size: 22rpx; font-weight: 800; text-align: right; }
 .rate-row { padding: 10rpx 0; }
-.rate-head { display: flex; justify-content: space-between; gap: 12rpx; margin-bottom: 8rpx; }
+.rate-head { display: grid; grid-template-columns: minmax(0,1fr) 82rpx; gap: 10rpx; align-items: center; margin-bottom: 8rpx; padding-right: 4rpx; box-sizing: border-box; }
 .rate-name { flex: 1; min-width: 0; color: #344054; font-size: 22rpx; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
-.rate-num { color: #2563eb; font-size: 22rpx; font-weight: 800; }
+.rate-num { width: 82rpx; color: #2563eb; font-size: 21rpx; font-weight: 800; text-align: right; white-space: nowrap; overflow: visible; }
 .rank-row, .row { display: flex; align-items: center; justify-content: space-between; gap: 12rpx; padding: 10rpx 0; }
 .chart-rank { align-items: flex-start; }
 .rank-main { flex: 1; min-width: 0; }

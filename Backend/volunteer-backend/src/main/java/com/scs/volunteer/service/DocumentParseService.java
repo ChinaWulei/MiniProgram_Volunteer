@@ -17,7 +17,11 @@ import java.util.stream.Collectors;
 @Service
 public class DocumentParseService {
     public String parse(MultipartFile file) {
-        String extension = extension(file.getOriginalFilename());
+        return parse(file, file == null ? null : file.getOriginalFilename());
+    }
+
+    public String parse(MultipartFile file, String filename) {
+        String extension = extension(filename);
         try {
             byte[] bytes = file.getBytes();
             if ("pdf".equals(extension)) return parsePdf(bytes);

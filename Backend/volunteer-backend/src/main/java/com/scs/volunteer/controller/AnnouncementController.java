@@ -26,8 +26,10 @@ public class AnnouncementController extends BaseController {
     }
 
     @PostMapping("/api/admin/announcements/attachments")
-    public ApiResponse<Map<String, Object>> uploadAttachment(HttpServletRequest request, @RequestParam("file") MultipartFile file) {
-        RuleFile ruleFile = announcementService.uploadAttachment(file, currentUser(request));
+    public ApiResponse<Map<String, Object>> uploadAttachment(HttpServletRequest request,
+                                                             @RequestParam("file") MultipartFile file,
+                                                             @RequestParam(value = "originalName", required = false) String originalName) {
+        RuleFile ruleFile = announcementService.uploadAttachment(file, originalName, currentUser(request));
         return ApiResponse.ok(announcementService.attachmentResult(ruleFile));
     }
 

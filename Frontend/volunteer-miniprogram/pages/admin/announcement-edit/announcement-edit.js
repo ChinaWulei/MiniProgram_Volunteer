@@ -36,7 +36,12 @@ Page({
           return
         }
         wx.showLoading({ title: '上传解析中' })
-        uploadFile({ url: '/api/admin/announcements/attachments', filePath, name: 'file' })
+        uploadFile({
+          url: '/api/admin/announcements/attachments',
+          filePath,
+          name: 'file',
+          formData: { originalName: file.name || '' }
+        })
           .then(data => this.setData({ attachments: this.data.attachments.concat([data]) }))
           .finally(() => wx.hideLoading())
       }

@@ -67,9 +67,9 @@ public class AnnouncementServiceImpl implements AnnouncementService {
     }
 
     @Override
-    public RuleFile uploadAttachment(MultipartFile file, CurrentUser currentUser) {
+    public RuleFile uploadAttachment(MultipartFile file, String originalName, CurrentUser currentUser) {
         requireAdmin(currentUser);
-        return ruleFileService.upload(file, currentUser);
+        return ruleFileService.upload(file, currentUser, originalName);
     }
 
     @Override

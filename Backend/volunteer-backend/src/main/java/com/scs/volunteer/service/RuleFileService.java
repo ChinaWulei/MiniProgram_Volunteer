@@ -32,11 +32,16 @@ public class RuleFileService {
     }
 
     public RuleFile upload(MultipartFile file, CurrentUser user) {
+        return upload(file, user, null);
+    }
+
+    public RuleFile upload(MultipartFile file, CurrentUser user, String originalName) {
         requireAdmin(user);
-        Map<String, String> stored = s3Service.uploadRuleFile(file);
+        String displayName = displayName(originalName, file.getOriginalFilename());
+        Map<String, String> stored = s3Service.uploadRuleFile(file, displayName);
         RuleFile ruleFile = new RuleFile();
-        ruleFile.setOriginalName(file.getOriginalFilename());
-        ruleFile.setFileType(extension(file.getOriginalFilename()));
+        ruleFile.setOriginalName(displayName);
+        ruleFile.setFileType(extension(displayName));
         ruleFile.setFileSize(file.getSize());
         ruleFile.setS3Key(stored.get("key"));
         ruleFile.setS3Url(stored.get("url"));
@@ -47,7 +52,7 @@ public class RuleFileService {
         ruleFile.setId(id);
 
         try {
-            String text = documentParseService.parse(file);
+            String text = documentParseService.parse(file, displayName);
             List<String> chunks = chunkService.split(text);
             if (chunks.isEmpty()) throw new BizException("规则文件未解析到有效文本");
             List<float[]> embeddings = new ArrayList<>();
@@ -88,5 +93,14 @@ public class RuleFileService {
     private String extension(String filename) {
         if (filename == null || !filename.contains(".")) return "";
         return filename.substring(filename.lastIndexOf('.') + 1).toLowerCase(Locale.ROOT);
+    }
+
+    private String displayName(String preferred, String fallback) {
+        String value = preferred == null || preferred.isBlank() ? fallback : preferred;
+        if (value == null) return "";
+        value = value.replace("\\", "/");
+        int slash = value.lastIndexOf('/');
+        if (slash >= 0) value = value.substring(slash + 1);
+        return value.trim();
     }
 }

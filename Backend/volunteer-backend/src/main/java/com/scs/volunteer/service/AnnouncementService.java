@@ -11,7 +11,7 @@ import java.util.Map;
 
 public interface AnnouncementService {
     List<String> uploadImages(MultipartFile[] files, CurrentUser currentUser);
-    RuleFile uploadAttachment(MultipartFile file, CurrentUser currentUser);
+    RuleFile uploadAttachment(MultipartFile file, String originalName, CurrentUser currentUser);
     Long save(AnnouncementDTO dto, CurrentUser currentUser);
     void publish(Long id, CurrentUser currentUser);
     List<AnnouncementVO> adminList(CurrentUser currentUser);

@@ -40,8 +40,12 @@ public class S3Service {
     }
 
     public Map<String, String> uploadRuleFile(MultipartFile file) {
-        validate(file);
-        String extension = extension(file.getOriginalFilename());
+        return uploadRuleFile(file, file == null ? null : file.getOriginalFilename());
+    }
+
+    public Map<String, String> uploadRuleFile(MultipartFile file, String originalFilename) {
+        validate(file, originalFilename);
+        String extension = extension(originalFilename);
         String key = "rules/" + System.currentTimeMillis() + "-" + UUID.randomUUID() + "." + extension;
         return Map.of("key", key, "url", upload(file, key));
     }
@@ -107,10 +111,10 @@ public class S3Service {
         return properties.getBucket() + ".s3." + properties.getRegion() + ".amazonaws.com";
     }
 
-    private void validate(MultipartFile file) {
+    private void validate(MultipartFile file, String filename) {
         if (file == null || file.isEmpty()) throw new BizException("请选择规则文件");
         if (file.getSize() > RULE_FILE_MAX_SIZE) throw new BizException("规则文件不能超过20MB");
-        String extension = extension(file.getOriginalFilename());
+        String extension = extension(filename);
         if (!extension.equals("pdf") && !extension.equals("docx") && !extension.equals("txt")) {
             throw new BizException("仅支持 PDF、DOCX、TXT 规则文件");
         }

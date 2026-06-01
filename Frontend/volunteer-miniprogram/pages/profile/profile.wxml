@@ -92,7 +92,10 @@
       <switch checked="{{emailReminderEnabled}}" bindchange="toggleEmailReminder" color="#0f766e" />
     </view>
     <input wx:if="{{emailReminderEnabled}}" class="email-input" placeholder="请输入接收提醒的邮箱" value="{{reminderEmail}}" bindinput="inputReminderEmail" />
-    <button wx:if="{{emailReminderEnabled}}" class="email-test-btn" bindtap="testActivityEmail">发送测试邮件</button>
+    <view class="custom-category-row">
+      <input class="category-input" placeholder="自定义活动方向" value="{{customActivityCategory}}" bindinput="inputCustomActivityCategory" confirm-type="done" bindconfirm="addActivityCategory" />
+      <button class="category-add-btn" bindtap="addActivityCategory">添加</button>
+    </view>
     <view class="category-grid">
       <view wx:for="{{activityCategoryOptions}}" wx:key="name" class="category-option {{item.selected ? 'active' : ''}}" data-category="{{item.name}}" bindtap="toggleActivityCategory">{{item.name}}</view>
     </view>

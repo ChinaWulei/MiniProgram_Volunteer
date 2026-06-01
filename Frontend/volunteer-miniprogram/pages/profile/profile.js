@@ -45,6 +45,7 @@ Page({
     selectedSkills: [],
     activityCategoryOptions: activityCategories.map(name => ({ name, selected: false })),
     selectedActivityCategories: [],
+    customActivityCategory: '',
     subscriptionEnabled: false,
     wechatReminderEnabled: true,
     emailReminderEnabled: false,
@@ -94,7 +95,11 @@ Page({
     return skillNames.map(name => ({ name, selected: selectedSkills.indexOf(name) >= 0 }))
   },
   buildActivityCategoryOptions(selectedCategories) {
-    return activityCategories.map(name => ({ name, selected: selectedCategories.indexOf(name) >= 0 }))
+    const names = activityCategories.slice()
+    ;(selectedCategories || []).forEach(name => {
+      if (name && names.indexOf(name) < 0) names.push(name)
+    })
+    return names.map(name => ({ name, selected: selectedCategories.indexOf(name) >= 0 }))
   },
   loadActivitySubscription() {
     request({ url: '/api/activity-subscriptions', silent: true })
@@ -154,6 +159,9 @@ Page({
   inputReminderEmail(e) {
     this.setData({ reminderEmail: e.detail.value })
   },
+  inputCustomActivityCategory(e) {
+    this.setData({ customActivityCategory: e.detail.value })
+  },
   toggleWechatReminder(e) {
     this.setData({ wechatReminderEnabled: e.detail.value })
   },
@@ -183,6 +191,27 @@ Page({
     this.setData({
       selectedActivityCategories: selected,
       activityCategoryOptions: this.buildActivityCategoryOptions(selected),
+      subscriptionEnabled: selected.length > 0
+    })
+  },
+  addActivityCategory() {
+    const category = String(this.data.customActivityCategory || '').trim()
+    if (!category) {
+      wx.showToast({ title: '请输入活动方向', icon: 'none' })
+      return
+    }
+    if (category.length > 20) {
+      wx.showToast({ title: '活动方向过长', icon: 'none' })
+      return
+    }
+    const selected = this.data.selectedActivityCategories.slice()
+    if (selected.indexOf(category) < 0) {
+      selected.push(category)
+    }
+    this.setData({
+      selectedActivityCategories: selected,
+      activityCategoryOptions: this.buildActivityCategoryOptions(selected),
+      customActivityCategory: '',
       subscriptionEnabled: selected.length > 0
     })
   },
@@ -236,20 +265,6 @@ Page({
         wx.showToast({ title: '订阅授权失败', icon: 'none' })
       }
     })
-  },
-  testActivityEmail() {
-    const email = String(this.data.reminderEmail || '').trim()
-    if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) {
-      wx.showToast({ title: '请输入有效邮箱', icon: 'none' })
-      return
-    }
-    wx.showLoading({ title: '发送中' })
-    request({ url: '/api/activity-subscriptions/test-email', method: 'POST', data: { email } })
-      .then(data => {
-        wx.showToast({ title: data && data.sent ? '测试邮件已发送' : '邮件未发送', icon: 'none' })
-      })
-      .catch(() => {})
-      .finally(() => wx.hideLoading())
   },
   saveProfile() {
     const form = Object.assign({}, this.data.form, { skillTags: this.data.selectedSkills.join(',') })

@@ -64,4 +64,16 @@ public class ActivitySubscriptionMapper {
                   and u.role='VOLUNTEER'
                 """, category);
     }
+
+    public List<Map<String, Object>> enabledSubscriptions() {
+        return jdbcTemplate.queryForList("""
+                select u.id as userId, u.openid as openid, s.category as category,
+                       s.wechat_enabled as wechatEnabled, s.email_enabled as emailEnabled, s.email as email
+                from user_activity_subscription s
+                join user u on u.id=s.user_id
+                where s.enabled=1
+                  and (s.wechat_enabled=1 or s.email_enabled=1)
+                  and u.role='VOLUNTEER'
+                """);
+    }
 }

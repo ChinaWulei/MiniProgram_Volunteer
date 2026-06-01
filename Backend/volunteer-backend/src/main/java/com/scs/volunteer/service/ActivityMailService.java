@@ -27,12 +27,18 @@ public class ActivityMailService {
     }
 
     public boolean sendActivityReminder(String email, Activity activity) {
-        if (blank(email) || activity == null || !configured()) {
+        if (blank(email) || activity == null) {
+            log.warn("Activity email reminder skipped, emailBlank={}, activityNull={}", blank(email), activity == null);
+            return false;
+        }
+        if (!configured()) {
+            log.warn("Activity email reminder skipped, mail not configured: enabled={}, hostBlank={}, fromBlank={}",
+                    activityMailProperties.isEnabled(), blank(mailProperties.getHost()), blank(fromAddress()));
             return false;
         }
         try {
             SimpleMailMessage message = new SimpleMailMessage();
-            message.setFrom(first(activityMailProperties.getFrom(), mailProperties.getUsername()));
+            message.setFrom(fromAddress());
             message.setTo(email.trim());
             message.setSubject("志愿活动提醒：" + activity.getName());
             message.setText("""
@@ -53,6 +59,7 @@ public class ActivityMailService {
                     safe(first(activity.getTips(), "请按时参加志愿活动"))
             ));
             mailSender.send(message);
+            log.info("Activity email reminder sent, email={}, activityId={}", mask(email), activity.getId());
             return true;
         } catch (Exception e) {
             log.warn("Activity email reminder failed, email={}, activityId={}", mask(email), activity.getId(), e);
@@ -60,8 +67,37 @@ public class ActivityMailService {
         }
     }
 
+    public boolean sendTestEmail(String email) {
+        if (blank(email)) {
+            log.warn("Activity test email skipped, email is blank");
+            return false;
+        }
+        if (!configured()) {
+            log.warn("Activity test email skipped, mail not configured: enabled={}, hostBlank={}, fromBlank={}",
+                    activityMailProperties.isEnabled(), blank(mailProperties.getHost()), blank(fromAddress()));
+            return false;
+        }
+        try {
+            SimpleMailMessage message = new SimpleMailMessage();
+            message.setFrom(fromAddress());
+            message.setTo(email.trim());
+            message.setSubject("志愿活动邮箱提醒测试");
+            message.setText("这是一封测试邮件。收到后说明志愿活动邮箱提醒通道已配置成功。");
+            mailSender.send(message);
+            log.info("Activity test email sent, email={}", mask(email));
+            return true;
+        } catch (Exception e) {
+            log.warn("Activity test email failed, email={}", mask(email), e);
+            return false;
+        }
+    }
+
     private boolean configured() {
-        return activityMailProperties.isEnabled() && !blank(mailProperties.getHost()) && !blank(first(activityMailProperties.getFrom(), mailProperties.getUsername()));
+        return activityMailProperties.isEnabled() && !blank(mailProperties.getHost()) && !blank(fromAddress());
+    }
+
+    private String fromAddress() {
+        return first(activityMailProperties.getFrom(), mailProperties.getUsername());
     }
 
     private String first(String value, String fallback) {

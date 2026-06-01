@@ -259,6 +259,20 @@
   font-size: 26rpx;
   box-sizing: border-box;
 }
+.email-test-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 68rpx;
+  margin: 0 0 18rpx;
+  padding: 0;
+  border-radius: 12rpx;
+  background: #ecfdf5;
+  color: #0f766e;
+  font-size: 26rpx;
+}
+.email-test-btn::after { border: 0; }
 .category-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);

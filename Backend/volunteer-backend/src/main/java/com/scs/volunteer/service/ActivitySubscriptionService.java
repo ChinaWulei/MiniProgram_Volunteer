@@ -49,6 +49,14 @@ public class ActivitySubscriptionService {
         subscriptionMapper.replace(userId, categories == null ? List.of() : categories, enabled, wechatEnabled, emailEnabled, dto == null ? null : dto.getEmail());
     }
 
+    public boolean sendTestEmail(Long userId, String email) {
+        String target = email == null || email.isBlank() ? String.valueOf(settings(userId).get("email")) : email;
+        if (!validEmail(target)) {
+            return false;
+        }
+        return activityMailService.sendTestEmail(target);
+    }
+
     public void notifyActivityPublished(Activity activity) {
         if (activity == null || activity.getCategory() == null || activity.getCategory().isBlank()) {
             return;

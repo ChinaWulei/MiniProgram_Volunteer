@@ -237,6 +237,20 @@ Page({
       }
     })
   },
+  testActivityEmail() {
+    const email = String(this.data.reminderEmail || '').trim()
+    if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) {
+      wx.showToast({ title: '请输入有效邮箱', icon: 'none' })
+      return
+    }
+    wx.showLoading({ title: '发送中' })
+    request({ url: '/api/activity-subscriptions/test-email', method: 'POST', data: { email } })
+      .then(data => {
+        wx.showToast({ title: data && data.sent ? '测试邮件已发送' : '邮件未发送', icon: 'none' })
+      })
+      .catch(() => {})
+      .finally(() => wx.hideLoading())
+  },
   saveProfile() {
     const form = Object.assign({}, this.data.form, { skillTags: this.data.selectedSkills.join(',') })
     wx.showLoading({ title: '保存中' })

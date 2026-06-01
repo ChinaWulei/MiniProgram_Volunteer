@@ -5,6 +5,7 @@ import com.scs.volunteer.dto.SubscribeSettingsDTO;
 import com.scs.volunteer.service.ActivitySubscriptionService;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -30,5 +31,11 @@ public class ActivitySubscriptionController extends BaseController {
     public ApiResponse<Void> save(@RequestBody SubscribeSettingsDTO dto, HttpServletRequest request) {
         activitySubscriptionService.save(currentUser(request).getId(), dto);
         return ApiResponse.ok(null);
+    }
+
+    @PostMapping("/test-email")
+    public ApiResponse<Map<String, Boolean>> testEmail(@RequestBody(required = false) SubscribeSettingsDTO dto, HttpServletRequest request) {
+        boolean sent = activitySubscriptionService.sendTestEmail(currentUser(request).getId(), dto == null ? null : dto.getEmail());
+        return ApiResponse.ok(Map.of("sent", sent));
     }
 }

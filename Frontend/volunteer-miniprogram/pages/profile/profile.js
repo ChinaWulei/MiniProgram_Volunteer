@@ -46,6 +46,9 @@ Page({
     activityCategoryOptions: activityCategories.map(name => ({ name, selected: false })),
     selectedActivityCategories: [],
     subscriptionEnabled: false,
+    wechatReminderEnabled: true,
+    emailReminderEnabled: false,
+    reminderEmail: '',
     editing: false,
     isAdmin: false
   },
@@ -100,7 +103,10 @@ Page({
         this.setData({
           selectedActivityCategories: selected,
           activityCategoryOptions: this.buildActivityCategoryOptions(selected),
-          subscriptionEnabled: !!(data && data.enabled)
+          subscriptionEnabled: !!(data && data.enabled),
+          wechatReminderEnabled: data && data.wechatEnabled !== undefined ? !!data.wechatEnabled : true,
+          emailReminderEnabled: !!(data && data.emailEnabled),
+          reminderEmail: data && data.email ? data.email : ''
         })
       })
       .catch(() => {})
@@ -145,6 +151,15 @@ Page({
     const key = e.currentTarget.dataset.key
     this.setData({ [`form.${key}`]: e.detail.value })
   },
+  inputReminderEmail(e) {
+    this.setData({ reminderEmail: e.detail.value })
+  },
+  toggleWechatReminder(e) {
+    this.setData({ wechatReminderEnabled: e.detail.value })
+  },
+  toggleEmailReminder(e) {
+    this.setData({ emailReminderEnabled: e.detail.value })
+  },
   toggleSkill(e) {
     const skill = e.currentTarget.dataset.skill
     const selected = this.data.selectedSkills.slice()
@@ -173,9 +188,12 @@ Page({
   },
   saveActivityReminder() {
     const categories = this.data.selectedActivityCategories.slice()
+    const email = String(this.data.reminderEmail || '').trim()
+    const emailEnabled = !!this.data.emailReminderEnabled
+    const wechatWanted = !!this.data.wechatReminderEnabled
     bindWechatOpenid()
     if (!categories.length) {
-      request({ url: '/api/activity-subscriptions', method: 'PUT', data: { enabled: false, categories: [] } })
+      request({ url: '/api/activity-subscriptions', method: 'PUT', data: { enabled: false, wechatEnabled: false, emailEnabled: false, email: '', categories: [] } })
         .then(() => {
           this.setData({ subscriptionEnabled: false })
           wx.showToast({ title: '已关闭活动提醒', icon: 'none' })
@@ -183,28 +201,40 @@ Page({
         .catch(() => {})
       return
     }
-    const save = () => {
-      request({ url: '/api/activity-subscriptions', method: 'PUT', data: { enabled: true, categories } })
+    if (!wechatWanted && !emailEnabled) {
+      wx.showToast({ title: '请选择提醒方式', icon: 'none' })
+      return
+    }
+    if (emailEnabled && !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) {
+      wx.showToast({ title: '请输入有效邮箱', icon: 'none' })
+      return
+    }
+    const save = wechatEnabled => {
+      request({ url: '/api/activity-subscriptions', method: 'PUT', data: { enabled: true, wechatEnabled, emailEnabled, email, categories } })
         .then(() => {
           this.setData({ subscriptionEnabled: true })
           wx.showToast({ title: '已保存提醒设置', icon: 'success' })
         })
         .catch(() => {})
     }
-    if (!wx.requestSubscribeMessage) {
-      save()
+    if (!wechatWanted || !wx.requestSubscribeMessage) {
+      save(false)
       return
     }
     wx.requestSubscribeMessage({
       tmplIds: [activityReminderTemplateId],
       success: res => {
         if (res[activityReminderTemplateId] === 'accept') {
-          save()
+          save(true)
         } else {
+          if (emailEnabled) save(false)
           wx.showToast({ title: '未授权微信提醒', icon: 'none' })
         }
       },
-      fail: () => wx.showToast({ title: '订阅授权失败', icon: 'none' })
+      fail: () => {
+        if (emailEnabled) save(false)
+        wx.showToast({ title: '订阅授权失败', icon: 'none' })
+      }
     })
   },
   saveProfile() {

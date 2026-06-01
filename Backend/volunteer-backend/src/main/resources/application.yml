@@ -19,6 +19,19 @@ spring:
     multipart:
       max-file-size: 20MB
       max-request-size: 20MB
+  mail:
+    host: ${MAIL_HOST:}
+    port: ${MAIL_PORT:587}
+    username: ${MAIL_USERNAME:}
+    password: ${MAIL_PASSWORD:}
+    protocol: smtp
+    properties:
+      mail:
+        smtp:
+          auth: ${MAIL_SMTP_AUTH:true}
+          starttls:
+            enable: ${MAIL_SMTP_STARTTLS_ENABLE:true}
+            required: ${MAIL_SMTP_STARTTLS_REQUIRED:false}
 
 app:
   auth:
@@ -44,6 +57,9 @@ app:
     appid: ${WECHAT_MINIAPP_APPID:wx0a33c2af7b3e97e8}
     secret: ${WECHAT_MINIAPP_SECRET:}
     activity-reminder-template-id: ${WECHAT_ACTIVITY_REMINDER_TEMPLATE_ID:3MyIDa1qmvqiDyydT6aQrnCrYrKvz8aq92raqwL0Qq4}
+  mail:
+    enabled: ${ACTIVITY_MAIL_ENABLED:true}
+    from: ${ACTIVITY_MAIL_FROM:${MAIL_USERNAME:}}
   rag:
     vector:
       url: ${RAG_VECTOR_DATASOURCE_URL:jdbc:postgresql://localhost:5432/volunteer_rag}

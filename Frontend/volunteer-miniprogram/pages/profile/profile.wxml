@@ -83,6 +83,15 @@
   <view class="section" wx:if="{{!isAdmin}}">
     <view class="section-title">活动提醒设置</view>
     <view class="reminder-status">{{subscriptionEnabled ? '已开启关注类型提醒' : '未开启活动提醒'}}</view>
+    <view class="reminder-channel">
+      <text>微信提醒</text>
+      <switch checked="{{wechatReminderEnabled}}" bindchange="toggleWechatReminder" color="#0f766e" />
+    </view>
+    <view class="reminder-channel">
+      <text>邮箱提醒</text>
+      <switch checked="{{emailReminderEnabled}}" bindchange="toggleEmailReminder" color="#0f766e" />
+    </view>
+    <input wx:if="{{emailReminderEnabled}}" class="email-input" placeholder="请输入接收提醒的邮箱" value="{{reminderEmail}}" bindinput="inputReminderEmail" />
     <view class="category-grid">
       <view wx:for="{{activityCategoryOptions}}" wx:key="name" class="category-option {{item.selected ? 'active' : ''}}" data-category="{{item.name}}" bindtap="toggleActivityCategory">{{item.name}}</view>
     </view>

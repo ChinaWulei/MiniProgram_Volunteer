@@ -22,6 +22,10 @@ function auditText(status) {
   return map[status] || ''
 }
 
+function formatTime(value) {
+  return value ? String(value).replace('T', ' ').slice(0, 16) : ''
+}
+
 function normalize(item) {
   const checkinStatus = item.checkin_status || item.checkinStatus
   const auditStatus = item.adjustment_status || item.adjustmentStatus
@@ -29,6 +33,8 @@ function normalize(item) {
     checkinStatus,
     checkinStatusText: statusText(checkinStatus),
     adjustmentStatusText: auditText(auditStatus),
+    startTimeText: formatTime(item.start_time || item.startTime),
+    endTimeText: formatTime(item.end_time || item.endTime),
     canApplyAdjustment: ['ABSENT', 'LATE_CHECKED_IN'].indexOf(checkinStatus) >= 0 && auditStatus !== 'PENDING' && auditStatus !== 'APPROVED'
   })
 }

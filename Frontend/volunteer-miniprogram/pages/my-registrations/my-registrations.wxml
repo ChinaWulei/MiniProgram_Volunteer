@@ -6,7 +6,7 @@
         <view class="tag">{{item.status}}</view>
       </view>
       <view class="muted">{{item.category}} · {{item.location}}</view>
-      <view class="muted">{{item.start_time}} 至 {{item.end_time}}</view>
+      <view class="muted">{{item.startTimeText}} 至 {{item.endTimeText}}</view>
       <view class="muted" wx:if="{{item.service_hours}}">服务时长：{{item.service_hours}} 小时</view>
       <view class="checkin-line {{item.checkinStatus}}">
         签到状态：{{item.checkinStatusText}}

@@ -247,15 +247,31 @@ public class AiChatServiceImpl implements AiChatService {
                 .filter(item -> !item.isBlank())
                 .distinct()
                 .collect(Collectors.toList());
+        List<String> historyDomains = history.stream()
+                .map(item -> safeText(String.valueOf(item.getOrDefault("activity_name", ""))) + " "
+                        + safeText(String.valueOf(item.getOrDefault("category", ""))))
+                .map(this::topicOf)
+                .filter(item -> !item.isBlank())
+                .distinct()
+                .collect(Collectors.toList());
         ActivityRequestCriteria criteria = parseCriteria(message);
-        return activityMapper.availableForAi().stream()
+        List<AiActivityCandidateVO> matched = activityMapper.availableForAi().stream()
                 .filter(activity -> matchesCriteria(activity, criteria))
-                .peek(activity -> score(activity, message, profile, userSkills, historyCategories, criteria))
                 .filter(activity -> activity.getRemainingSlots() != null && activity.getRemainingSlots() > 0)
+                .peek(activity -> score(activity, message, profile, userSkills, historyCategories, historyDomains, criteria))
                 .sorted(Comparator.comparing(AiActivityCandidateVO::getScore).reversed()
                         .thenComparing(AiActivityCandidateVO::getStartTime))
-                .limit(10)
                 .collect(Collectors.toList());
+        if (criteria.preferNewCategory) {
+            List<AiActivityCandidateVO> freshCategories = matched.stream()
+                    .filter(activity -> isNewDomain(activity, historyCategories, historyDomains))
+                    .limit(10)
+                    .collect(Collectors.toList());
+            if (!freshCategories.isEmpty()) {
+                return freshCategories;
+            }
+        }
+        return matched.stream().limit(10).collect(Collectors.toList());
     }
 
     private ActivityRequestCriteria parseCriteria(String message) {
@@ -266,7 +282,7 @@ public class AiChatServiceImpl implements AiChatService {
                     请把用户的志愿活动推荐需求解析为结构化条件，只输出JSON，不要markdown。
                     可选topic值：COMPETITION, ENVIRONMENT, WELCOME, ACADEMIC, COMMUNITY, PROGRAMMING, LOGISTICS, GUIDE, ANY。
                     字段：
-                    {"topic":"主题或ANY","keywords":["用户关心的关键词"],"excludeTopics":["明确不想要的主题"],"timePreference":"周末/工作日/上午/下午/晚上/不限","skillPreference":["技能偏好"]}
+                    {"topic":"主题或ANY","keywords":["用户关心的关键词"],"excludeTopics":["明确不想要的主题"],"timePreference":"周末/工作日/上午/下午/晚上/不限","skillPreference":["技能偏好"],"preferNewCategory":true/false}
                     语义说明：
                     COMPETITION 包含比赛、竞赛、赛事、赛务、运动会、评比、挑战赛等说法。
                     ENVIRONMENT 包含环保、低碳、垃圾分类、清洁、绿色校园等说法。
@@ -274,6 +290,7 @@ public class AiChatServiceImpl implements AiChatService {
                     ACADEMIC 包含讲座、论坛、会议、学术活动等说法。
                     COMMUNITY 包含社区、助老、公益服务等说法。
                     PROGRAMMING 包含编程、程序设计、机房技术支持、代码等说法。
+                    当用户表达新领域、未尝试、没参加过、换个类型、不想和以前类似时，preferNewCategory 为 true。
 
                     用户需求：%s
                     """.formatted(message);
@@ -286,6 +303,12 @@ public class AiChatServiceImpl implements AiChatService {
             String timePreference = text(parsed.get("timePreference"));
             if (!timePreference.isBlank() && !"不限".equals(timePreference)) criteria.timePreference = timePreference;
             criteria.skillPreference.addAll(listValue(parsed.get("skillPreference")));
+            String preferNewCategory = text(parsed.get("preferNewCategory"));
+            if (parsed.get("preferNewCategory") instanceof Boolean booleanValue) {
+                criteria.preferNewCategory = booleanValue;
+            } else if ("true".equalsIgnoreCase(preferNewCategory)) {
+                criteria.preferNewCategory = true;
+            }
         } catch (Exception e) {
             log.warn("Activity recommend criteria parse failed: {}", e.getMessage());
         }
@@ -302,6 +325,10 @@ public class AiChatServiceImpl implements AiChatService {
         else if (containsAny(message, "编程", "程序设计", "代码", "机房", "技术支持")) criteria.topic = "PROGRAMMING";
         else if (containsAny(message, "讲解", "引导", "介绍")) criteria.topic = "GUIDE";
         else if (containsAny(message, "搬运", "物资", "后勤")) criteria.topic = "LOGISTICS";
+        if (containsAny(message, "新领域", "新类型", "新的类型", "没尝试", "未尝试", "没参加过", "未参加过", "没做过", "未做过",
+                "不一样", "不同类型", "换个类型", "换一种", "拓展", "别和以前类似", "不要类似")) {
+            criteria.preferNewCategory = true;
+        }
         if (containsAny(message, "周末")) criteria.timePreference = "周末";
         else if (containsAny(message, "工作日")) criteria.timePreference = "工作日";
         else if (containsAny(message, "上午")) criteria.timePreference = "上午";
@@ -337,6 +364,26 @@ public class AiChatServiceImpl implements AiChatService {
         };
     }
 
+    private String topicOf(AiActivityCandidateVO activity) {
+        String text = safeText(activity.getName()) + " "
+                + safeText(activity.getCategory()) + " "
+                + safeText(activity.getDescription()) + " "
+                + safeText(activity.getSkillRequirements());
+        return topicOf(text);
+    }
+
+    private String topicOf(String text) {
+        if (containsAny(text, "比赛", "竞赛", "赛事", "赛务", "运动会", "赛事保障", "挑战赛", "评比", "蓝桥杯")) return "COMPETITION";
+        if (containsAny(text, "环保", "环境保护", "垃圾分类", "低碳", "清洁校园", "绿色校园")) return "ENVIRONMENT";
+        if (containsAny(text, "迎新", "新生报到", "新生接待", "报到引导")) return "WELCOME";
+        if (containsAny(text, "学术", "讲座", "会议", "论坛")) return "ACADEMIC";
+        if (containsAny(text, "社区", "敬老", "助老", "公益")) return "COMMUNITY";
+        if (containsAny(text, "编程", "程序设计", "代码", "机房", "技术支持")) return "PROGRAMMING";
+        if (containsAny(text, "讲解", "引导", "介绍", "路线")) return "GUIDE";
+        if (containsAny(text, "搬运", "物资", "后勤", "保障")) return "LOGISTICS";
+        return "";
+    }
+
     private boolean matchesTimePreference(AiActivityCandidateVO activity, String preference) {
         if (activity.getStartTime() == null) return true;
         return switch (preference) {
@@ -362,7 +409,8 @@ public class AiChatServiceImpl implements AiChatService {
     }
 
     private void score(AiActivityCandidateVO activity, String message, UserProfileVO profile,
-                       List<String> userSkills, List<String> historyCategories, ActivityRequestCriteria criteria) {
+                       List<String> userSkills, List<String> historyCategories, List<String> historyDomains,
+                       ActivityRequestCriteria criteria) {
         int score = 0;
         List<String> reasons = new ArrayList<>();
         String skills = activity.getSkillRequirements() == null ? "" : activity.getSkillRequirements();
@@ -377,7 +425,14 @@ public class AiChatServiceImpl implements AiChatService {
             score += 25;
             reasons.add("时间与你的可服务时间较匹配");
         }
-        if (historyCategories.contains(activity.getCategory())) {
+        if (criteria.preferNewCategory) {
+            if (isNewDomain(activity, historyCategories, historyDomains)) {
+                score += 45;
+                reasons.add("这是你未尝试过的活动类型");
+            } else {
+                score -= 30;
+            }
+        } else if (historyCategories.contains(activity.getCategory())) {
             score += 15;
             reasons.add("你曾参加过类似类型活动");
         }
@@ -404,6 +459,14 @@ public class AiChatServiceImpl implements AiChatService {
         }
         activity.setScore(score);
         activity.setReason(reasons.isEmpty() ? "活动仍有名额，适合进一步查看详情" : String.join("，", reasons));
+    }
+
+    private boolean isNewDomain(AiActivityCandidateVO activity, List<String> historyCategories, List<String> historyDomains) {
+        String category = activity.getCategory();
+        String topic = topicOf(activity);
+        boolean categoryIsNew = category == null || category.isBlank() || !historyCategories.contains(category);
+        boolean topicIsNew = topic.isBlank() || !historyDomains.contains(topic);
+        return categoryIsNew && topicIsNew;
     }
 
     private String sanitizeJson(String text) {
@@ -439,6 +502,7 @@ public class AiChatServiceImpl implements AiChatService {
     private static class ActivityRequestCriteria {
         private String topic;
         private String timePreference;
+        private boolean preferNewCategory;
         private final List<String> keywords = new ArrayList<>();
         private final List<String> excludeTopics = new ArrayList<>();
         private final List<String> skillPreference = new ArrayList<>();

@@ -152,6 +152,20 @@ public class RegistrationMapper {
         return adminList(null, null, activityId);
     }
 
+    public List<Long> participantUserIds(Long activityId, String scope) {
+        String normalized = scope == null || scope.isBlank() ? "APPROVED" : scope.trim().toUpperCase();
+        String statusSql = switch (normalized) {
+            case "ALL" -> "";
+            case "COMPLETED" -> " and status='已完成'";
+            default -> " and status in ('已通过','已完成')";
+        };
+        return jdbcTemplate.queryForList("""
+                select distinct user_id
+                from registration
+                where activity_id=?
+                """ + statusSql, Long.class, activityId);
+    }
+
     public Map<String, Object> findMap(Long id) {
         return jdbcTemplate.queryForMap("select * from registration where id=?", id);
     }

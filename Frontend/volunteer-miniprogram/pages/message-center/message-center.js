@@ -76,7 +76,8 @@ Page({
               : item.type === 'ANNOUNCEMENT' ? '公告通知'
                 : item.type === 'ACTIVITY_SUBSCRIBE' ? '活动提醒'
                   : item.type === 'ACTIVITY_REVIEW_REMINDER' ? '评价与参与经验提醒'
-                    : '系统通知',
+                    : item.type === 'ACTIVITY_NOTICE' ? '活动通知'
+                      : '系统通知',
           title: item.title,
           summary: item.content,
           targetType: item.targetType,

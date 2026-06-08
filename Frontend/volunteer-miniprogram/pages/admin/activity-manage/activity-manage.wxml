@@ -33,6 +33,7 @@
         <button class="edit" bindtap="edit" data-id="{{item.id}}">编辑</button>
         <button bindtap="checkin" data-id="{{item.id}}">签到</button>
         <button bindtap="feedback" data-id="{{item.id}}">评价</button>
+        <button bindtap="openNotice" data-id="{{item.id}}">通知</button>
         <button bindtap="finish" data-id="{{item.id}}">结束</button>
         <button wx:if="{{item.status === '已结束'}}" bindtap="summary" data-id="{{item.id}}">总结</button>
         <button class="danger" bindtap="remove" data-id="{{item.id}}">删除</button>
@@ -89,5 +90,20 @@
       </view>
       <view wx:if="{{feedbackList.length === 0}}" class="feedback-empty">暂无志愿者评价</view>
     </scroll-view>
+  </view>
+
+  <view wx:if="{{showNotice}}" class="mask" bindtap="closeNotice"></view>
+  <view wx:if="{{showNotice}}" class="notice-panel" catchtap="stopTap">
+    <view class="summary-title">发布活动通知</view>
+    <view class="notice-activity">{{noticeActivity.title || noticeActivity.name}}</view>
+    <input placeholder="通知标题" value="{{noticeForm.title}}" data-key="title" bindinput="inputNotice" maxlength="60" />
+    <textarea placeholder="请输入要发送给该活动志愿者的通知内容，例如集合地点变更、物资准备、活动流程提醒等" value="{{noticeForm.content}}" data-key="content" bindinput="inputNotice" maxlength="400"></textarea>
+    <picker mode="selector" range="{{noticeScopes}}" range-key="label" value="{{noticeScopeIndex}}" bindchange="pickNoticeScope">
+      <view class="notice-scope">接收范围：{{noticeScopeLabel}}</view>
+    </picker>
+    <view class="notice-actions">
+      <button bindtap="closeNotice">取消</button>
+      <button class="edit" bindtap="sendNotice" loading="{{noticeSending}}">发送</button>
+    </view>
   </view>
 </view>

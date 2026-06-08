@@ -49,3 +49,11 @@ button::after { border: 0; }
 .feedback-target { margin-top: 6rpx; color: #98a2b3; font-size: 21rpx; }
 .feedback-content { margin-top: 12rpx; color: #475467; font-size: 24rpx; line-height: 1.55; }
 .feedback-empty { padding: 80rpx 0; color: #98a2b3; text-align: center; font-size: 25rpx; }
+.notice-panel { position: fixed; left: 24rpx; right: 24rpx; bottom: 32rpx; z-index: 41; padding: 24rpx; border-radius: 20rpx; background: #fff; box-sizing: border-box; }
+.notice-activity { margin-bottom: 16rpx; color: #667085; font-size: 24rpx; }
+.notice-panel input, .notice-panel textarea { width: 100%; margin-top: 14rpx; padding: 18rpx; border-radius: 16rpx; background: #f8fbfb; box-sizing: border-box; color: #172033; font-size: 25rpx; }
+.notice-panel textarea { min-height: 220rpx; line-height: 1.55; }
+.notice-scope { margin-top: 14rpx; padding: 18rpx; border-radius: 16rpx; color: #0f766e; background: #eefaf7; font-size: 24rpx; }
+.notice-actions { display: flex; gap: 14rpx; margin-top: 18rpx; }
+.notice-actions button { flex: 1; height: 68rpx; line-height: 68rpx; margin: 0; border-radius: 16rpx; color: #0f766e; background: #eefaf7; font-size: 25rpx; }
+.notice-actions .edit { color: #fff; background: #0f766e; }

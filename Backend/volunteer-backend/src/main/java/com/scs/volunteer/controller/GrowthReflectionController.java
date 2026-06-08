@@ -120,10 +120,11 @@ public class GrowthReflectionController extends BaseController {
                 try {
                     String answer = aiModelClient.chat("""
                             请基于以下真实成长感悟，生成“往届志愿者经验”，输出3到5条简洁建议，不得编造。
+                            只输出建议列表，不要输出“基于真实成长感悟”“根据反馈整理”等说明性开头。
                             活动：%s，类型：%s
                             感悟：%s
                             """.formatted(activity.getName(), activity.getCategory(), items));
-                    if (answer != null && !answer.isBlank()) advice = answer.trim();
+                    if (answer != null && !answer.isBlank()) advice = cleanAdviceText(answer);
                 } catch (Exception ignored) {
                     advice = fallbackAdvice(items);
                 }
@@ -187,6 +188,20 @@ public class GrowthReflectionController extends BaseController {
                 .map(value -> "- " + value)
                 .limit(5).collect(Collectors.joining("\n"));
         return advice.isBlank() ? "暂无往届志愿者经验" : advice;
+    }
+
+    private String cleanAdviceText(String text) {
+        String cleaned = text == null ? "" : text.trim();
+        cleaned = cleaned
+                .replace("基于你的真实感悟，", "")
+                .replace("基于你的真实感悟：", "")
+                .replace("基于以下真实成长感悟，", "")
+                .replace("基于以下真实成长感悟：", "")
+                .replace("根据往届志愿者反馈整理：", "")
+                .replace("往届志愿者经验：", "")
+                .trim();
+        cleaned = cleaned.replaceFirst("^(?i)based on[^\\n:：]*[:：]?\\s*", "");
+        return cleaned.isBlank() ? "暂无往届志愿者经验" : cleaned;
     }
 
     private String matchToken(Activity activity) {

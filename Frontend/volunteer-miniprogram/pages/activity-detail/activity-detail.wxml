@@ -55,6 +55,7 @@
 
   <view wx:if="{{growthAdvice}}" class="detail-section">
     <view class="section-title">往届志愿者经验</view>
+    <view class="muted">根据往届志愿者反馈整理，仅供参考</view>
     <view class="paragraph pre">{{growthAdvice}}</view>
   </view>
 

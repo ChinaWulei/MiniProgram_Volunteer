@@ -27,6 +27,7 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -255,8 +256,10 @@ public class AiChatServiceImpl implements AiChatService {
                 .filter(item -> !item.isBlank())
                 .distinct()
                 .collect(Collectors.toList());
+        ActivityRequestCriteria criteria = parseCriteria(message);
         return activityMapper.availableForAi().stream()
-                .peek(activity -> score(activity, message, profile, userSkills, historyCategories))
+                .filter(activity -> matchesCriteria(activity, criteria))
+                .peek(activity -> score(activity, message, profile, userSkills, historyCategories, criteria))
                 .filter(activity -> activity.getRemainingSlots() != null && activity.getRemainingSlots() > 0)
                 .sorted(Comparator.comparing(AiActivityCandidateVO::getScore).reversed()
                         .thenComparing(AiActivityCandidateVO::getStartTime))
@@ -264,8 +267,111 @@ public class AiChatServiceImpl implements AiChatService {
                 .collect(Collectors.toList());
     }
 
+    private ActivityRequestCriteria parseCriteria(String message) {
+        ActivityRequestCriteria criteria = keywordCriteria(message);
+        if (!aiModelClient.available()) return criteria;
+        try {
+            String prompt = """
+                    请把用户的志愿活动推荐需求解析为结构化条件，只输出JSON，不要markdown。
+                    可选topic值：COMPETITION, ENVIRONMENT, WELCOME, ACADEMIC, COMMUNITY, PROGRAMMING, LOGISTICS, GUIDE, ANY。
+                    字段：
+                    {"topic":"主题或ANY","keywords":["用户关心的关键词"],"excludeTopics":["明确不想要的主题"],"timePreference":"周末/工作日/上午/下午/晚上/不限","skillPreference":["技能偏好"]}
+                    语义说明：
+                    COMPETITION 包含比赛、竞赛、赛事、赛务、运动会、评比、挑战赛等说法。
+                    ENVIRONMENT 包含环保、低碳、垃圾分类、清洁、绿色校园等说法。
+                    WELCOME 包含迎新、新生接待、报到引导等说法。
+                    ACADEMIC 包含讲座、论坛、会议、学术活动等说法。
+                    COMMUNITY 包含社区、助老、公益服务等说法。
+                    PROGRAMMING 包含编程、程序设计、机房技术支持、代码等说法。
+
+                    用户需求：%s
+                    """.formatted(message);
+            String json = sanitizeJson(aiModelClient.chat(prompt));
+            Map<String, Object> parsed = parseSimpleJson(json);
+            String topic = text(parsed.get("topic")).toUpperCase();
+            if (criteria.topic == null && !topic.isBlank() && !"ANY".equals(topic)) criteria.topic = topic;
+            criteria.keywords.addAll(listValue(parsed.get("keywords")));
+            criteria.excludeTopics.addAll(listValue(parsed.get("excludeTopics")));
+            String timePreference = text(parsed.get("timePreference"));
+            if (!timePreference.isBlank() && !"不限".equals(timePreference)) criteria.timePreference = timePreference;
+            criteria.skillPreference.addAll(listValue(parsed.get("skillPreference")));
+        } catch (Exception e) {
+            log.warn("Activity recommend criteria parse failed: {}", e.getMessage());
+        }
+        return criteria;
+    }
+
+    private ActivityRequestCriteria keywordCriteria(String message) {
+        ActivityRequestCriteria criteria = new ActivityRequestCriteria();
+        if (containsAny(message, "比赛", "竞赛", "赛事", "赛务", "运动会", "挑战赛", "评比")) criteria.topic = "COMPETITION";
+        else if (containsAny(message, "环保", "环境保护", "垃圾分类", "低碳", "清洁校园", "绿色校园")) criteria.topic = "ENVIRONMENT";
+        else if (containsAny(message, "迎新", "新生报到", "新生接待", "报到引导")) criteria.topic = "WELCOME";
+        else if (containsAny(message, "学术", "讲座", "会议", "论坛")) criteria.topic = "ACADEMIC";
+        else if (containsAny(message, "社区", "敬老", "助老", "公益")) criteria.topic = "COMMUNITY";
+        else if (containsAny(message, "编程", "程序设计", "代码", "机房", "技术支持")) criteria.topic = "PROGRAMMING";
+        else if (containsAny(message, "讲解", "引导", "介绍")) criteria.topic = "GUIDE";
+        else if (containsAny(message, "搬运", "物资", "后勤")) criteria.topic = "LOGISTICS";
+        if (containsAny(message, "周末")) criteria.timePreference = "周末";
+        else if (containsAny(message, "工作日")) criteria.timePreference = "工作日";
+        else if (containsAny(message, "上午")) criteria.timePreference = "上午";
+        else if (containsAny(message, "下午")) criteria.timePreference = "下午";
+        else if (containsAny(message, "晚上")) criteria.timePreference = "晚上";
+        return criteria;
+    }
+
+    private boolean matchesCriteria(AiActivityCandidateVO activity, ActivityRequestCriteria criteria) {
+        if (criteria.topic != null && !matchesTopic(activity, criteria.topic)) return false;
+        for (String excludeTopic : criteria.excludeTopics) {
+            if (matchesTopic(activity, excludeTopic)) return false;
+        }
+        if (criteria.timePreference != null && !matchesTimePreference(activity, criteria.timePreference)) return false;
+        return true;
+    }
+
+    private boolean matchesTopic(AiActivityCandidateVO activity, String topic) {
+        String text = safeText(activity.getName()) + " "
+                + safeText(activity.getCategory()) + " "
+                + safeText(activity.getDescription()) + " "
+                + safeText(activity.getSkillRequirements());
+        return switch (topic) {
+            case "COMPETITION" -> containsAny(text, "比赛", "竞赛", "赛事", "赛务", "运动会", "赛事保障", "挑战赛", "评比");
+            case "ENVIRONMENT" -> containsAny(text, "环保", "环境保护", "垃圾分类", "低碳", "清洁校园");
+            case "WELCOME" -> containsAny(text, "迎新", "新生报到", "新生接待");
+            case "ACADEMIC" -> containsAny(text, "学术", "讲座", "会议", "论坛");
+            case "COMMUNITY" -> containsAny(text, "社区", "敬老", "助老", "公益");
+            case "PROGRAMMING" -> containsAny(text, "编程", "程序设计", "代码", "机房");
+            case "GUIDE" -> containsAny(text, "讲解", "引导", "介绍", "路线");
+            case "LOGISTICS" -> containsAny(text, "搬运", "物资", "后勤", "保障");
+            default -> true;
+        };
+    }
+
+    private boolean matchesTimePreference(AiActivityCandidateVO activity, String preference) {
+        if (activity.getStartTime() == null) return true;
+        return switch (preference) {
+            case "周末" -> isWeekend(activity);
+            case "工作日" -> !isWeekend(activity);
+            case "上午" -> activity.getStartTime().getHour() < 12;
+            case "下午" -> activity.getStartTime().getHour() >= 12 && activity.getStartTime().getHour() < 18;
+            case "晚上" -> activity.getStartTime().getHour() >= 18;
+            default -> true;
+        };
+    }
+
+    private boolean containsAny(String text, String... keywords) {
+        if (text == null) return false;
+        for (String keyword : keywords) {
+            if (text.contains(keyword)) return true;
+        }
+        return false;
+    }
+
+    private String safeText(String value) {
+        return value == null ? "" : value;
+    }
+
     private void score(AiActivityCandidateVO activity, String message, UserProfileVO profile,
-                       List<String> userSkills, List<String> historyCategories) {
+                       List<String> userSkills, List<String> historyCategories, ActivityRequestCriteria criteria) {
         int score = 0;
         List<String> reasons = new ArrayList<>();
         String skills = activity.getSkillRequirements() == null ? "" : activity.getSkillRequirements();
@@ -284,6 +390,16 @@ public class AiChatServiceImpl implements AiChatService {
             score += 15;
             reasons.add("你曾参加过类似类型活动");
         }
+        if (criteria.topic != null) {
+            score += 50;
+            reasons.add("活动主题符合你的需求");
+        }
+        for (String skill : criteria.skillPreference) {
+            if (!skill.isBlank() && skills.contains(skill)) {
+                score += 20;
+                reasons.add("符合你提到的" + skill + "偏好");
+            }
+        }
         if (message.contains("周末") && isWeekend(activity)) {
             score += 25;
             reasons.add("这是周末活动");
@@ -297,6 +413,44 @@ public class AiChatServiceImpl implements AiChatService {
         }
         activity.setScore(score);
         activity.setReason(reasons.isEmpty() ? "活动仍有名额，适合进一步查看详情" : String.join("，", reasons));
+    }
+
+    private String sanitizeJson(String text) {
+        String value = text == null ? "" : text.trim();
+        if (value.startsWith("```")) {
+            value = value.replaceFirst("^```(?:json)?\\s*", "").replaceFirst("\\s*```$", "");
+        }
+        int start = value.indexOf('{');
+        int end = value.lastIndexOf('}');
+        return start >= 0 && end > start ? value.substring(start, end + 1) : value;
+    }
+
+    private Map<String, Object> parseSimpleJson(String json) {
+        Map<String, Object> map = new LinkedHashMap<>();
+        if (json == null || json.isBlank()) return map;
+        try {
+            com.fasterxml.jackson.databind.ObjectMapper mapper = new com.fasterxml.jackson.databind.ObjectMapper();
+            return mapper.readValue(json, new com.fasterxml.jackson.core.type.TypeReference<>() {});
+        } catch (Exception e) {
+            return map;
+        }
+    }
+
+    private List<String> listValue(Object value) {
+        if (!(value instanceof List<?> list)) return new ArrayList<>();
+        return list.stream().map(String::valueOf).filter(item -> !item.isBlank() && !"null".equals(item)).collect(Collectors.toCollection(ArrayList::new));
+    }
+
+    private String text(Object value) {
+        return value == null ? "" : String.valueOf(value).trim();
+    }
+
+    private static class ActivityRequestCriteria {
+        private String topic;
+        private String timePreference;
+        private final List<String> keywords = new ArrayList<>();
+        private final List<String> excludeTopics = new ArrayList<>();
+        private final List<String> skillPreference = new ArrayList<>();
     }
 
     private boolean matchesAvailableTime(String availableTime, AiActivityCandidateVO activity) {

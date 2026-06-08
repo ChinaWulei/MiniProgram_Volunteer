@@ -34,7 +34,8 @@ public class IntentRouterServiceImpl implements IntentRouterService {
         if (containsAny(text, "月总结", "本月", "这个月", "月度", "志愿情况", "成长报告")) {
             return AiIntent.MONTHLY_REPORT;
         }
-        if (containsAny(text, "推荐", "适合参加什么", "参加什么活动", "推荐几个", "找活动", "可报名活动")) {
+        if (containsAny(text, "推荐", "适合参加什么", "参加什么活动", "推荐几个", "找活动", "可报名活动",
+                "给我", "有没有活动", "有什么活动", "想参加", "关于比赛的活动", "关于竞赛的活动")) {
             return AiIntent.ACTIVITY_RECOMMEND;
         }
         if (containsAny(text, "我报名", "报名了哪些", "多少时长", "志愿时长", "积分", "等级", "服务次数", "个人数据", "我的活动")) {

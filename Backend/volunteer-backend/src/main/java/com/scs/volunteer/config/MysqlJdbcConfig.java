@@ -1,5 +1,6 @@
 package com.scs.volunteer.config;
 
+import com.zaxxer.hikari.HikariDataSource;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.autoconfigure.jdbc.DataSourceProperties;
 import org.springframework.boot.context.properties.ConfigurationProperties;
@@ -22,7 +23,11 @@ public class MysqlJdbcConfig {
     @Bean(name = "mysqlDataSource")
     @Primary
     public DataSource mysqlDataSource(@Qualifier("mysqlDataSourceProperties") DataSourceProperties mysqlDataSourceProperties) {
-        return mysqlDataSourceProperties.initializeDataSourceBuilder().build();
+        DataSource dataSource = mysqlDataSourceProperties.initializeDataSourceBuilder().build();
+        if (dataSource instanceof HikariDataSource hikariDataSource) {
+            hikariDataSource.setConnectionInitSql("set time_zone = '+08:00'");
+        }
+        return dataSource;
     }
 
     @Bean

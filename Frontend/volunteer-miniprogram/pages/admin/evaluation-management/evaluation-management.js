@@ -4,12 +4,7 @@ Page({
   data: {
     activities: [],
     keyword: '',
-    currentId: null,
-    currentName: '',
-    feedback: [],
-    averageScore: '0.0',
-    summaryText: '',
-    summaryLoading: false
+    loadingActivityId: null
   },
   onShow() {
     this.loadActivities()
@@ -31,15 +26,21 @@ Page({
     })
   },
   selectActivity(e) {
-    this.setData({
-      currentId: e.currentTarget.dataset.id,
-      currentName: e.currentTarget.dataset.name || '',
-      summaryText: ''
-    })
-    this.loadFeedback()
+    const id = Number(e.currentTarget.dataset.id)
+    const index = this.data.activities.findIndex(item => Number(item.id) === id)
+    if (index < 0) return
+    const activity = this.data.activities[index]
+    if (activity.expanded) {
+      this.setData({ [`activities[${index}].expanded`]: false })
+      return
+    }
+    this.setData({ [`activities[${index}].expanded`]: true })
+    if (activity.feedbackLoaded) return
+    this.loadFeedback(id, index)
   },
-  loadFeedback() {
-    request({ url: `/api/activities/${this.data.currentId}/evaluations` }).then(list => {
+  loadFeedback(activityId, index) {
+    this.setData({ loadingActivityId: activityId })
+    request({ url: `/api/activities/${activityId}/evaluations` }).then(list => {
       const feedback = (list || []).map(item => Object.assign({}, item, {
         targetText: item.targetType === 'VOLUNTEER'
           ? `志愿者${item.targetUserName ? `：${item.targetUserName}` : ''}`
@@ -49,15 +50,34 @@ Page({
       const activityFeedback = feedback.filter(item => item.canAdopt)
       const total = activityFeedback.reduce((s, i) => s + Number(i.score || 0), 0)
       this.setData({
-        feedback,
-        averageScore: activityFeedback.length ? (total / activityFeedback.length).toFixed(1) : '0.0'
+        [`activities[${index}].feedback`]: feedback,
+        [`activities[${index}].feedbackLoaded`]: true,
+        [`activities[${index}].averageScore`]: activityFeedback.length ? (total / activityFeedback.length).toFixed(1) : '0.0'
       })
-    })
+    }).finally(() => this.setData({ loadingActivityId: null }))
   },
-  summary() {
-    this.setData({ summaryLoading: true })
-    request({ url: `/api/activities/${this.data.currentId}/evaluations/feedback/ai-summary`, method: 'POST' })
-      .then(data => this.setData({ summaryText: data.summary || '' }))
-      .finally(() => this.setData({ summaryLoading: false }))
+  summary(e) {
+    const id = Number(e.currentTarget.dataset.id)
+    const index = this.data.activities.findIndex(item => Number(item.id) === id)
+    if (index < 0) return
+    this.setData({ [`activities[${index}].summaryLoading`]: true })
+    request({ url: `/api/activities/${id}/evaluations/feedback/ai-summary`, method: 'POST' })
+      .then(data => this.setData({
+        [`activities[${index}].summaryText`]: data.summary || '',
+        [`activities[${index}].summaryItems`]: this.formatSummary(data.summary || '')
+      }))
+      .finally(() => this.setData({ [`activities[${index}].summaryLoading`]: false }))
+  },
+  formatSummary(text) {
+    const raw = String(text || '').replace(/\r/g, '\n').trim()
+    if (!raw) return []
+    const normalized = raw
+      .replace(/(总体评价|整体满意度|主要亮点|主要优点|集中问题|主要问题|改进建议|典型反馈)[:：]/g, '\n$1：')
+      .replace(/([。；;])\s*(?=(总体评价|整体满意度|主要亮点|主要优点|集中问题|主要问题|改进建议|典型反馈)[:：])/g, '$1\n')
+    const lines = normalized.split('\n')
+      .map(item => item.replace(/^[-*•\d.、\s]+/, '').trim())
+      .filter(Boolean)
+    if (lines.length > 1) return lines
+    return raw.split(/[。；;]/).map(item => item.trim()).filter(Boolean)
   }
 })

@@ -4,27 +4,36 @@
     <button bindtap="loadActivities">搜索</button>
   </view>
 
-  <view class="activity" wx:for="{{activities}}" wx:key="id">
-    <view class="activity-main">
-      <view class="title">{{item.name}}</view>
-      <view class="meta">{{item.category}} · {{item.status}} · {{item.evaluationCount || 0}} 条评价</view>
-    </view>
-    <button class="view-btn" bindtap="selectActivity" data-id="{{item.id}}" data-name="{{item.name}}">查看评价</button>
-  </view>
-
-  <view wx:if="{{currentId}}" class="panel">
-    <view class="panel-title">{{currentName}} · 活动反馈均分 {{averageScore}} · 共 {{feedback.length}} 条评价</view>
-    <button class="primary" bindtap="summary" loading="{{summaryLoading}}">生成AI评价总结</button>
-    <view wx:if="{{summaryText}}" class="summary">{{summaryText}}</view>
-
-    <view class="feedback" wx:for="{{feedback}}" wx:key="id">
-      <view class="row"><text>{{item.evaluatorName}}</text><text>{{item.score}}分</text></view>
-      <view class="target">评价对象：{{item.targetText}}</view>
-      <view class="content">{{item.content}}</view>
-      <view wx:if="{{item.canAdopt}}" class="ai">活动评价内容：{{item.parsedOverall || '无'}}&#10;活动优点：{{item.parsedAdvantages || '无'}}&#10;活动不足：{{item.parsedProblems || '无'}}&#10;改进建议：{{item.parsedSuggestions || '无'}}</view>
-      <view wx:else class="admin-evaluation-tip">这是管理员对志愿者的履约评价。</view>
+  <view class="activity-card" wx:for="{{activities}}" wx:key="id">
+    <view class="activity">
+      <view class="activity-main">
+        <view class="title">{{item.name}}</view>
+        <view class="meta">{{item.category}} · {{item.status}} · {{item.evaluationCount || 0}} 条评价</view>
+      </view>
+      <button class="view-btn" bindtap="selectActivity" data-id="{{item.id}}">{{item.expanded ? '收起评价' : '查看评价'}}</button>
     </view>
 
-    <view wx:if="{{feedback.length === 0}}" class="empty">该活动暂无志愿者评价</view>
+    <view wx:if="{{item.expanded}}" class="panel">
+      <view class="panel-title">活动反馈均分 {{item.averageScore || '0.0'}} · 共 {{item.feedback.length || 0}} 条评价</view>
+      <button class="primary summary-btn" bindtap="summary" data-id="{{item.id}}" loading="{{item.summaryLoading}}">生成AI评价总结</button>
+      <view wx:if="{{item.summaryItems && item.summaryItems.length}}" class="summary">
+        <view class="summary-title">AI评价总结</view>
+        <view class="summary-line" wx:for="{{item.summaryItems}}" wx:for-item="line" wx:key="*this">
+          <text class="dot">•</text>
+          <text class="line-text">{{line}}</text>
+        </view>
+      </view>
+      <view wx:if="{{loadingActivityId === item.id}}" class="empty">评价加载中...</view>
+
+      <view class="feedback" wx:for="{{item.feedback}}" wx:for-item="fb" wx:key="id">
+        <view class="row"><text>{{fb.evaluatorName}}</text><text>{{fb.score}}分</text></view>
+        <view class="target">评价对象：{{fb.targetText}}</view>
+        <view class="content">{{fb.content}}</view>
+        <view wx:if="{{fb.canAdopt}}" class="ai">活动评价内容：{{fb.parsedOverall || '无'}}&#10;活动优点：{{fb.parsedAdvantages || '无'}}&#10;活动不足：{{fb.parsedProblems || '无'}}&#10;改进建议：{{fb.parsedSuggestions || '无'}}</view>
+        <view wx:else class="admin-evaluation-tip">这是管理员对志愿者的履约评价。</view>
+      </view>
+
+      <view wx:if="{{item.feedbackLoaded && (!item.feedback || item.feedback.length === 0)}}" class="empty">该活动暂无志愿者评价</view>
+    </view>
   </view>
 </view>

@@ -43,7 +43,7 @@ public class GrowthReflectionMapper {
                 select g.id,g.activity_id as activityId,g.content,g.anonymous,
                        g.parsed_gain as parsedGain,g.parsed_ability as parsedAbility,
                        g.parsed_experience as parsedExperience,g.parsed_advice as parsedAdvice,
-                       g.recommended,g.created_at as createdAt,a.name as activityName,a.category
+                       g.recommended as displayEnabled,g.created_at as createdAt,a.name as activityName,a.category
                 from volunteer_growth_reflection g join activity a on a.id=g.activity_id
                 where g.user_id=? order by g.created_at desc
                 """, userId);
@@ -54,7 +54,7 @@ public class GrowthReflectionMapper {
                 select g.id,g.activity_id as activityId,g.content,g.anonymous,
                        g.parsed_gain as parsedGain,g.parsed_ability as parsedAbility,
                        g.parsed_experience as parsedExperience,g.parsed_advice as parsedAdvice,
-                       g.recommended,g.created_at as createdAt,a.name as activityName,a.category,
+                       g.recommended as displayEnabled,g.created_at as createdAt,a.name as activityName,a.category,
                        if(g.anonymous=1,'匿名志愿者',u.name) as volunteerName
                 from volunteer_growth_reflection g
                 join activity a on a.id=g.activity_id join user u on u.id=g.user_id
@@ -63,12 +63,16 @@ public class GrowthReflectionMapper {
                 """, activityId, activityId);
     }
 
-    public void recommend(Long id, boolean recommended, Long adminId) {
+    public void setDisplayEnabled(Long id, boolean enabled, Long adminId) {
         jdbcTemplate.update("""
                 update volunteer_growth_reflection
                 set recommended=?,recommended_by=?,recommended_at=?
                 where id=?
-                """, recommended, recommended ? adminId : null, recommended ? LocalDateTime.now() : null, id);
+                """, enabled, enabled ? adminId : null, enabled ? LocalDateTime.now() : null, id);
+    }
+
+    public void delete(Long id) {
+        jdbcTemplate.update("delete from volunteer_growth_reflection where id=?", id);
     }
 
     public List<Map<String, Object>> recommended(Long activityId, String category, int limit) {

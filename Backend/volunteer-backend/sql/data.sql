@@ -41,21 +41,6 @@ create table if not exists activity_evaluation (
     unique key uk_activity_eval(activity_id,evaluator_id,target_type,target_user_id)
 ) comment='活动互评';
 
-create table if not exists activity_experience (
-    id bigint primary key auto_increment,
-    activity_id bigint not null,
-    evaluation_id bigint not null,
-    activity_category varchar(50) not null,
-    experience_type varchar(30) not null,
-    content varchar(500) not null,
-    enabled tinyint(1) not null default 1,
-    adopted_by bigint not null,
-    adopted_at datetime not null default current_timestamp,
-    updated_at datetime not null default current_timestamp on update current_timestamp,
-    unique key uk_experience_source(evaluation_id, experience_type),
-    key idx_experience_category_enabled(activity_category, enabled)
-) comment='活动评价经验库';
-
 create table if not exists volunteer_growth_reflection (
     id bigint primary key auto_increment,
     activity_id bigint not null,
@@ -178,7 +163,6 @@ truncate table announcement_attachment;
 truncate table announcement_image;
 truncate table announcement;
 truncate table rule_file;
-truncate table activity_experience;
 truncate table volunteer_growth_reflection;
 truncate table activity_evaluation;
 truncate table credit_record;

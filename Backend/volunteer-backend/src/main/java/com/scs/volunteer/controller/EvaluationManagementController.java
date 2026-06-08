@@ -4,7 +4,6 @@ import com.scs.volunteer.common.ApiResponse;
 import com.scs.volunteer.common.BizException;
 import com.scs.volunteer.common.CurrentUser;
 import com.scs.volunteer.mapper.EvaluationMapper;
-import com.scs.volunteer.service.ActivityExperienceService;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.web.bind.annotation.*;
 
@@ -14,11 +13,9 @@ import java.util.Map;
 @RestController
 public class EvaluationManagementController extends BaseController {
     private final EvaluationMapper evaluationMapper;
-    private final ActivityExperienceService activityExperienceService;
 
-    public EvaluationManagementController(EvaluationMapper evaluationMapper, ActivityExperienceService activityExperienceService) {
+    public EvaluationManagementController(EvaluationMapper evaluationMapper) {
         this.evaluationMapper = evaluationMapper;
-        this.activityExperienceService = activityExperienceService;
     }
 
     @GetMapping("/api/evaluations/my")
@@ -28,16 +25,4 @@ public class EvaluationManagementController extends BaseController {
         return ApiResponse.ok(evaluationMapper.my(user.getId()));
     }
 
-    @GetMapping("/api/admin/experiences")
-    public ApiResponse<List<Map<String, Object>>> experiences(HttpServletRequest request,
-                                                              @RequestParam(required = false) String category,
-                                                              @RequestParam(required = false) Boolean enabled) {
-        return ApiResponse.ok(activityExperienceService.list(category, enabled, currentUser(request)));
-    }
-
-    @PostMapping("/api/admin/experiences/{id}/enabled")
-    public ApiResponse<Void> enableExperience(HttpServletRequest request, @PathVariable Long id, @RequestBody Map<String, Object> body) {
-        activityExperienceService.setEnabled(id, Boolean.TRUE.equals(body.get("enabled")), currentUser(request));
-        return ApiResponse.ok(null);
-    }
 }

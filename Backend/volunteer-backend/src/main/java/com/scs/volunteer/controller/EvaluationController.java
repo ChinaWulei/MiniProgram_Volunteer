@@ -11,7 +11,6 @@ import com.scs.volunteer.mapper.ActivityMapper;
 import com.scs.volunteer.mapper.CreditMapper;
 import com.scs.volunteer.mapper.EvaluationMapper;
 import com.scs.volunteer.mapper.RegistrationMapper;
-import com.scs.volunteer.service.ActivityExperienceService;
 import com.scs.volunteer.service.AiModelClient;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.web.bind.annotation.*;
@@ -30,18 +29,16 @@ public class EvaluationController extends BaseController {
     private final CreditMapper creditMapper;
     private final AiModelClient aiModelClient;
     private final RegistrationMapper registrationMapper;
-    private final ActivityExperienceService activityExperienceService;
     private final ObjectMapper objectMapper;
 
     public EvaluationController(ActivityMapper activityMapper, EvaluationMapper evaluationMapper, CreditMapper creditMapper,
                                 AiModelClient aiModelClient, RegistrationMapper registrationMapper,
-                                ActivityExperienceService activityExperienceService, ObjectMapper objectMapper) {
+                                ObjectMapper objectMapper) {
         this.activityMapper = activityMapper;
         this.evaluationMapper = evaluationMapper;
         this.creditMapper = creditMapper;
         this.aiModelClient = aiModelClient;
         this.registrationMapper = registrationMapper;
-        this.activityExperienceService = activityExperienceService;
         this.objectMapper = objectMapper;
     }
 
@@ -85,18 +82,6 @@ public class EvaluationController extends BaseController {
         requireAdmin(request);
         activityMapper.findById(activityId).orElseThrow(() -> new BizException("活动不存在"));
         return ApiResponse.ok(evaluationMapper.feedbackByActivity(activityId));
-    }
-
-    @PostMapping("/{evaluationId}/adopt/{type}")
-    public ApiResponse<Void> adopt(@PathVariable Long evaluationId, @PathVariable String type, HttpServletRequest request) {
-        activityExperienceService.adopt(evaluationId, type, currentUser(request));
-        return ApiResponse.ok(null);
-    }
-
-    @DeleteMapping("/{evaluationId}/adopt/{type}")
-    public ApiResponse<Void> unadopt(@PathVariable Long evaluationId, @PathVariable String type, HttpServletRequest request) {
-        activityExperienceService.unadopt(evaluationId, type, currentUser(request));
-        return ApiResponse.ok(null);
     }
 
     @PostMapping("/feedback/ai-summary")

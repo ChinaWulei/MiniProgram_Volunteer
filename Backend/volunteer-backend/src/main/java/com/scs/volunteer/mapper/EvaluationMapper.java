@@ -44,7 +44,12 @@ public class EvaluationMapper {
 
     public List<Map<String, Object>> byActivity(Long activityId) {
         return jdbcTemplate.queryForList("""
-                select e.*,if(e.anonymous=1 and u.role='VOLUNTEER','匿名志愿者',u.name) as evaluatorName,
+                select e.id,e.activity_id as activityId,e.evaluator_id as evaluatorId,
+                       e.target_user_id as targetUserId,e.target_type as targetType,
+                       e.score,e.content,e.anonymous,e.created_at as createdAt,
+                       e.parsed_overall as parsedOverall,e.parsed_advantages as parsedAdvantages,
+                       e.parsed_problems as parsedProblems,e.parsed_suggestions as parsedSuggestions,
+                       if(e.anonymous=1 and u.role='VOLUNTEER','匿名志愿者',u.name) as evaluatorName,
                        if(e.anonymous=1 and u.role='VOLUNTEER',null,u.id) as evaluatorVisibleId,
                        tu.name as targetUserName,a.name as activityName,a.category
                 from activity_evaluation e

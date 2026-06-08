@@ -6,8 +6,6 @@ import com.scs.volunteer.common.BizException;
 import com.scs.volunteer.common.CurrentUser;
 import com.scs.volunteer.config.AiProperties;
 import com.scs.volunteer.dto.ActivityAiGenerateRequest;
-import com.scs.volunteer.mapper.GrowthReflectionMapper;
-import com.scs.volunteer.service.ActivityExperienceService;
 import com.scs.volunteer.service.ActivityAiGenerateService;
 import com.scs.volunteer.service.AiModelClient;
 import com.scs.volunteer.service.S3StorageService;
@@ -37,21 +35,15 @@ public class ActivityAiGenerateServiceImpl implements ActivityAiGenerateService 
     private final AiModelClient aiModelClient;
     private final AiProperties aiProperties;
     private final S3StorageService s3StorageService;
-    private final ActivityExperienceService activityExperienceService;
-    private final GrowthReflectionMapper growthReflectionMapper;
     private final ObjectMapper objectMapper;
     private final org.springframework.web.client.RestTemplate restTemplate = new org.springframework.web.client.RestTemplate();
 
     public ActivityAiGenerateServiceImpl(AiModelClient aiModelClient, AiProperties aiProperties,
-                                         S3StorageService s3StorageService, ObjectMapper objectMapper,
-                                         ActivityExperienceService activityExperienceService,
-                                         GrowthReflectionMapper growthReflectionMapper) {
+                                         S3StorageService s3StorageService, ObjectMapper objectMapper) {
         this.aiModelClient = aiModelClient;
         this.aiProperties = aiProperties;
         this.s3StorageService = s3StorageService;
         this.objectMapper = objectMapper;
-        this.activityExperienceService = activityExperienceService;
-        this.growthReflectionMapper = growthReflectionMapper;
     }
 
     @Override
@@ -258,8 +250,6 @@ public class ActivityAiGenerateServiceImpl implements ActivityAiGenerateService 
 
     private String buildTextPrompt(ActivityAiGenerateRequest request, String mode) throws JsonProcessingException {
         String category = inferCategory(request);
-        List<Map<String, Object>> experiences = activityExperienceService.enabledByCategory(category, 12);
-        List<Map<String, Object>> growthExperiences = growthReflectionMapper.recommended(null, category, 8);
         return """
                 你是校园志愿服务平台的活动策划助手。请基于管理员输入和当前表单内容生成活动发布表单 JSON。
 
@@ -272,23 +262,16 @@ public class ActivityAiGenerateServiceImpl implements ActivityAiGenerateService 
                 系统识别的活动类型：
                 %s
 
-                经验库参考：
-                %s
-
-                优秀成长感悟参考：
-                %s
-
                 生成模式：%s
 
                 要求：
                 1. 内容必须符合校园志愿活动场景，安全合规，不生成违规内容。
                 2. 内容自然真实，活动简介不要过短，报名要求和注意事项要具体。
                 3. 技能标签尽量合理，招募人数和服务时长要符合活动规模。
-                4. 必须吸收经验库中的有效经验，尤其体现在报名要求、注意事项、现场组织安排中。
-                5. 不允许编造真实不存在的学校、机构、具体政策或联系人。
-                6. 输出必须是 JSON 对象，不要 markdown，不要解释文字。
-                7. FULL 模式输出全部字段；DESCRIPTION 只优化 description；SKILLS 只推荐 skills。
-                8. JSON 字段固定为：
+                4. 不允许编造真实不存在的学校、机构、具体政策或联系人。
+                5. 输出必须是 JSON 对象，不要 markdown，不要解释文字。
+                6. FULL 模式输出全部字段；DESCRIPTION 只优化 description；SKILLS 只推荐 skills。
+                7. JSON 字段固定为：
                 {
                   "title": "活动标题",
                   "category": "活动类型",
@@ -301,7 +284,7 @@ public class ActivityAiGenerateServiceImpl implements ActivityAiGenerateService 
                   "coverUrl": ""
                 }
                 """.formatted(request.getPrompt(), objectMapper.writeValueAsString(request), category,
-                experienceText(experiences), growthText(growthExperiences), mode);
+                mode);
     }
 
     private String inferCategory(ActivityAiGenerateRequest request) {
@@ -312,24 +295,6 @@ public class ActivityAiGenerateServiceImpl implements ActivityAiGenerateService 
         if (text.contains("会议") || text.contains("讲座") || text.contains("学术")) return "学术会议活动";
         if (text.contains("校园")) return "校园服务活动";
         return null;
-    }
-
-    private String experienceText(List<Map<String, Object>> experiences) {
-        if (experiences == null || experiences.isEmpty()) {
-            return "暂无相关经验";
-        }
-        return experiences.stream()
-                .map(item -> "- " + item.get("content"))
-                .collect(java.util.stream.Collectors.joining("\n"));
-    }
-
-    private String growthText(List<Map<String, Object>> growthExperiences) {
-        if (growthExperiences == null || growthExperiences.isEmpty()) {
-            return "暂无优秀成长感悟";
-        }
-        return growthExperiences.stream()
-                .map(item -> "- " + nullToEmpty(String.valueOf(item.get("content"))))
-                .collect(java.util.stream.Collectors.joining("\n"));
     }
 
     private String buildImagePrompt(ActivityAiGenerateVO vo, String userPrompt) {

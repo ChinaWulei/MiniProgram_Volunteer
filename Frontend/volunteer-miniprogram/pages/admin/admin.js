@@ -135,7 +135,6 @@ Page({
   checkinAdjustments() { wx.navigateTo({ url: '/pages/admin/checkin-adjustments/checkin-adjustments' }) },
   evaluationManagement() { wx.navigateTo({ url: '/pages/admin/evaluation-management/evaluation-management' }) },
   growthReflections() { wx.navigateTo({ url: '/pages/admin/growth-reflections/growth-reflections' }) },
-  experienceLibrary() { wx.navigateTo({ url: '/pages/admin/experience-library/experience-library' }) },
   aiReports() { wx.navigateTo({ url: '/pages/report-center/report-center' }) },
   ruleFiles() { wx.navigateTo({ url: '/pages/rule-files/rule-files' }) },
   announcements() { wx.navigateTo({ url: '/pages/announcements/announcements' }) },

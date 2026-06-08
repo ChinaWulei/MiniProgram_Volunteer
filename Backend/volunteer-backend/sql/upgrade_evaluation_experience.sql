@@ -78,20 +78,3 @@ prepare stmt from @ddl;
 execute stmt;
 deallocate prepare stmt;
 
-create table if not exists activity_experience (
-    id bigint primary key auto_increment,
-    activity_id bigint not null,
-    evaluation_id bigint not null,
-    activity_category varchar(50) not null,
-    experience_type varchar(30) not null comment 'ADVANTAGE/SUGGESTION',
-    content varchar(500) not null,
-    enabled tinyint(1) not null default 1,
-    adopted_by bigint not null,
-    adopted_at datetime not null default current_timestamp,
-    updated_at datetime not null default current_timestamp on update current_timestamp,
-    unique key uk_experience_source(evaluation_id, experience_type),
-    key idx_experience_category_enabled(activity_category, enabled),
-    constraint fk_experience_activity foreign key(activity_id) references activity(id) on delete cascade,
-    constraint fk_experience_evaluation foreign key(evaluation_id) references activity_evaluation(id) on delete cascade,
-    constraint fk_experience_admin foreign key(adopted_by) references user(id)
-) comment='活动评价经验库';

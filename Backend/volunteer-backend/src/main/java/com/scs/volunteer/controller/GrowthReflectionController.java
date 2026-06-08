@@ -105,11 +105,18 @@ public class GrowthReflectionController extends BaseController {
         return ApiResponse.ok(growthMapper.adminList(activityId));
     }
 
-    @PostMapping("/api/admin/growth-reflections/{id}/recommend")
-    public ApiResponse<Void> recommend(HttpServletRequest request, @PathVariable Long id, @RequestBody Map<String, Object> body) {
+    @PostMapping("/api/admin/growth-reflections/{id}/display")
+    public ApiResponse<Void> display(HttpServletRequest request, @PathVariable Long id, @RequestBody Map<String, Object> body) {
         CurrentUser user = currentUser(request);
         requireAdmin(user);
-        growthMapper.recommend(id, Boolean.TRUE.equals(body.get("recommended")), user.getId());
+        growthMapper.setDisplayEnabled(id, Boolean.TRUE.equals(body.get("displayEnabled")), user.getId());
+        return ApiResponse.ok(null);
+    }
+
+    @DeleteMapping("/api/admin/growth-reflections/{id}")
+    public ApiResponse<Void> delete(HttpServletRequest request, @PathVariable Long id) {
+        requireAdmin(currentUser(request));
+        growthMapper.delete(id);
         return ApiResponse.ok(null);
     }
 

@@ -37,7 +37,6 @@
     <button class="ghost-btn" bindtap="checkinAdjustments">签到异常处理</button>
     <button class="ghost-btn" bindtap="evaluationManagement">评价管理</button>
     <button class="ghost-btn" bindtap="growthReflections">成长感悟管理</button>
-    <button class="ghost-btn" bindtap="experienceLibrary">活动经验库</button>
     <button class="ghost-btn" bindtap="volunteers">志愿者库</button>
     <button class="ghost-btn" bindtap="aiReports">AI分析报告</button>
     <button class="ghost-btn" bindtap="ruleFiles">规则文件库</button>

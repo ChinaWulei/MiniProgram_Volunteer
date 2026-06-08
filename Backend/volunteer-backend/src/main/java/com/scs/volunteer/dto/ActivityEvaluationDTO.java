@@ -5,6 +5,7 @@ public class ActivityEvaluationDTO {
     private String targetType;
     private Integer score;
     private String content;
+    private Boolean anonymous;
 
     public Long getTargetUserId() { return targetUserId; }
     public void setTargetUserId(Long targetUserId) { this.targetUserId = targetUserId; }
@@ -14,4 +15,6 @@ public class ActivityEvaluationDTO {
     public void setScore(Integer score) { this.score = score; }
     public String getContent() { return content; }
     public void setContent(String content) { this.content = content; }
+    public Boolean getAnonymous() { return anonymous; }
+    public void setAnonymous(Boolean anonymous) { this.anonymous = anonymous; }
 }

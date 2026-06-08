@@ -1,0 +1,14 @@
+<view class="page">
+  <view class="card" wx:for="{{list}}" wx:key="id">
+    <view class="title">{{item.activityName}}</view>
+    <view class="meta">{{item.score}}分 · {{item.anonymous ? '匿名' : '实名'}} · {{item.createdText}}</view>
+    <view class="content">{{item.content}}</view>
+    <view class="ai">
+      <view>活动评价内容：{{item.parsedOverall || '无'}}</view>
+      <view>活动优点：{{item.parsedAdvantages || '无'}}</view>
+      <view>活动不足：{{item.parsedProblems || '无'}}</view>
+      <view>改进建议：{{item.parsedSuggestions || '无'}}</view>
+    </view>
+  </view>
+  <view wx:if="{{list.length === 0}}" class="empty">暂无历史评价</view>
+</view>

@@ -30,9 +30,51 @@ create table if not exists activity_evaluation (
     target_type varchar(30) not null,
     score int not null,
     content varchar(500),
+    anonymous tinyint(1) not null default 0,
+    parsed_overall varchar(500),
+    parsed_advantages varchar(500),
+    parsed_problems varchar(500),
+    parsed_suggestions varchar(500),
+    analysis_status varchar(20) not null default 'PENDING',
+    analyzed_at datetime,
     created_at datetime not null default current_timestamp,
     unique key uk_activity_eval(activity_id,evaluator_id,target_type,target_user_id)
 ) comment='活动互评';
+
+create table if not exists activity_experience (
+    id bigint primary key auto_increment,
+    activity_id bigint not null,
+    evaluation_id bigint not null,
+    activity_category varchar(50) not null,
+    experience_type varchar(30) not null,
+    content varchar(500) not null,
+    enabled tinyint(1) not null default 1,
+    adopted_by bigint not null,
+    adopted_at datetime not null default current_timestamp,
+    updated_at datetime not null default current_timestamp on update current_timestamp,
+    unique key uk_experience_source(evaluation_id, experience_type),
+    key idx_experience_category_enabled(activity_category, enabled)
+) comment='活动评价经验库';
+
+create table if not exists volunteer_growth_reflection (
+    id bigint primary key auto_increment,
+    activity_id bigint not null,
+    user_id bigint not null,
+    content varchar(1200) not null,
+    anonymous tinyint(1) not null default 0,
+    parsed_gain varchar(500),
+    parsed_ability varchar(500),
+    parsed_experience varchar(500),
+    parsed_advice varchar(500),
+    analysis_status varchar(20) not null default 'PENDING',
+    recommended tinyint(1) not null default 0,
+    recommended_by bigint,
+    recommended_at datetime,
+    created_at datetime not null default current_timestamp,
+    updated_at datetime not null default current_timestamp on update current_timestamp,
+    unique key uk_growth_activity_user(activity_id, user_id),
+    key idx_growth_recommended(activity_id, recommended)
+) comment='志愿者活动成长感悟';
 
 create table if not exists checkin_adjustment (
     id bigint primary key auto_increment,
@@ -136,6 +178,8 @@ truncate table announcement_attachment;
 truncate table announcement_image;
 truncate table announcement;
 truncate table rule_file;
+truncate table activity_experience;
+truncate table volunteer_growth_reflection;
 truncate table activity_evaluation;
 truncate table credit_record;
 truncate table credit_rule;

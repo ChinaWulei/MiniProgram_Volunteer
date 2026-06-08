@@ -87,6 +87,8 @@
   font-size: 28rpx;
   line-height: 1.7;
 }
+.paragraph.pre { white-space: pre-wrap; }
+.excellent-card { margin-top: 12rpx; padding: 14rpx; border-radius: 12rpx; color: #475467; background: #f8fbfb; font-size: 24rpx; line-height: 1.55; }
 .contact-section {
   margin-bottom: 28rpx;
 }
@@ -168,8 +170,11 @@
 .eval-user.active { color: #fff; background: #0f766e; }
 .eval-user::after { border: 0; }
 .eval-textarea { width: 100%; min-height: 140rpx; padding: 16rpx; box-sizing: border-box; border-radius: 14rpx; background: #f8fbfb; font-size: 26rpx; }
+.eval-score-title { color: #172033; font-size: 26rpx; font-weight: 800; }
+.anonymous-row { display: flex; align-items: center; justify-content: space-between; margin-top: 16rpx; color: #475467; font-size: 26rpx; }
 .eval-card { margin-top: 14rpx; padding: 16rpx; border-radius: 14rpx; background: #f8fbfb; }
 .checkin-btn.small { height: 62rpx; line-height: 1; font-size: 24rpx; }
+.checkin-btn.ghost { color: #0f766e; background: #eefaf7; }
 .mask { position: fixed; left: 0; right: 0; top: 0; bottom: 0; z-index: 40; background: rgba(0,0,0,.35); }
 .cancel-panel { position: fixed; left: 24rpx; right: 24rpx; bottom: 32rpx; z-index: 41; padding: 24rpx; border-radius: 20rpx; background: #fff; }
 .panel-title { color: #172033; font-size: 30rpx; font-weight: 800; }

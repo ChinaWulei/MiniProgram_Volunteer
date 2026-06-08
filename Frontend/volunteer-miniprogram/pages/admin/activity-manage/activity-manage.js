@@ -15,7 +15,15 @@ Page({
     status: '',
     statuses: ['全部', '已发布', '草稿', '已结束', '已取消', '报名中', '已满员'],
     showSummary: false,
-    summaryText: ''
+    summaryText: '',
+    showFeedback: false,
+    feedbackActivityId: null,
+    feedbackActivityName: '',
+    feedbackList: [],
+    feedbackCount: 0,
+    feedbackAverage: '0.0',
+    aiFeedbackSummary: '',
+    aiSummaryLoading: false
   },
   onShow() {
     this.load()
@@ -79,6 +87,57 @@ Page({
   summary(e) {
     wx.navigateTo({ url: `/pages/admin/activity-news-edit/activity-news-edit?activityId=${e.currentTarget.dataset.id}` })
   },
+  feedback(e) {
+    const id = e.currentTarget.dataset.id
+    const activity = this.data.list.find(item => item.id === id)
+    this.setData({
+      showFeedback: true,
+      feedbackActivityId: id,
+      feedbackActivityName: activity ? activity.title : '活动',
+      feedbackList: [],
+      feedbackCount: 0,
+      feedbackAverage: '0.0',
+      aiFeedbackSummary: ''
+    })
+    wx.showLoading({ title: '加载评价' })
+    request({ url: `/api/activities/${id}/evaluations/feedback` })
+      .then(list => {
+        const feedbackList = (list || []).map(item => ({
+          ...item,
+          targetText: item.targetType === 'LEADER' ? '活动负责人' : '活动',
+          contentText: item.content || '未填写文字评价',
+          createdText: String(item.createdAt || '').replace('T', ' ').slice(0, 16)
+        }))
+        const total = feedbackList.reduce((sum, item) => sum + Number(item.score || 0), 0)
+        this.setData({
+          feedbackList,
+          feedbackCount: feedbackList.length,
+          feedbackAverage: feedbackList.length ? (total / feedbackList.length).toFixed(1) : '0.0'
+        })
+      })
+      .catch(() => {})
+      .finally(() => wx.hideLoading())
+  },
+  generateFeedbackSummary() {
+    if (!this.data.feedbackCount || this.data.aiSummaryLoading) return
+    this.setData({ aiSummaryLoading: true })
+    request({
+      url: `/api/activities/${this.data.feedbackActivityId}/evaluations/feedback/ai-summary`,
+      method: 'POST'
+    })
+      .then(data => this.setData({ aiFeedbackSummary: data.summary || '暂无总结' }))
+      .catch(() => {})
+      .finally(() => this.setData({ aiSummaryLoading: false }))
+  },
+  closeFeedback() {
+    this.setData({
+      showFeedback: false,
+      feedbackActivityId: null,
+      feedbackList: [],
+      aiFeedbackSummary: ''
+    })
+  },
+  stopTap() {},
   closeSummary() {
     this.setData({ showSummary: false, summaryText: '' })
   },

@@ -53,6 +53,14 @@
     <view class="paragraph">{{activity.tips || '暂无注意事项'}}</view>
   </view>
 
+  <view wx:if="{{growthAdvice}}" class="detail-section">
+    <view class="section-title">往届志愿者经验</view>
+    <view class="paragraph pre">{{growthAdvice}}</view>
+    <view class="excellent-card" wx:for="{{excellentReflections}}" wx:key="id">
+      <view>{{item.content}}</view>
+    </view>
+  </view>
+
   <view class="detail-section contact-section">
     <view class="section-title">联系人</view>
     <view class="info-line"><text>联系人</text><text>{{activity.contactName || '-'}}</text></view>
@@ -108,9 +116,29 @@
       <button class="checkin-btn" bindtap="submitAllEvaluations">一键提交全部评价</button>
     </view>
     <view wx:else>
+      <view class="eval-score-title">活动评分：{{evaluationScore}} 星</view>
       <slider min="1" max="5" step="1" value="{{evaluationScore}}" show-value bindchange="setEvalScore"></slider>
-      <textarea class="eval-textarea" placeholder="填写对活动组织和负责人的评价" value="{{evaluationContent}}" bindinput="inputEvaluation" maxlength="-1"></textarea>
+      <textarea class="eval-textarea" placeholder="请分享您的活动体验，例如：活动整体评价、活动优点、活动不足、改进建议。" value="{{evaluationContent}}" bindinput="inputEvaluation" maxlength="-1"></textarea>
+      <view class="anonymous-row">
+        <text>匿名评价</text>
+        <switch checked="{{evaluationAnonymous}}" bindchange="toggleEvaluationAnonymous" color="#0f766e" />
+      </view>
       <button class="checkin-btn" bindtap="submitEvaluation">提交评价</button>
+      <button class="checkin-btn ghost" bindtap="openGrowth">填写成长感悟</button>
+    </view>
+  </view>
+
+  <view wx:if="{{showGrowth}}" class="mask" bindtap="closeGrowth"></view>
+  <view wx:if="{{showGrowth}}" class="cancel-panel">
+    <view class="panel-title">填写成长感悟</view>
+    <textarea placeholder="请分享本次活动中的：收获与成长、学到的技能、遇到的问题、对未来参与者的建议。" value="{{growthContent}}" bindinput="inputGrowth" maxlength="-1"></textarea>
+    <view class="anonymous-row">
+      <text>匿名提交</text>
+      <switch checked="{{growthAnonymous}}" bindchange="toggleGrowthAnonymous" color="#0f766e" />
+    </view>
+    <view class="panel-actions">
+      <button bindtap="closeGrowth">取消</button>
+      <button class="danger" bindtap="submitGrowth">提交</button>
     </view>
   </view>
 

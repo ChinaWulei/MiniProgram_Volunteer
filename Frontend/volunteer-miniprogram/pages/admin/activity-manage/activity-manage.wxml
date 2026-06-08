@@ -32,6 +32,7 @@
         <button bindtap="detail" data-id="{{item.id}}">详情</button>
         <button class="edit" bindtap="edit" data-id="{{item.id}}">编辑</button>
         <button bindtap="checkin" data-id="{{item.id}}">签到</button>
+        <button bindtap="feedback" data-id="{{item.id}}">评价</button>
         <button bindtap="finish" data-id="{{item.id}}">结束</button>
         <button wx:if="{{item.status === '已结束'}}" bindtap="summary" data-id="{{item.id}}">总结</button>
         <button class="danger" bindtap="remove" data-id="{{item.id}}">删除</button>
@@ -51,5 +52,42 @@
       <button bindtap="closeSummary">关闭</button>
       <button class="edit" bindtap="copySummary">复制</button>
     </view>
+  </view>
+
+  <view wx:if="{{showFeedback}}" class="mask" bindtap="closeFeedback"></view>
+  <view wx:if="{{showFeedback}}" class="feedback-panel" catchtap="stopTap">
+    <view class="feedback-head">
+      <view>
+        <view class="summary-title">志愿者评价</view>
+        <view class="feedback-activity">{{feedbackActivityName}}</view>
+      </view>
+      <button class="close-btn" bindtap="closeFeedback">关闭</button>
+    </view>
+
+    <view class="feedback-stats">
+      <view><text class="stat-number">{{feedbackAverage}}</text><text class="stat-unit"> / 5 分</text></view>
+      <view class="stat-count">共 {{feedbackCount}} 条评价</view>
+    </view>
+
+    <button class="ai-summary-btn" disabled="{{feedbackCount === 0 || aiSummaryLoading}}" bindtap="generateFeedbackSummary">
+      {{aiSummaryLoading ? 'AI 正在总结...' : '生成 AI 评价总结'}}
+    </button>
+
+    <view wx:if="{{aiFeedbackSummary}}" class="ai-summary-box">
+      <view class="ai-summary-title">AI 总结</view>
+      <text>{{aiFeedbackSummary}}</text>
+    </view>
+
+    <scroll-view scroll-y class="feedback-scroll">
+      <view wx:for="{{feedbackList}}" wx:key="id" class="feedback-item">
+        <view class="feedback-row">
+          <view class="feedback-user">{{item.evaluatorName || '志愿者'}}</view>
+          <view class="feedback-score">{{item.score}} 分</view>
+        </view>
+        <view class="feedback-target">评价对象：{{item.targetText}} · {{item.createdText}}</view>
+        <view class="feedback-content">{{item.contentText}}</view>
+      </view>
+      <view wx:if="{{feedbackList.length === 0}}" class="feedback-empty">暂无志愿者评价</view>
+    </scroll-view>
   </view>
 </view>

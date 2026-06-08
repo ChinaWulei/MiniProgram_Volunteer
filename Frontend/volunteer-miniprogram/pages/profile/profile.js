@@ -288,6 +288,12 @@ Page({
   myRegs() {
     wx.navigateTo({ url: '/pages/my-registrations/my-registrations' })
   },
+  myEvaluations() {
+    wx.navigateTo({ url: '/pages/my-evaluations/my-evaluations' })
+  },
+  growthProfile() {
+    wx.navigateTo({ url: '/pages/growth-profile/growth-profile' })
+  },
   goAdmin() {
     wx.navigateTo({ url: '/pages/admin/admin' })
   },

@@ -1,0 +1,9 @@
+<view class="page">
+  <view class="card" wx:for="{{list}}" wx:key="id">
+    <view class="title">{{item.activityCategory}} · {{item.experienceType === 'ADVANTAGE' ? '优秀反馈' : '改进建议'}}</view>
+    <view class="content">{{item.content}}</view>
+    <view class="meta">来源：{{item.activityName}} · {{item.enabled ? '已启用' : '已停用'}}</view>
+    <button bindtap="toggle" data-id="{{item.id}}" data-enabled="{{!item.enabled}}">{{item.enabled ? '停用经验' : '启用经验'}}</button>
+  </view>
+  <view wx:if="{{list.length === 0}}" class="empty">暂无经验</view>
+</view>

@@ -14,6 +14,12 @@ Page({
     profile: null,
     evaluationScore: 5,
     evaluationContent: '',
+    evaluationAnonymous: false,
+    showGrowth: false,
+    growthContent: '',
+    growthAnonymous: false,
+    growthAdvice: '',
+    excellentReflections: [],
     evaluationTargetUserId: null,
     isAdmin: false,
     canEvaluate: false,
@@ -63,9 +69,13 @@ Page({
         activity.signupDeadlineText = this.formatTime(activity.signupDeadline)
         activity.checkinStartTimeText = this.formatTime(activity.checkinStartTime)
         activity.checkinEndTimeText = this.formatTime(activity.checkinEndTime)
-        this.setData({ activity, skills: this.splitTags(activity.skillRequirements), canEvaluate: this.isActivityEnded(activity) })
+        const canEvaluate = this.data.isAdmin
+          ? this.isActivityEnded(activity)
+          : this.isActivityEnded(activity) && activity.signupStatus === '已完成'
+        this.setData({ activity, skills: this.splitTags(activity.skillRequirements), canEvaluate })
         this.refreshButton(activity)
         if (!this.data.isAdmin) this.loadCheckinStatus()
+        if (!this.data.isAdmin) this.loadGrowthExperience()
         if (this.data.isAdmin) this.loadRegistrations()
       })
       .catch(() => {})
@@ -98,6 +108,11 @@ Page({
   loadCheckinStatus() {
     request({ url: `/api/activity/${this.data.id}/checkin/status`, silent: true })
       .then(checkin => this.setData({ checkin }))
+      .catch(() => {})
+  },
+  loadGrowthExperience() {
+    request({ url: `/api/activities/${this.data.id}/growth-experience`, silent: true })
+      .then(data => this.setData({ growthAdvice: data.advice || '', excellentReflections: data.items || [] }))
       .catch(() => {})
   },
   splitTags(tags) {
@@ -361,7 +376,7 @@ Page({
     }).catch(() => {})
   },
   setEvalScore(e) {
-    this.setData({ evaluationScore: Number(e.detail.value) + 1 })
+    this.setData({ evaluationScore: Number(e.detail.value) })
   },
   setRegEvalScore(e) {
     const id = e.currentTarget.dataset.id
@@ -370,6 +385,9 @@ Page({
   },
   inputEvaluation(e) {
     this.setData({ evaluationContent: e.detail.value })
+  },
+  toggleEvaluationAnonymous(e) {
+    this.setData({ evaluationAnonymous: e.detail.value })
   },
   inputRegEvaluation(e) {
     const id = e.currentTarget.dataset.id
@@ -384,7 +402,8 @@ Page({
       targetType: this.data.isAdmin ? 'VOLUNTEER' : 'ACTIVITY',
       targetUserId: this.data.isAdmin ? this.data.evaluationTargetUserId : null,
       score: this.data.evaluationScore,
-      content: this.data.evaluationContent
+      content: this.data.evaluationContent,
+      anonymous: !this.data.isAdmin && this.data.evaluationAnonymous
     }
     if (this.data.isAdmin && !data.targetUserId) {
       wx.showToast({ title: '请选择志愿者', icon: 'none' })
@@ -393,9 +412,36 @@ Page({
     request({ url: `/api/activities/${this.data.id}/evaluations`, method: 'POST', data })
       .then(() => {
         wx.showToast({ title: '评价成功' })
-        this.setData({ evaluationContent: '', evaluationScore: 5, evaluationTargetUserId: null })
+        this.setData({ evaluationContent: '', evaluationScore: 5, evaluationAnonymous: false, evaluationTargetUserId: null })
       })
       .catch(() => {})
+  },
+  openGrowth() {
+    this.setData({ showGrowth: true, growthContent: '', growthAnonymous: false })
+  },
+  closeGrowth() {
+    this.setData({ showGrowth: false })
+  },
+  inputGrowth(e) {
+    this.setData({ growthContent: e.detail.value })
+  },
+  toggleGrowthAnonymous(e) {
+    this.setData({ growthAnonymous: e.detail.value })
+  },
+  submitGrowth() {
+    const content = String(this.data.growthContent || '').trim()
+    if (!content) {
+      wx.showToast({ title: '请填写成长感悟', icon: 'none' })
+      return
+    }
+    request({
+      url: '/api/growth-reflections',
+      method: 'POST',
+      data: { activityId: this.data.id, content, anonymous: this.data.growthAnonymous }
+    }).then(() => {
+      wx.showToast({ title: '已保存' })
+      this.closeGrowth()
+    }).catch(() => {})
   },
   submitRegEvaluation(e) {
     const id = e.currentTarget.dataset.id

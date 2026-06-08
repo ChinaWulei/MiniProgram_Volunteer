@@ -31,3 +31,21 @@ button::after { border: 0; }
 .summary-actions { display: flex; gap: 14rpx; margin-top: 16rpx; }
 .summary-actions button { flex: 1; height: 68rpx; line-height: 68rpx; margin: 0; border-radius: 16rpx; color: #0f766e; background: #eefaf7; font-size: 25rpx; }
 .summary-actions .edit { color: #fff; background: #0f766e; }
+.feedback-panel { position: fixed; left: 24rpx; right: 24rpx; top: 90rpx; bottom: 40rpx; z-index: 41; padding: 24rpx; border-radius: 20rpx; background: #fff; box-sizing: border-box; display: flex; flex-direction: column; }
+.feedback-head, .feedback-row { display: flex; align-items: center; justify-content: space-between; gap: 16rpx; }
+.feedback-activity { margin-top: 6rpx; color: #667085; font-size: 23rpx; }
+.close-btn { width: 100rpx; height: 56rpx; line-height: 56rpx; margin: 0; padding: 0; border-radius: 14rpx; color: #475467; background: #f2f4f7; font-size: 23rpx; }
+.feedback-stats { display: flex; align-items: baseline; justify-content: space-between; margin-top: 18rpx; padding: 20rpx; border-radius: 16rpx; color: #0f766e; background: #eefaf7; }
+.stat-number { font-size: 42rpx; font-weight: 800; }
+.stat-unit, .stat-count { font-size: 23rpx; }
+.ai-summary-btn { height: 68rpx; line-height: 68rpx; margin: 16rpx 0 0; border-radius: 16rpx; color: #fff; background: #0f766e; font-size: 25rpx; }
+.ai-summary-btn[disabled] { color: #98a2b3; background: #eaecf0; }
+.ai-summary-box { margin-top: 16rpx; padding: 18rpx; border: 1rpx solid #b7e4db; border-radius: 16rpx; color: #344054; background: #f6fffd; font-size: 24rpx; line-height: 1.65; white-space: pre-wrap; }
+.ai-summary-title { margin-bottom: 8rpx; color: #0f766e; font-size: 25rpx; font-weight: 800; }
+.feedback-scroll { flex: 1; min-height: 0; margin-top: 16rpx; }
+.feedback-item { margin-bottom: 14rpx; padding: 18rpx; border-radius: 16rpx; background: #f8fafc; }
+.feedback-user { color: #172033; font-size: 26rpx; font-weight: 700; }
+.feedback-score { color: #f59e0b; font-size: 25rpx; font-weight: 800; }
+.feedback-target { margin-top: 6rpx; color: #98a2b3; font-size: 21rpx; }
+.feedback-content { margin-top: 12rpx; color: #475467; font-size: 24rpx; line-height: 1.55; }
+.feedback-empty { padding: 80rpx 0; color: #98a2b3; text-align: center; font-size: 25rpx; }

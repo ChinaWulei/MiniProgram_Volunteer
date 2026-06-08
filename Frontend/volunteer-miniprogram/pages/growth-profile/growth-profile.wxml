@@ -1,0 +1,27 @@
+<view class="page">
+  <view class="hero">
+    <view class="title">AI成长档案</view>
+    <view class="sub">累计 {{profile.activityCount || 0}} 次活动 · {{profile.totalHours || 0}} 小时</view>
+  </view>
+  <view class="card">
+    <view class="section-title">成长关键词</view>
+    <text class="tag" wx:for="{{profile.keywords}}" wx:key="*this">{{item}}</text>
+    <view wx:if="{{!profile.keywords || profile.keywords.length === 0}}" class="muted">暂无关键词</view>
+  </view>
+  <view class="card">
+    <view class="section-title">能力画像</view>
+    <view class="content">{{profile.abilityProfile}}</view>
+    <view class="section-title small">AI成长总结</view>
+    <view class="content">{{profile.aiSummary}}</view>
+    <button class="primary" bindtap="generateReport" loading="{{loadingReport}}">生成个人成长报告</button>
+  </view>
+  <view wx:if="{{report}}" class="card">
+    <view class="section-title">AI成长报告</view>
+    <view class="content pre">{{report}}</view>
+  </view>
+  <view class="card" wx:for="{{profile.reflections}}" wx:key="id">
+    <view class="section-title">{{item.activityName}}</view>
+    <view class="content">{{item.content}}</view>
+    <view class="ai">主要收获：{{item.parsedGain || '无'}}&#10;能力成长：{{item.parsedAbility || '无'}}&#10;经验总结：{{item.parsedExperience || '无'}}&#10;给后来者的建议：{{item.parsedAdvice || '无'}}</view>
+  </view>
+</view>

@@ -48,19 +48,35 @@ public class GrowthReflectionMapper {
                 """, userId);
     }
 
-    public List<Map<String, Object>> recommended(Long activityId, String category, int limit) {
+    public List<Map<String, Object>> recommended(Long activityId, String category, String matchToken, int limit) {
         return jdbcTemplate.queryForList("""
                 select g.id,g.content,g.parsed_gain as parsedGain,g.parsed_ability as parsedAbility,
                        g.parsed_experience as parsedExperience,g.parsed_advice as parsedAdvice,
-                       a.name as activityName,a.category
+                       a.name as activityName,a.category,a.skill_requirements as skillRequirements
                 from volunteer_growth_reflection g join activity a on a.id=g.activity_id
                 where (? is null or g.activity_id<>?)
-                  and (? is null or a.category=?)
-                  and ((coalesce(g.parsed_experience,'')<>'' and g.parsed_experience<>'无')
-                       or (coalesce(g.parsed_advice,'')<>'' and g.parsed_advice<>'无'))
+                  and ((? is not null and a.category=?)
+                       or (? is not null and (a.name like concat('%',?,'%')
+                            or a.category like concat('%',?,'%')
+                            or a.skill_requirements like concat('%',?,'%'))))
+                  and coalesce(g.content,'')<>''
                 order by g.created_at desc
                 limit ?
-                """, activityId, activityId, n(category), n(category), limit);
+                """, activityId, activityId, n(category), n(category),
+                n(matchToken), n(matchToken), n(matchToken), n(matchToken), limit);
+    }
+
+    public List<Map<String, Object>> recent(Long activityId, int limit) {
+        return jdbcTemplate.queryForList("""
+                select g.id,g.content,g.parsed_gain as parsedGain,g.parsed_ability as parsedAbility,
+                       g.parsed_experience as parsedExperience,g.parsed_advice as parsedAdvice,
+                       a.name as activityName,a.category,a.skill_requirements as skillRequirements
+                from volunteer_growth_reflection g join activity a on a.id=g.activity_id
+                where (? is null or g.activity_id<>?)
+                  and coalesce(g.content,'')<>''
+                order by g.created_at desc
+                limit ?
+                """, activityId, activityId, limit);
     }
 
     public Map<String, Object> profileStats(Long userId) {

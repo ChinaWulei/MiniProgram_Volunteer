@@ -110,7 +110,10 @@ public class GrowthReflectionController extends BaseController {
     @GetMapping("/api/activities/{activityId}/growth-experience")
     public ApiResponse<Map<String, Object>> activityExperience(@PathVariable Long activityId) {
         Activity activity = activityMapper.findById(activityId).orElseThrow(() -> new BizException("活动不存在"));
-        List<Map<String, Object>> items = growthMapper.recommended(activityId, activity.getCategory(), 8);
+        List<Map<String, Object>> items = growthMapper.recommended(activityId, activity.getCategory(), matchToken(activity), 8);
+        if (items.isEmpty()) {
+            items = growthMapper.recent(activityId, 5);
+        }
         String advice = "暂无往届志愿者经验";
         if (!items.isEmpty()) {
             if (aiModelClient.available()) {
@@ -155,8 +158,11 @@ public class GrowthReflectionController extends BaseController {
     private Map<String, String> heuristic(String content, Map<String, String> result) {
         if (content.contains("沟通")) result.put("ability", "沟通能力提升");
         if (content.contains("团队")) result.put("ability", "团队协作能力提升");
-        if (content.contains("路线") || content.contains("流程") || content.contains("提前")) result.put("experience", content);
-        if (content.contains("建议") || content.contains("后来") || content.contains("下次")) result.put("advice", content);
+        if (content.contains("路线") || content.contains("流程") || content.contains("提前") || content.contains("带") || content.contains("准备")) result.put("experience", content);
+        if (content.contains("建议") || content.contains("后来") || content.contains("下次") || content.contains("带") || content.contains("准备")) result.put("advice", content);
+        if ("无".equals(result.get("experience")) && "无".equals(result.get("advice")) && content.length() <= 80) {
+            result.put("advice", content);
+        }
         return result;
     }
 
@@ -181,6 +187,20 @@ public class GrowthReflectionController extends BaseController {
                 .map(value -> "- " + value)
                 .limit(5).collect(Collectors.joining("\n"));
         return advice.isBlank() ? "暂无往届志愿者经验" : advice;
+    }
+
+    private String matchToken(Activity activity) {
+        String skills = activity.getSkillRequirements();
+        if (skills != null) {
+            for (String token : skills.split("[,，;；|\\s]+")) {
+                String text = token.trim();
+                if (text.length() >= 2) return text;
+            }
+        }
+        String category = activity.getCategory();
+        if (category != null && category.length() >= 2) return category;
+        String name = activity.getName();
+        return name == null || name.isBlank() ? null : name.substring(0, Math.min(4, name.length()));
     }
 
     private String pickAdvice(Map<String, Object> item) {

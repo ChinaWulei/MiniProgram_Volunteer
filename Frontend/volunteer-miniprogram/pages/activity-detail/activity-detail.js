@@ -76,7 +76,7 @@ Page({
         this.setData({ activity, skills: this.splitTags(activity.skillRequirements), canEvaluate })
         this.refreshButton(activity)
         if (!this.data.isAdmin) this.loadCheckinStatus()
-        if (!this.data.isAdmin) this.loadGrowthExperience()
+        this.loadGrowthExperience()
         if (this.data.isAdmin) this.loadRegistrations()
       })
       .catch(() => {})

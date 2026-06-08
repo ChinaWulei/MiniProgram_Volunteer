@@ -4,15 +4,20 @@ import com.scs.volunteer.common.ApiResponse;
 import com.scs.volunteer.common.BizException;
 import com.scs.volunteer.common.CurrentUser;
 import com.scs.volunteer.dto.ActivityAiGenerateRequest;
+import com.scs.volunteer.dto.ActivityParticipantNoticeDTO;
 import com.scs.volunteer.dto.ActivityDTO;
 import com.scs.volunteer.dto.CreditRuleDTO;
 import com.scs.volunteer.dto.ManualCheckinRequest;
+import com.scs.volunteer.entity.Activity;
+import com.scs.volunteer.mapper.ActivityMapper;
 import com.scs.volunteer.service.ActivityAiGenerateService;
 import com.scs.volunteer.service.ActivityService;
 import com.scs.volunteer.service.CheckinService;
 import com.scs.volunteer.service.S3StorageService;
 import com.scs.volunteer.service.StatisticsService;
 import com.scs.volunteer.mapper.CreditMapper;
+import com.scs.volunteer.mapper.NotificationMapper;
+import com.scs.volunteer.mapper.RegistrationMapper;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -36,15 +41,22 @@ public class AdminController extends BaseController {
     private final CheckinService checkinService;
     private final CreditMapper creditMapper;
     private final ActivityAiGenerateService activityAiGenerateService;
+    private final ActivityMapper activityMapper;
+    private final RegistrationMapper registrationMapper;
+    private final NotificationMapper notificationMapper;
 
     public AdminController(StatisticsService statisticsService, ActivityService activityService, S3StorageService s3StorageService,
-                           CheckinService checkinService, CreditMapper creditMapper, ActivityAiGenerateService activityAiGenerateService) {
+                           CheckinService checkinService, CreditMapper creditMapper, ActivityAiGenerateService activityAiGenerateService,
+                           ActivityMapper activityMapper, RegistrationMapper registrationMapper, NotificationMapper notificationMapper) {
         this.statisticsService = statisticsService;
         this.activityService = activityService;
         this.s3StorageService = s3StorageService;
         this.checkinService = checkinService;
         this.creditMapper = creditMapper;
         this.activityAiGenerateService = activityAiGenerateService;
+        this.activityMapper = activityMapper;
+        this.registrationMapper = registrationMapper;
+        this.notificationMapper = notificationMapper;
     }
 
     @GetMapping("/statistics")
@@ -99,6 +111,27 @@ public class AdminController extends BaseController {
         return ApiResponse.ok(null);
     }
 
+    @PostMapping("/activities/{id}/notifications")
+    public ApiResponse<Map<String, Integer>> sendActivityNotice(HttpServletRequest request,
+                                                                @PathVariable Long id,
+                                                                @RequestBody ActivityParticipantNoticeDTO dto) {
+        requireAdmin(currentUser(request));
+        if (dto == null || dto.getTitle() == null || dto.getTitle().isBlank()) {
+            throw new BizException("请填写通知标题");
+        }
+        if (dto.getContent() == null || dto.getContent().isBlank()) {
+            throw new BizException("请填写通知内容");
+        }
+        Activity activity = activityMapper.findById(id).orElseThrow(() -> new BizException("活动不存在"));
+        java.util.List<Long> userIds = registrationMapper.participantUserIds(id, dto.getScope());
+        String title = limit(dto.getTitle().trim(), 120);
+        String content = limit("《" + activity.getName() + "》：" + dto.getContent().trim(), 500);
+        for (Long userId : userIds) {
+            notificationMapper.insert(userId, "ACTIVITY_NOTICE", title, content, "ACTIVITY", id);
+        }
+        return ApiResponse.ok(Map.of("sentCount", userIds.size()));
+    }
+
     @GetMapping("/activities/{id}/summary")
     public ApiResponse<Map<String, String>> activitySummary(HttpServletRequest request, @PathVariable Long id) {
         return ApiResponse.ok(Map.of("summary", activityService.summary(id, currentUser(request))));
@@ -129,5 +162,10 @@ public class AdminController extends BaseController {
         if (user == null || !"ADMIN".equals(user.getRole())) {
             throw new BizException("仅管理员可操作");
         }
+    }
+
+    private String limit(String value, int max) {
+        if (value == null) return "";
+        return value.length() > max ? value.substring(0, max) : value;
     }
 }

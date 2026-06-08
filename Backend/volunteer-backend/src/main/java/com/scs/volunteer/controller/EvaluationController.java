@@ -53,8 +53,8 @@ public class EvaluationController extends BaseController {
         validate(user, dto);
         if ("ACTIVITY".equals(dto.getTargetType()) || "LEADER".equals(dto.getTargetType())) {
             String status = registrationMapper.findStatus(activityId, user.getId());
-            if (!"已完成".equals(status)) {
-                throw new BizException("仅已完成该活动的志愿者可评价");
+            if (!participantCanReflect(status, activity)) {
+                throw new BizException("仅已完成或已通过且活动已结束的志愿者可评价");
             }
         }
         if (evaluationMapper.exists(activityId, user.getId(), dto.getTargetType(), dto.getTargetUserId())) {
@@ -127,6 +127,13 @@ public class EvaluationController extends BaseController {
                 "averageScore", Math.round(average * 10.0) / 10.0,
                 "summary", summary
         ));
+    }
+
+    private boolean participantCanReflect(String status, Activity activity) {
+        if ("已完成".equals(status)) return true;
+        if (!"已通过".equals(status)) return false;
+        return "已结束".equals(activity.getStatus())
+                || (activity.getEndTime() != null && !activity.getEndTime().isAfter(LocalDateTime.now()));
     }
 
     private Map<String, String> parseEvaluation(String content) {

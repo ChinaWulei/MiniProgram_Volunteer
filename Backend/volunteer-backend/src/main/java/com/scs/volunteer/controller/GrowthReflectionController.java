@@ -43,13 +43,21 @@ public class GrowthReflectionController extends BaseController {
         if (dto == null || dto.getActivityId() == null) throw new BizException("活动不能为空");
         String content = dto.getContent() == null ? "" : dto.getContent().trim();
         if (content.isBlank()) throw new BizException("请填写参与经验");
-        if (!"已完成".equals(registrationMapper.findStatus(dto.getActivityId(), user.getId()))) {
-            throw new BizException("仅已完成活动可填写参与经验");
+        Activity activity = activityMapper.findById(dto.getActivityId()).orElseThrow(() -> new BizException("活动不存在"));
+        if (!participantCanReflect(registrationMapper.findStatus(dto.getActivityId(), user.getId()), activity)) {
+            throw new BizException("仅已完成或已通过且活动已结束的志愿者可填写参与经验");
         }
         if (growthMapper.exists(dto.getActivityId(), user.getId())) throw new BizException("该活动已填写参与经验");
         Long id = growthMapper.insert(dto.getActivityId(), user.getId(), content, Boolean.TRUE.equals(dto.getAnonymous()));
         growthMapper.saveAnalysis(id, parse(content));
         return ApiResponse.ok(Map.of("id", id));
+    }
+
+    private boolean participantCanReflect(String status, Activity activity) {
+        if ("已完成".equals(status)) return true;
+        if (!"已通过".equals(status)) return false;
+        return "已结束".equals(activity.getStatus())
+                || (activity.getEndTime() != null && !activity.getEndTime().isAfter(java.time.LocalDateTime.now()));
     }
 
     @GetMapping("/api/growth-reflections/my")

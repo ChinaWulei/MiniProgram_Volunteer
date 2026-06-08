@@ -72,7 +72,7 @@ Page({
         activity.checkinEndTimeText = this.formatTime(activity.checkinEndTime)
         const canEvaluate = this.data.isAdmin
           ? this.isActivityEnded(activity)
-          : this.isActivityEnded(activity) && activity.signupStatus === '已完成'
+          : this.isActivityEnded(activity) && this.isParticipantCompleted(activity.signupStatus)
         this.setData({ activity, skills: this.splitTags(activity.skillRequirements), canEvaluate })
         this.refreshButton(activity)
         if (!this.data.isAdmin) this.loadCheckinStatus()
@@ -124,6 +124,9 @@ Page({
     if (activity.status === '已结束') return true
     if (!activity.endTime) return false
     return new Date(String(activity.endTime).replace('T', ' ').replace(/-/g, '/')).getTime() <= Date.now()
+  },
+  isParticipantCompleted(status) {
+    return status === '已完成' || status === '已通过'
   },
   refreshButton(activity) {
     let buttonText = '立即报名'

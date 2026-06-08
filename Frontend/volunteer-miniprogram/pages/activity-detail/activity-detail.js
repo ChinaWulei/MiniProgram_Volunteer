@@ -1,5 +1,6 @@
 const app = getApp()
 const { request } = require('../../utils/request')
+const activityReviewTemplateId = 'llzSkIXycuVZvp_JsaB36o80EhkKdAdFHbrvffvlSrQ'
 
 Page({
   data: {
@@ -162,6 +163,7 @@ Page({
         .then(() => {
           wx.hideLoading()
           wx.showToast({ title: '报名成功' })
+          this.requestReviewReminderSubscribe()
           this.load()
         })
         .catch(err => {
@@ -178,6 +180,14 @@ Page({
       return
     }
     submit()
+  },
+  requestReviewReminderSubscribe() {
+    if (!wx.requestSubscribeMessage) return
+    wx.requestSubscribeMessage({
+      tmplIds: [activityReviewTemplateId],
+      success: () => {},
+      fail: () => {}
+    })
   },
   contactAdmin() {
     const adminId = this.data.activity && this.data.activity.createdBy
@@ -431,7 +441,7 @@ Page({
   submitGrowth() {
     const content = String(this.data.growthContent || '').trim()
     if (!content) {
-      wx.showToast({ title: '请填写成长感悟', icon: 'none' })
+      wx.showToast({ title: '请填写参与经验', icon: 'none' })
       return
     }
     request({

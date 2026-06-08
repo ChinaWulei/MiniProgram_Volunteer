@@ -52,13 +52,9 @@ create table if not exists volunteer_growth_reflection (
     parsed_experience varchar(500),
     parsed_advice varchar(500),
     analysis_status varchar(20) not null default 'PENDING',
-    recommended tinyint(1) not null default 0,
-    recommended_by bigint,
-    recommended_at datetime,
     created_at datetime not null default current_timestamp,
     updated_at datetime not null default current_timestamp on update current_timestamp,
-    unique key uk_growth_activity_user(activity_id, user_id),
-    key idx_growth_recommended(activity_id, recommended)
+    unique key uk_growth_activity_user(activity_id, user_id)
 ) comment='志愿者活动成长感悟';
 
 create table if not exists checkin_adjustment (

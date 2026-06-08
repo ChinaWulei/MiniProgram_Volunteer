@@ -105,6 +105,15 @@ public class ActivityMapper {
         return jdbcTemplate.queryForList("select user_id from registration where activity_id=? and status in ('已通过','已完成')", Long.class, id);
     }
 
+    public List<String> participantOpenids(Long id) {
+        return jdbcTemplate.queryForList("""
+                select distinct u.openid
+                from registration r join user u on u.id=r.user_id
+                where r.activity_id=? and r.status in ('已通过','已完成')
+                  and u.openid is not null and u.openid<>''
+                """, String.class, id);
+    }
+
     public void increaseRegistered(Long id) {
         jdbcTemplate.update("update activity set registered_number=registered_number+1, status=if(registered_number+1>=recruit_number,'已满员',status) where id=?", id);
     }

@@ -56,9 +56,6 @@
   <view wx:if="{{growthAdvice}}" class="detail-section">
     <view class="section-title">往届志愿者经验</view>
     <view class="paragraph pre">{{growthAdvice}}</view>
-    <view class="excellent-card" wx:for="{{excellentReflections}}" wx:key="id">
-      <view>{{item.content}}</view>
-    </view>
   </view>
 
   <view class="detail-section contact-section">
@@ -124,14 +121,14 @@
         <switch checked="{{evaluationAnonymous}}" bindchange="toggleEvaluationAnonymous" color="#0f766e" />
       </view>
       <button class="checkin-btn" bindtap="submitEvaluation">提交评价</button>
-      <button class="checkin-btn ghost" bindtap="openGrowth">填写成长感悟</button>
+      <button class="checkin-btn ghost" bindtap="openGrowth">填写参与经验</button>
     </view>
   </view>
 
   <view wx:if="{{showGrowth}}" class="mask" bindtap="closeGrowth"></view>
   <view wx:if="{{showGrowth}}" class="cancel-panel">
-    <view class="panel-title">填写成长感悟</view>
-    <textarea placeholder="请分享本次活动中的：收获与成长、学到的技能、遇到的问题、对未来参与者的建议。" value="{{growthContent}}" bindinput="inputGrowth" maxlength="-1"></textarea>
+    <view class="panel-title">填写参与经验</view>
+    <textarea placeholder="请分享本次活动中的收获与经验，例如：你学到了什么、遇到了什么问题、有什么参与经验、对后续参加类似活动的同学有什么建议。" value="{{growthContent}}" bindinput="inputGrowth" maxlength="-1"></textarea>
     <view class="anonymous-row">
       <text>匿名提交</text>
       <switch checked="{{growthAnonymous}}" bindchange="toggleGrowthAnonymous" color="#0f766e" />

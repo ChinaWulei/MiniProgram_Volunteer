@@ -3,6 +3,7 @@ const { request, uploadFile } = require('../../utils/request')
 
 const activityCategories = ['迎新服务', '赛事保障', '校园讲解', '社区服务', '校园服务']
 const activityReminderTemplateId = '3MyIDa1qmvqiDyydT6aQrnCrYrKvz8aq92raqwL0Qq4'
+const activityReviewTemplateId = 'llzSkIXycuVZvp_JsaB36o80EhkKdAdFHbrvffvlSrQ'
 
 function bindWechatOpenid() {
   if (!wx.login) return
@@ -251,9 +252,9 @@ Page({
       return
     }
     wx.requestSubscribeMessage({
-      tmplIds: [activityReminderTemplateId],
+      tmplIds: [activityReminderTemplateId, activityReviewTemplateId],
       success: res => {
-        if (res[activityReminderTemplateId] === 'accept') {
+        if (res[activityReminderTemplateId] === 'accept' || res[activityReviewTemplateId] === 'accept') {
           save(true)
         } else {
           if (emailEnabled) save(false)

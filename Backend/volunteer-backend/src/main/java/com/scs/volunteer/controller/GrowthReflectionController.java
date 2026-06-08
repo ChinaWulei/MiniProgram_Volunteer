@@ -39,14 +39,14 @@ public class GrowthReflectionController extends BaseController {
     @PostMapping("/api/growth-reflections")
     public ApiResponse<Map<String, Long>> submit(HttpServletRequest request, @RequestBody GrowthReflectionDTO dto) {
         CurrentUser user = currentUser(request);
-        if (user == null || !"VOLUNTEER".equals(user.getRole())) throw new BizException("仅志愿者可填写成长感悟");
+        if (user == null || !"VOLUNTEER".equals(user.getRole())) throw new BizException("仅志愿者可填写参与经验");
         if (dto == null || dto.getActivityId() == null) throw new BizException("活动不能为空");
         String content = dto.getContent() == null ? "" : dto.getContent().trim();
-        if (content.isBlank()) throw new BizException("请填写成长感悟");
+        if (content.isBlank()) throw new BizException("请填写参与经验");
         if (!"已完成".equals(registrationMapper.findStatus(dto.getActivityId(), user.getId()))) {
-            throw new BizException("仅已完成活动可填写成长感悟");
+            throw new BizException("仅已完成活动可填写参与经验");
         }
-        if (growthMapper.exists(dto.getActivityId(), user.getId())) throw new BizException("该活动已填写成长感悟");
+        if (growthMapper.exists(dto.getActivityId(), user.getId())) throw new BizException("该活动已填写参与经验");
         Long id = growthMapper.insert(dto.getActivityId(), user.getId(), content, Boolean.TRUE.equals(dto.getAnonymous()));
         growthMapper.saveAnalysis(id, parse(content));
         return ApiResponse.ok(Map.of("id", id));
@@ -99,27 +99,6 @@ public class GrowthReflectionController extends BaseController {
         return ApiResponse.ok(Map.of("report", report));
     }
 
-    @GetMapping("/api/admin/growth-reflections")
-    public ApiResponse<List<Map<String, Object>>> adminList(HttpServletRequest request, @RequestParam(required = false) Long activityId) {
-        requireAdmin(currentUser(request));
-        return ApiResponse.ok(growthMapper.adminList(activityId));
-    }
-
-    @PostMapping("/api/admin/growth-reflections/{id}/display")
-    public ApiResponse<Void> display(HttpServletRequest request, @PathVariable Long id, @RequestBody Map<String, Object> body) {
-        CurrentUser user = currentUser(request);
-        requireAdmin(user);
-        growthMapper.setDisplayEnabled(id, Boolean.TRUE.equals(body.get("displayEnabled")), user.getId());
-        return ApiResponse.ok(null);
-    }
-
-    @DeleteMapping("/api/admin/growth-reflections/{id}")
-    public ApiResponse<Void> delete(HttpServletRequest request, @PathVariable Long id) {
-        requireAdmin(currentUser(request));
-        growthMapper.delete(id);
-        return ApiResponse.ok(null);
-    }
-
     @GetMapping("/api/activities/{activityId}/growth-experience")
     public ApiResponse<Map<String, Object>> activityExperience(@PathVariable Long activityId) {
         Activity activity = activityMapper.findById(activityId).orElseThrow(() -> new BizException("活动不存在"));
@@ -129,7 +108,7 @@ public class GrowthReflectionController extends BaseController {
             if (aiModelClient.available()) {
                 try {
                     String answer = aiModelClient.chat("""
-                            请基于以下优秀成长感悟，生成“往届志愿者经验”，输出3到5条简洁建议，不得编造。
+                            请基于以下真实成长感悟，生成“往届志愿者经验”，输出3到5条简洁建议，不得编造。
                             活动：%s，类型：%s
                             感悟：%s
                             """.formatted(activity.getName(), activity.getCategory(), items));
@@ -190,12 +169,22 @@ public class GrowthReflectionController extends BaseController {
     }
 
     private String fallbackAdvice(List<Map<String, Object>> items) {
-        return items.stream().map(item -> "- " + clean(String.valueOf(item.getOrDefault("parsedAdvice", item.get("content")))))
+        String advice = items.stream().map(this::pickAdvice).filter(value -> !"无".equals(value))
+                .map(value -> "- " + value)
                 .limit(5).collect(Collectors.joining("\n"));
+        return advice.isBlank() ? "暂无往届志愿者经验" : advice;
     }
 
-    private void requireAdmin(CurrentUser user) {
-        if (user == null || !"ADMIN".equals(user.getRole())) throw new BizException("仅管理员可操作");
+    private String pickAdvice(Map<String, Object> item) {
+        String advice = clean(value(item.get("parsedAdvice")));
+        if (!"无".equals(advice)) return advice;
+        String experience = clean(value(item.get("parsedExperience")));
+        if (!"无".equals(experience)) return experience;
+        return clean(value(item.get("content")));
+    }
+
+    private String value(Object value) {
+        return value == null ? "" : String.valueOf(value);
     }
 
     private String sanitizeJson(String value) {

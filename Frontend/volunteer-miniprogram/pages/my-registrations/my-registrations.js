@@ -139,7 +139,7 @@ Page({
     const form = this.data.growthForm
     if (!item || this.data.submitting) return
     if (!String(form.content || '').trim()) {
-      wx.showToast({ title: '请填写成长感悟', icon: 'none' })
+      wx.showToast({ title: '请填写参与经验', icon: 'none' })
       return
     }
     this.setData({ submitting: true })

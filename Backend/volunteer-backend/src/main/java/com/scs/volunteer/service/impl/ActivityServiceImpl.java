@@ -5,10 +5,12 @@ import com.scs.volunteer.common.CurrentUser;
 import com.scs.volunteer.dto.ActivityDTO;
 import com.scs.volunteer.entity.Activity;
 import com.scs.volunteer.mapper.ActivityMapper;
+import com.scs.volunteer.mapper.NotificationMapper;
 import com.scs.volunteer.mapper.RegistrationMapper;
 import com.scs.volunteer.mapper.VolunteerMapper;
 import com.scs.volunteer.service.ActivityService;
 import com.scs.volunteer.service.ActivitySubscriptionService;
+import com.scs.volunteer.service.WechatMiniProgramService;
 import com.scs.volunteer.vo.ActivityDetailVO;
 import com.scs.volunteer.vo.VolunteerVO;
 import org.springframework.stereotype.Service;
@@ -25,13 +27,18 @@ public class ActivityServiceImpl implements ActivityService {
     private final RegistrationMapper registrationMapper;
     private final VolunteerMapper volunteerMapper;
     private final ActivitySubscriptionService activitySubscriptionService;
+    private final NotificationMapper notificationMapper;
+    private final WechatMiniProgramService wechatMiniProgramService;
 
     public ActivityServiceImpl(ActivityMapper activityMapper, RegistrationMapper registrationMapper, VolunteerMapper volunteerMapper,
-                               ActivitySubscriptionService activitySubscriptionService) {
+                               ActivitySubscriptionService activitySubscriptionService, NotificationMapper notificationMapper,
+                               WechatMiniProgramService wechatMiniProgramService) {
         this.activityMapper = activityMapper;
         this.registrationMapper = registrationMapper;
         this.volunteerMapper = volunteerMapper;
         this.activitySubscriptionService = activitySubscriptionService;
+        this.notificationMapper = notificationMapper;
+        this.wechatMiniProgramService = wechatMiniProgramService;
     }
 
     @Override
@@ -122,8 +129,21 @@ public class ActivityServiceImpl implements ActivityService {
     @Override
     public void finish(Long id, CurrentUser currentUser) {
         requireAdmin(currentUser);
-        detail(id);
+        Activity activity = detail(id);
         activityMapper.updateStatus(id, "已结束");
+        registrationMapper.markActivityCompleted(id, "活动结束，系统开放评价与成长经验填写");
+        notifyParticipantsToReflect(activity);
+    }
+
+    private void notifyParticipantsToReflect(Activity activity) {
+        for (Long userId : activityMapper.participantUserIds(activity.getId())) {
+            notificationMapper.insert(userId, "ACTIVITY_REVIEW_REMINDER", "活动已结束，请完成反馈",
+                    "你参与的「" + activity.getName() + "」已结束，可以前往活动详情进行评价打分，并填写本次参与经验。",
+                    "ACTIVITY", activity.getId());
+        }
+        for (String openid : activityMapper.participantOpenids(activity.getId())) {
+            wechatMiniProgramService.sendActivityReviewReminder(openid, activity);
+        }
     }
 
     @Override

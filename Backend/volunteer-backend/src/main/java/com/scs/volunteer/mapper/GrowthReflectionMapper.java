@@ -3,7 +3,6 @@ package com.scs.volunteer.mapper;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 
@@ -43,36 +42,10 @@ public class GrowthReflectionMapper {
                 select g.id,g.activity_id as activityId,g.content,g.anonymous,
                        g.parsed_gain as parsedGain,g.parsed_ability as parsedAbility,
                        g.parsed_experience as parsedExperience,g.parsed_advice as parsedAdvice,
-                       g.recommended as displayEnabled,g.created_at as createdAt,a.name as activityName,a.category
+                       g.created_at as createdAt,a.name as activityName,a.category
                 from volunteer_growth_reflection g join activity a on a.id=g.activity_id
                 where g.user_id=? order by g.created_at desc
                 """, userId);
-    }
-
-    public List<Map<String, Object>> adminList(Long activityId) {
-        return jdbcTemplate.queryForList("""
-                select g.id,g.activity_id as activityId,g.content,g.anonymous,
-                       g.parsed_gain as parsedGain,g.parsed_ability as parsedAbility,
-                       g.parsed_experience as parsedExperience,g.parsed_advice as parsedAdvice,
-                       g.recommended as displayEnabled,g.created_at as createdAt,a.name as activityName,a.category,
-                       if(g.anonymous=1,'匿名志愿者',u.name) as volunteerName
-                from volunteer_growth_reflection g
-                join activity a on a.id=g.activity_id join user u on u.id=g.user_id
-                where (? is null or g.activity_id=?)
-                order by g.created_at desc
-                """, activityId, activityId);
-    }
-
-    public void setDisplayEnabled(Long id, boolean enabled, Long adminId) {
-        jdbcTemplate.update("""
-                update volunteer_growth_reflection
-                set recommended=?,recommended_by=?,recommended_at=?
-                where id=?
-                """, enabled, enabled ? adminId : null, enabled ? LocalDateTime.now() : null, id);
-    }
-
-    public void delete(Long id) {
-        jdbcTemplate.update("delete from volunteer_growth_reflection where id=?", id);
     }
 
     public List<Map<String, Object>> recommended(Long activityId, String category, int limit) {
@@ -81,11 +54,13 @@ public class GrowthReflectionMapper {
                        g.parsed_experience as parsedExperience,g.parsed_advice as parsedAdvice,
                        a.name as activityName,a.category
                 from volunteer_growth_reflection g join activity a on a.id=g.activity_id
-                where g.recommended=1
-                  and ((? is not null and g.activity_id=?) or (? is not null and a.category=?))
-                order by case when g.activity_id=? then 0 else 1 end,g.recommended_at desc
+                where (? is null or g.activity_id<>?)
+                  and (? is null or a.category=?)
+                  and ((coalesce(g.parsed_experience,'')<>'' and g.parsed_experience<>'无')
+                       or (coalesce(g.parsed_advice,'')<>'' and g.parsed_advice<>'无'))
+                order by g.created_at desc
                 limit ?
-                """, activityId, activityId, n(category), n(category), activityId, limit);
+                """, activityId, activityId, n(category), n(category), limit);
     }
 
     public Map<String, Object> profileStats(Long userId) {

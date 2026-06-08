@@ -57,6 +57,7 @@ app:
     appid: ${WECHAT_MINIAPP_APPID:wx0a33c2af7b3e97e8}
     secret: ${WECHAT_MINIAPP_SECRET:}
     activity-reminder-template-id: ${WECHAT_ACTIVITY_REMINDER_TEMPLATE_ID:3MyIDa1qmvqiDyydT6aQrnCrYrKvz8aq92raqwL0Qq4}
+    activity-review-template-id: ${WECHAT_ACTIVITY_REVIEW_TEMPLATE_ID:llzSkIXycuVZvp_JsaB36o80EhkKdAdFHbrvffvlSrQ}
   mail:
     enabled: ${ACTIVITY_MAIL_ENABLED:true}
     from: ${ACTIVITY_MAIL_FROM:${MAIL_USERNAME:}}

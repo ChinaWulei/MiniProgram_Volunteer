@@ -105,6 +105,22 @@ public class WechatMiniProgramService {
         }
     }
 
+    public boolean sendActivityReviewReminder(String openid, Activity activity) {
+        if (blank(openid) || !configured() || blank(properties.getActivityReviewTemplateId())) {
+            return false;
+        }
+        Map<String, Object> payload = new LinkedHashMap<>();
+        payload.put("touser", openid);
+        payload.put("template_id", properties.getActivityReviewTemplateId());
+        payload.put("page", "pages/activity-detail/activity-detail?id=" + activity.getId());
+        payload.put("data", Map.of(
+                "thing1", Map.of("value", limit(activity.getName(), 20)),
+                "thing3", Map.of("value", "请评价打分并填写参与经验"),
+                "time2", Map.of("value", format(activity.getEndTime()))
+        ));
+        return sendSubscribeMessage(openid, activity, properties.getActivityReviewTemplateId(), payload);
+    }
+
     private String accessToken() {
         long now = System.currentTimeMillis();
         if (!blank(accessToken) && now < accessTokenExpireAt) {
@@ -123,6 +139,38 @@ public class WechatMiniProgramService {
         accessToken = String.valueOf(token);
         accessTokenExpireAt = now + Math.max(60, expiresIn - 300) * 1000;
         return accessToken;
+    }
+
+    private boolean sendSubscribeMessage(String openid, Activity activity, String templateId, Map<String, Object> payload) {
+        try {
+            String requestBody = objectMapper.writeValueAsString(payload);
+            WechatResponse response = restClient.post()
+                    .uri("https://api.weixin.qq.com/cgi-bin/message/subscribe/send?access_token=" + accessToken())
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .accept(MediaType.APPLICATION_JSON)
+                    .body(requestBody)
+                    .exchange((request, clientResponse) -> new WechatResponse(
+                            clientResponse.getStatusCode().value(),
+                            StreamUtils.copyToString(clientResponse.getBody(), StandardCharsets.UTF_8)
+                    ));
+            String body = response.body();
+            if (response.statusCode() < 200 || response.statusCode() >= 300) {
+                log.warn("Wechat subscribe HTTP failed, status={}, body={}, templateId={}, openidTail={}, activityId={}, payload={}",
+                        response.statusCode(), body, templateId, tail(openid), activity.getId(), requestBody);
+                return false;
+            }
+            Map<String, Object> result = parse(body);
+            Object errcode = result.get("errcode");
+            boolean ok = errcode instanceof Number number && number.intValue() == 0;
+            if (!ok) {
+                log.warn("Wechat subscribe message failed, body={}, templateId={}, openidTail={}, activityId={}, payload={}",
+                        body, templateId, tail(openid), activity.getId(), requestBody);
+            }
+            return ok;
+        } catch (Exception e) {
+            log.warn("Wechat subscribe message failed for activity {}", activity.getId(), e);
+            return false;
+        }
     }
 
     private Map<String, Object> parse(String body) {

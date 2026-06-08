@@ -168,6 +168,14 @@ public class RegistrationMapper {
                 """, remark, activityId, userId);
     }
 
+    public void markActivityCompleted(Long activityId, String remark) {
+        jdbcTemplate.update("""
+                update registration
+                set status='已完成',review_remark=coalesce(?,review_remark)
+                where activity_id=? and status in ('已通过','已完成')
+                """, remark, activityId);
+    }
+
     public void delete(Long id) {
         jdbcTemplate.update("delete from registration where id=?", id);
     }

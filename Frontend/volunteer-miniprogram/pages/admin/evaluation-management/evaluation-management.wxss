@@ -19,6 +19,8 @@
 .dot { flex: 0 0 20rpx; color: #0f766e; font-weight: 800; }
 .line-text { flex: 1; min-width: 0; color: #344054; }
 .admin-evaluation-tip { margin-top: 12rpx; padding: 14rpx; border-radius: 14rpx; color: #667085; background: #f2f4f7; font-size: 22rpx; }
+.delete-btn { width: 136rpx; height: 54rpx; line-height: 54rpx; margin: 14rpx 0 0; padding: 0; border-radius: 14rpx; color: #dc2626; background: #fee2e2; font-size: 22rpx; }
+.delete-btn::after { border: 0; }
 .actions { display: flex; flex-wrap: wrap; gap: 10rpx; margin-top: 12rpx; }
 .actions button { width: auto; height: 54rpx; line-height: 54rpx; margin: 0; padding: 0 16rpx; border-radius: 14rpx; color: #0f766e; background: #eefaf7; font-size: 22rpx; }
 .empty { color: #98a2b3; text-align: center; }

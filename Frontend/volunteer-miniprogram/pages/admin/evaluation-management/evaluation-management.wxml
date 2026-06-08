@@ -31,6 +31,7 @@
         <view class="content">{{fb.content}}</view>
         <view wx:if="{{fb.canAdopt}}" class="ai">活动评价内容：{{fb.parsedOverall || '无'}}&#10;活动优点：{{fb.parsedAdvantages || '无'}}&#10;活动不足：{{fb.parsedProblems || '无'}}&#10;改进建议：{{fb.parsedSuggestions || '无'}}</view>
         <view wx:else class="admin-evaluation-tip">这是管理员对志愿者的履约评价。</view>
+        <button class="delete-btn" data-activity-id="{{item.id}}" data-id="{{fb.id}}" bindtap="deleteEvaluation">删除评价</button>
       </view>
 
       <view wx:if="{{item.feedbackLoaded && (!item.feedback || item.feedback.length === 0)}}" class="empty">该活动暂无志愿者评价</view>

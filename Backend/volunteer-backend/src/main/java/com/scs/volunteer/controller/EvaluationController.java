@@ -84,6 +84,28 @@ public class EvaluationController extends BaseController {
         return ApiResponse.ok(evaluationMapper.byActivity(activityId));
     }
 
+    @GetMapping("/public")
+    public ApiResponse<List<Map<String, Object>>> publicList(@PathVariable Long activityId) {
+        activityMapper.findById(activityId).orElseThrow(() -> new BizException("活动不存在"));
+        return ApiResponse.ok(evaluationMapper.publicByActivity(activityId));
+    }
+
+    @DeleteMapping("/{evaluationId}")
+    public ApiResponse<Void> delete(@PathVariable Long activityId, @PathVariable Long evaluationId,
+                                    HttpServletRequest request) {
+        requireAdmin(request);
+        Map<String, Object> evaluation = evaluationMapper.find(evaluationId);
+        Long storedActivityId = ((Number) evaluation.get("activity_id")).longValue();
+        if (!activityId.equals(storedActivityId)) throw new BizException("评价不属于当前活动");
+        String targetType = text(evaluation.get("target_type"), "");
+        Long evaluatorId = ((Number) evaluation.get("evaluator_id")).longValue();
+        evaluationMapper.delete(evaluationId);
+        if ("ACTIVITY".equals(targetType) || "LEADER".equals(targetType)) {
+            growthReflectionMapper.deleteByActivityAndUser(activityId, evaluatorId);
+        }
+        return ApiResponse.ok(null);
+    }
+
     @GetMapping("/feedback")
     public ApiResponse<List<Map<String, Object>>> feedback(@PathVariable Long activityId, HttpServletRequest request) {
         requireAdmin(request);

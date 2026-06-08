@@ -54,6 +54,10 @@ public class GrowthReflectionMapper {
                 parsed.get("gain"), parsed.get("ability"), parsed.get("experience"), parsed.get("advice"));
     }
 
+    public void deleteByActivityAndUser(Long activityId, Long userId) {
+        jdbcTemplate.update("delete from volunteer_growth_reflection where activity_id=? and user_id=?", activityId, userId);
+    }
+
     public List<Map<String, Object>> my(Long userId) {
         return jdbcTemplate.queryForList("""
                 select g.id,g.activity_id as activityId,g.content,g.anonymous,

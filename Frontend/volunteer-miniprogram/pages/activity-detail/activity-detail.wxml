@@ -124,6 +124,22 @@
     </view>
   </view>
 
+  <view class="detail-section">
+    <view class="section-title">活动评价</view>
+    <view class="public-eval-card" wx:for="{{publicEvaluations}}" wx:key="id">
+      <view class="public-eval-head">
+        <text class="public-eval-user">{{item.evaluatorText}}</text>
+        <text class="public-eval-score">{{item.score}} 星</text>
+      </view>
+      <view class="public-eval-content">{{item.content || '该用户仅进行了评分'}}</view>
+      <view class="public-eval-bottom">
+        <text>{{item.createdText}}</text>
+        <button wx:if="{{isAdmin}}" class="delete-eval-btn" data-id="{{item.id}}" bindtap="deleteEvaluation">删除</button>
+      </view>
+    </view>
+    <view wx:if="{{publicEvaluations.length === 0}}" class="empty-reg">暂无活动评价</view>
+  </view>
+
   <view wx:if="{{showCancel}}" class="mask" bindtap="closeCancel"></view>
   <view wx:if="{{showCancel}}" class="cancel-panel">
     <view class="panel-title">取消 {{cancelItem.userText}} 的报名</view>

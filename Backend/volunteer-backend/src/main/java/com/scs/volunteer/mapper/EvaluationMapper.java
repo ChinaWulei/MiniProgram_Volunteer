@@ -81,6 +81,23 @@ public class EvaluationMapper {
                 """, activityId);
     }
 
+    public List<Map<String, Object>> publicByActivity(Long activityId) {
+        return jdbcTemplate.queryForList("""
+                select e.id,e.score,e.content,e.anonymous,e.created_at as createdAt,
+                       if(e.anonymous=1,'匿名志愿者',u.name) as evaluatorName
+                from activity_evaluation e
+                join user u on u.id=e.evaluator_id
+                where e.activity_id=?
+                  and u.role='VOLUNTEER'
+                  and e.target_type in ('ACTIVITY','LEADER')
+                order by e.created_at desc
+                """, activityId);
+    }
+
+    public void delete(Long id) {
+        jdbcTemplate.update("delete from activity_evaluation where id=?", id);
+    }
+
     public List<Map<String, Object>> my(Long userId) {
         return jdbcTemplate.queryForList("""
                 select e.id,e.activity_id as activityId,e.target_type as targetType,e.score,e.content,e.anonymous,

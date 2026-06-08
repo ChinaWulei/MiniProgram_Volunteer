@@ -79,5 +79,30 @@ Page({
       .filter(Boolean)
     if (lines.length > 1) return lines
     return raw.split(/[。；;]/).map(item => item.trim()).filter(Boolean)
+  },
+  deleteEvaluation(e) {
+    const activityId = Number(e.currentTarget.dataset.activityId)
+    const id = Number(e.currentTarget.dataset.id)
+    const index = this.data.activities.findIndex(item => Number(item.id) === activityId)
+    if (index < 0 || !id) return
+    wx.showModal({
+      title: '删除评价',
+      content: '确定删除这条评价吗？删除后对应提炼经验也会移除。',
+      success: res => {
+        if (!res.confirm) return
+        request({ url: `/api/activities/${activityId}/evaluations/${id}`, method: 'DELETE' })
+          .then(() => {
+            wx.showToast({ title: '已删除' })
+            this.setData({
+              [`activities[${index}].feedbackLoaded`]: false,
+              [`activities[${index}].evaluationCount`]: Math.max(0, Number(this.data.activities[index].evaluationCount || 0) - 1),
+              [`activities[${index}].summaryText`]: '',
+              [`activities[${index}].summaryItems`]: []
+            })
+            this.loadFeedback(activityId, index)
+          })
+          .catch(() => {})
+      }
+    })
   }
 })

@@ -9,6 +9,7 @@ Page({
     skills: [],
     checkin: {},
     registrations: [],
+    publicEvaluations: [],
     showCancel: false,
     cancelItem: null,
     cancelReason: '',
@@ -74,6 +75,7 @@ Page({
         this.refreshButton(activity)
         if (!this.data.isAdmin) this.loadCheckinStatus()
         this.loadGrowthExperience()
+        this.loadActivityEvaluations()
         if (this.data.isAdmin) this.loadRegistrations()
       })
       .catch(() => {})
@@ -111,6 +113,16 @@ Page({
   loadGrowthExperience() {
     request({ url: `/api/activities/${this.data.id}/growth-experience`, silent: true })
       .then(data => this.setData({ growthAdvice: data.advice || '', excellentReflections: data.items || [] }))
+      .catch(() => {})
+  },
+  loadActivityEvaluations() {
+    request({ url: `/api/activities/${this.data.id}/evaluations/public`, silent: true })
+      .then(list => this.setData({
+        publicEvaluations: (list || []).map(item => Object.assign({}, item, {
+          createdText: this.formatTime(item.createdAt || item.created_at),
+          evaluatorText: item.evaluatorName || item.evaluator_name || '匿名志愿者'
+        }))
+      }))
       .catch(() => {})
   },
   splitTags(tags) {
@@ -423,8 +435,27 @@ Page({
       .then(() => {
         wx.showToast({ title: '评价成功' })
         this.setData({ evaluationContent: '', evaluationScore: 5, evaluationAnonymous: false, evaluationTargetUserId: null })
+        this.loadActivityEvaluations()
+        this.loadGrowthExperience()
       })
       .catch(() => {})
+  },
+  deleteEvaluation(e) {
+    const id = e.currentTarget.dataset.id
+    wx.showModal({
+      title: '删除评价',
+      content: '确定删除这条评价吗？删除后对应提炼经验也会移除。',
+      success: res => {
+        if (!res.confirm) return
+        request({ url: `/api/activities/${this.data.id}/evaluations/${id}`, method: 'DELETE' })
+          .then(() => {
+            wx.showToast({ title: '已删除' })
+            this.loadActivityEvaluations()
+            this.loadGrowthExperience()
+          })
+          .catch(() => {})
+      }
+    })
   },
   submitRegEvaluation(e) {
     const id = e.currentTarget.dataset.id

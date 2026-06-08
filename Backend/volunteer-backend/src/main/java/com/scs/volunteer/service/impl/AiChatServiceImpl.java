@@ -116,16 +116,7 @@ public class AiChatServiceImpl implements AiChatService {
             response.setAnswer("暂时没有找到可报名且匹配度较高的活动，我不会编造平台中不存在的活动。");
             return response;
         }
-        String prompt = """
-                你是校园志愿服务小程序的活动推荐助手。请只基于给定用户画像、历史报名和候选活动推荐，不要编造不存在的活动。
-                用户问题：%s
-                用户画像：%s
-                历史参与活动：%s
-                可报名活动：%s
-
-                请输出 2-3 个推荐活动和理由，简洁自然。
-                """.formatted(message, profileText(profile), history, candidatesText(candidates));
-        response.setAnswer(chatOrFallback(prompt, recommendFallback(candidates)));
+        response.setAnswer(recommendationAnswer(recommendations));
         return response;
     }
 
@@ -535,6 +526,21 @@ public class AiChatServiceImpl implements AiChatService {
     private String recommendFallback(List<AiActivityCandidateVO> candidates) {
         AiActivityCandidateVO first = candidates.get(0);
         return "根据你的技能、可服务时间和历史参与情况，优先推荐「" + first.getName() + "」。" + first.getReason() + "。";
+    }
+
+    private String recommendationAnswer(List<AiRecommendedActivityVO> recommendations) {
+        StringBuilder answer = new StringBuilder("根据你的需求和平台当前可报名活动，推荐：");
+        for (int i = 0; i < recommendations.size(); i++) {
+            AiRecommendedActivityVO item = recommendations.get(i);
+            answer.append("\n")
+                    .append(i + 1)
+                    .append(". 「")
+                    .append(item.getTitle())
+                    .append("」：")
+                    .append(safe(item.getReason()));
+        }
+        answer.append("\n\n下方活动卡片与以上推荐一一对应，可直接查看详情。");
+        return answer.toString();
     }
 
     private String monthlyFallback(Map<String, Object> stats, List<Map<String, Object>> categoryStats) {

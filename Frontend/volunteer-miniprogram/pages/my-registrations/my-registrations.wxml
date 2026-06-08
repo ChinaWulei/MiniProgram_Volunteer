@@ -18,7 +18,6 @@
       <view class="muted" wx:if="{{item.review_remark}}">报名审核意见：{{item.review_remark}}</view>
     </view>
     <button wx:if="{{item.canApplyAdjustment}}" class="apply-btn" catchtap="openApply" data-index="{{index}}">申请补签</button>
-    <button wx:if="{{item.canWriteGrowth}}" class="growth-btn" catchtap="openGrowth" data-index="{{index}}">填写参与经验</button>
   </view>
   <view class="card muted" wx:if="{{list.length === 0}}">暂无报名记录</view>
 
@@ -36,21 +35,6 @@
     <view class="panel-actions">
       <button class="ghost-btn" bindtap="closeApply">取消</button>
       <button class="primary-btn" bindtap="submitApply" loading="{{submitting}}">提交</button>
-    </view>
-  </view>
-
-  <view wx:if="{{showGrowth}}" class="mask" bindtap="closeGrowth"></view>
-  <view wx:if="{{showGrowth}}" class="apply-panel">
-    <view class="panel-title">填写参与经验</view>
-    <view class="panel-sub">{{growthItem.activity_name}}</view>
-    <textarea placeholder="请分享本次活动中的收获与经验，例如：你学到了什么、遇到了什么问题、有什么参与经验、对后续参加类似活动的同学有什么建议" value="{{growthForm.content}}" bindinput="inputGrowth" maxlength="-1"></textarea>
-    <view class="switch-row">
-      <text>匿名提交</text>
-      <switch checked="{{growthForm.anonymous}}" bindchange="toggleGrowthAnonymous" color="#0f766e" />
-    </view>
-    <view class="panel-actions">
-      <button class="ghost-btn" bindtap="closeGrowth">取消</button>
-      <button class="primary-btn" bindtap="submitGrowth" loading="{{submitting}}">提交</button>
     </view>
   </view>
 </view>

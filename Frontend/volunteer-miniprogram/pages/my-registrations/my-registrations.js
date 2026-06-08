@@ -29,8 +29,7 @@ function normalize(item) {
     checkinStatus,
     checkinStatusText: statusText(checkinStatus),
     adjustmentStatusText: auditText(auditStatus),
-    canApplyAdjustment: ['ABSENT', 'LATE_CHECKED_IN'].indexOf(checkinStatus) >= 0 && auditStatus !== 'PENDING' && auditStatus !== 'APPROVED',
-    canWriteGrowth: item.status === '已完成'
+    canApplyAdjustment: ['ABSENT', 'LATE_CHECKED_IN'].indexOf(checkinStatus) >= 0 && auditStatus !== 'PENDING' && auditStatus !== 'APPROVED'
   })
 }
 
@@ -40,9 +39,6 @@ Page({
     showApply: false,
     applyItem: null,
     applyForm: { reason: '', description: '', proofImageUrl: '' },
-    showGrowth: false,
-    growthItem: null,
-    growthForm: { content: '', anonymous: false },
     uploading: false,
     submitting: false
   },
@@ -116,45 +112,4 @@ Page({
       this.load()
     }).finally(() => this.setData({ submitting: false }))
   },
-  openGrowth(e) {
-    const item = this.data.list[e.currentTarget.dataset.index]
-    this.setData({
-      showGrowth: true,
-      growthItem: item,
-      growthForm: { content: '', anonymous: false }
-    })
-  },
-  closeGrowth() {
-    if (this.data.submitting) return
-    this.setData({ showGrowth: false, growthItem: null })
-  },
-  inputGrowth(e) {
-    this.setData({ 'growthForm.content': e.detail.value })
-  },
-  toggleGrowthAnonymous(e) {
-    this.setData({ 'growthForm.anonymous': e.detail.value })
-  },
-  submitGrowth() {
-    const item = this.data.growthItem
-    const form = this.data.growthForm
-    if (!item || this.data.submitting) return
-    if (!String(form.content || '').trim()) {
-      wx.showToast({ title: '请填写参与经验', icon: 'none' })
-      return
-    }
-    this.setData({ submitting: true })
-    request({
-      url: '/api/growth-reflections',
-      method: 'POST',
-      data: {
-        activityId: item.activity_id || item.activityId,
-        content: form.content,
-        anonymous: form.anonymous
-      }
-    }).then(() => {
-      wx.showToast({ title: '已保存' })
-      this.closeGrowth()
-      this.load()
-    }).finally(() => this.setData({ submitting: false }))
-  }
 })

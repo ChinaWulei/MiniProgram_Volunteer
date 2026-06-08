@@ -10,6 +10,7 @@ import com.scs.volunteer.entity.Activity;
 import com.scs.volunteer.mapper.ActivityMapper;
 import com.scs.volunteer.mapper.CreditMapper;
 import com.scs.volunteer.mapper.EvaluationMapper;
+import com.scs.volunteer.mapper.GrowthReflectionMapper;
 import com.scs.volunteer.mapper.RegistrationMapper;
 import com.scs.volunteer.service.AiModelClient;
 import jakarta.servlet.http.HttpServletRequest;
@@ -27,16 +28,18 @@ public class EvaluationController extends BaseController {
     private final ActivityMapper activityMapper;
     private final EvaluationMapper evaluationMapper;
     private final CreditMapper creditMapper;
+    private final GrowthReflectionMapper growthReflectionMapper;
     private final AiModelClient aiModelClient;
     private final RegistrationMapper registrationMapper;
     private final ObjectMapper objectMapper;
 
     public EvaluationController(ActivityMapper activityMapper, EvaluationMapper evaluationMapper, CreditMapper creditMapper,
-                                AiModelClient aiModelClient, RegistrationMapper registrationMapper,
+                                GrowthReflectionMapper growthReflectionMapper, AiModelClient aiModelClient, RegistrationMapper registrationMapper,
                                 ObjectMapper objectMapper) {
         this.activityMapper = activityMapper;
         this.evaluationMapper = evaluationMapper;
         this.creditMapper = creditMapper;
+        this.growthReflectionMapper = growthReflectionMapper;
         this.aiModelClient = aiModelClient;
         this.registrationMapper = registrationMapper;
         this.objectMapper = objectMapper;
@@ -65,6 +68,10 @@ public class EvaluationController extends BaseController {
             Map<String, String> parsed = parseEvaluation(dto.getContent());
             evaluationMapper.saveAnalysis(id, parsed.get("overall"), parsed.get("advantages"),
                     parsed.get("problems"), parsed.get("suggestions"), "DONE");
+            if (!text(dto.getContent(), "").isBlank()) {
+                growthReflectionMapper.saveFromEvaluation(activityId, user.getId(), dto.getContent(),
+                        Boolean.TRUE.equals(dto.getAnonymous()), parseGrowthExperience(dto.getContent(), parsed));
+            }
         }
         applyCredit(user, activityId, dto);
         return ApiResponse.ok(Map.of("id", id));
@@ -177,6 +184,49 @@ public class EvaluationController extends BaseController {
             result.put("suggestions", trim(text));
         }
         return result;
+    }
+
+    private Map<String, String> parseGrowthExperience(String content, Map<String, String> evaluationParsed) {
+        String text = text(content, "");
+        Map<String, String> result = new LinkedHashMap<>();
+        result.put("gain", normalizeParsed(evaluationParsed.getOrDefault("overall", text)));
+        result.put("ability", "无");
+        result.put("experience", normalizeExperience(text, evaluationParsed.get("suggestions")));
+        result.put("advice", normalizeExperience(text, evaluationParsed.get("suggestions")));
+        if (!aiModelClient.available()) {
+            return result;
+        }
+        try {
+            String answer = aiModelClient.chat("""
+                    你是志愿服务经验提炼助手。请只基于用户评价内容提炼可复用经验，不得编造。
+                    未提及的字段填“无”，只输出 JSON。
+                    字段固定：{"gain":"主要收获","ability":"能力成长","experience":"参与经验","advice":"给后续志愿者的建议"}
+                    用户评价：%s
+                    """.formatted(text));
+            Map<String, String> parsed = objectMapper.readValue(sanitizeJson(answer), new TypeReference<>() {});
+            result.replaceAll((key, value) -> normalizeParsed(parsed.get(key)));
+            if ("无".equals(result.get("experience")) && !"无".equals(result.get("advice"))) {
+                result.put("experience", result.get("advice"));
+            }
+            if ("无".equals(result.get("advice")) && !"无".equals(result.get("experience"))) {
+                result.put("advice", result.get("experience"));
+            }
+        } catch (Exception ignored) {
+            return result;
+        }
+        return result;
+    }
+
+    private String normalizeExperience(String content, String suggestion) {
+        String candidate = normalizeParsed(suggestion);
+        if (!"无".equals(candidate)) return candidate;
+        String text = text(content, "");
+        if (text.contains("建议") || text.contains("希望") || text.contains("下次")
+                || text.contains("提前") || text.contains("带") || text.contains("准备")
+                || text.length() <= 80) {
+            return trim(text);
+        }
+        return "无";
     }
 
     private String sanitizeJson(String text) {

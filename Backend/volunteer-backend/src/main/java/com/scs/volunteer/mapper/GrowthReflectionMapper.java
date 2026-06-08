@@ -37,6 +37,23 @@ public class GrowthReflectionMapper {
                 """, parsed.get("gain"), parsed.get("ability"), parsed.get("experience"), parsed.get("advice"), id);
     }
 
+    public void saveFromEvaluation(Long activityId, Long userId, String content, boolean anonymous, Map<String, String> parsed) {
+        jdbcTemplate.update("""
+                insert into volunteer_growth_reflection(activity_id,user_id,content,anonymous,
+                    parsed_gain,parsed_ability,parsed_experience,parsed_advice,analysis_status)
+                values(?,?,?,?,?,?,?,?, 'DONE')
+                on duplicate key update
+                    content=values(content),
+                    anonymous=values(anonymous),
+                    parsed_gain=values(parsed_gain),
+                    parsed_ability=values(parsed_ability),
+                    parsed_experience=values(parsed_experience),
+                    parsed_advice=values(parsed_advice),
+                    analysis_status='DONE'
+                """, activityId, userId, content, anonymous,
+                parsed.get("gain"), parsed.get("ability"), parsed.get("experience"), parsed.get("advice"));
+    }
+
     public List<Map<String, Object>> my(Long userId) {
         return jdbcTemplate.queryForList("""
                 select g.id,g.activity_id as activityId,g.content,g.anonymous,

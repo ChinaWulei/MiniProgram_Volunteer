@@ -16,9 +16,6 @@ Page({
     evaluationScore: 5,
     evaluationContent: '',
     evaluationAnonymous: false,
-    showGrowth: false,
-    growthContent: '',
-    growthAnonymous: false,
     growthAdvice: '',
     excellentReflections: [],
     evaluationTargetUserId: null,
@@ -428,33 +425,6 @@ Page({
         this.setData({ evaluationContent: '', evaluationScore: 5, evaluationAnonymous: false, evaluationTargetUserId: null })
       })
       .catch(() => {})
-  },
-  openGrowth() {
-    this.setData({ showGrowth: true, growthContent: '', growthAnonymous: false })
-  },
-  closeGrowth() {
-    this.setData({ showGrowth: false })
-  },
-  inputGrowth(e) {
-    this.setData({ growthContent: e.detail.value })
-  },
-  toggleGrowthAnonymous(e) {
-    this.setData({ growthAnonymous: e.detail.value })
-  },
-  submitGrowth() {
-    const content = String(this.data.growthContent || '').trim()
-    if (!content) {
-      wx.showToast({ title: '请填写参与经验', icon: 'none' })
-      return
-    }
-    request({
-      url: '/api/growth-reflections',
-      method: 'POST',
-      data: { activityId: this.data.id, content, anonymous: this.data.growthAnonymous }
-    }).then(() => {
-      wx.showToast({ title: '已保存' })
-      this.closeGrowth()
-    }).catch(() => {})
   },
   submitRegEvaluation(e) {
     const id = e.currentTarget.dataset.id

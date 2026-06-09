@@ -18,7 +18,15 @@ import com.scs.volunteer.mapper.ServiceRecordMapper;
 import com.scs.volunteer.mapper.VolunteerMapper;
 import com.scs.volunteer.service.RegistrationService;
 import org.springframework.stereotype.Service;
+import org.apache.poi.ss.usermodel.CellStyle;
+import org.apache.poi.ss.usermodel.FillPatternType;
+import org.apache.poi.ss.usermodel.Font;
+import org.apache.poi.ss.usermodel.IndexedColors;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
+import java.io.ByteArrayOutputStream;
 import java.time.Duration;
 import java.util.Arrays;
 import java.util.List;
@@ -145,6 +153,69 @@ public class RegistrationServiceImpl implements RegistrationService {
             throw new BizException("仅管理员可查看系别列表");
         }
         return registrationMapper.departments();
+    }
+
+    @Override
+    public byte[] exportApproved(Long activityId, CurrentUser currentUser) {
+        if (currentUser == null || !"ADMIN".equals(currentUser.getRole())) {
+            throw new BizException("仅管理员可导出录取名单");
+        }
+        Activity activity = activityMapper.findById(activityId)
+                .orElseThrow(() -> new BizException("活动不存在"));
+        List<Map<String, Object>> rows = registrationMapper.approvedExportList(activityId);
+        try (XSSFWorkbook workbook = new XSSFWorkbook();
+             ByteArrayOutputStream output = new ByteArrayOutputStream()) {
+            Sheet sheet = workbook.createSheet("录取名单");
+            String[] headers = {
+                    "序号", "活动名称", "姓名", "学号", "手机号", "学院", "校区", "系别",
+                    "班级", "岗位", "技能", "信用分", "累计服务时长", "需要交通", "上车点", "报名状态", "报名时间"
+            };
+            CellStyle headerStyle = workbook.createCellStyle();
+            headerStyle.setFillForegroundColor(IndexedColors.LIGHT_GREEN.getIndex());
+            headerStyle.setFillPattern(FillPatternType.SOLID_FOREGROUND);
+            Font headerFont = workbook.createFont();
+            headerFont.setBold(true);
+            headerStyle.setFont(headerFont);
+
+            Row header = sheet.createRow(0);
+            for (int i = 0; i < headers.length; i++) {
+                header.createCell(i).setCellValue(headers[i]);
+                header.getCell(i).setCellStyle(headerStyle);
+            }
+            for (int i = 0; i < rows.size(); i++) {
+                Map<String, Object> item = rows.get(i);
+                Row row = sheet.createRow(i + 1);
+                int column = 0;
+                row.createCell(column++).setCellValue(i + 1);
+                row.createCell(column++).setCellValue(activity.getName());
+                row.createCell(column++).setCellValue(text(item.get("userName")));
+                row.createCell(column++).setCellValue(text(item.get("identityNo")));
+                row.createCell(column++).setCellValue(text(item.get("phone")));
+                row.createCell(column++).setCellValue(text(item.get("college")));
+                row.createCell(column++).setCellValue(text(item.get("campus")));
+                row.createCell(column++).setCellValue(text(item.get("department")));
+                row.createCell(column++).setCellValue(text(item.get("majorClass")));
+                row.createCell(column++).setCellValue(text(item.get("positionName")));
+                row.createCell(column++).setCellValue(text(item.get("skillTags")));
+                row.createCell(column++).setCellValue(number(item.get("creditScore"), 0));
+                row.createCell(column++).setCellValue(number(item.get("totalHours"), 0));
+                row.createCell(column++).setCellValue(booleanValue(item.get("transportRequired")) ? "是" : "否");
+                row.createCell(column++).setCellValue(text(item.get("boardingPoint")));
+                row.createCell(column++).setCellValue(text(item.get("status")));
+                row.createCell(column).setCellValue(text(item.get("signupTime")));
+            }
+            sheet.createFreezePane(0, 1);
+            sheet.setAutoFilter(new org.apache.poi.ss.util.CellRangeAddress(
+                    0, Math.max(0, rows.size()), 0, headers.length - 1));
+            for (int i = 0; i < headers.length; i++) {
+                sheet.autoSizeColumn(i);
+                sheet.setColumnWidth(i, Math.min(sheet.getColumnWidth(i) + 800, 12000));
+            }
+            workbook.write(output);
+            return output.toByteArray();
+        } catch (Exception e) {
+            throw new BizException("录取名单生成失败");
+        }
     }
 
     private Map<String, Object> enrichReviewInfo(Map<String, Object> row,

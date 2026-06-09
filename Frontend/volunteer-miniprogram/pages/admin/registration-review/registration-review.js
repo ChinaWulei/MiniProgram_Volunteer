@@ -20,9 +20,9 @@ Page({
     status: '',
     statuses: ['全部', '待审核', '已通过', '已拒绝'],
     department: '',
-    departments: ['全部'],
+    departments: ['全部', '数学系', '计算机系'],
     priorityDepartment: '',
-    priorityDepartments: ['不设置'],
+    priorityDepartments: ['不设置', '数学系', '计算机系'],
     showCancel: false,
     cancelItem: null,
     cancelReason: ''
@@ -56,10 +56,16 @@ Page({
   },
   loadDepartments() {
     request({ url: '/api/registrations/admin/departments', silent: true })
-      .then(list => this.setData({
-        departments: ['全部'].concat(list || []),
-        priorityDepartments: ['不设置'].concat(list || [])
-      }))
+      .then(list => {
+        const departments = ['数学系', '计算机系']
+        ;(list || []).forEach(item => {
+          if (item && departments.indexOf(item) < 0) departments.push(item)
+        })
+        this.setData({
+          departments: ['全部'].concat(departments),
+          priorityDepartments: ['不设置'].concat(departments)
+        })
+      })
       .catch(() => {})
   },
   load() {
@@ -86,6 +92,32 @@ Page({
       wx.showToast({ title: '已处理' })
       this.load()
     }).catch(() => {})
+  },
+  exportApproved(e) {
+    const activityId = e.currentTarget.dataset.id
+    if (!activityId) return
+    const app = getApp()
+    const baseUrl = (app.globalData.baseUrl || '').replace(/\/+$/, '')
+    const token = app.globalData.token || wx.getStorageSync('token')
+    wx.showLoading({ title: '生成名单中' })
+    wx.downloadFile({
+      url: `${baseUrl}/api/registrations/admin/activities/${activityId}/approved-export`,
+      header: { Authorization: token || '' },
+      success: res => {
+        if (res.statusCode !== 200) {
+          wx.showToast({ title: '名单导出失败', icon: 'none' })
+          return
+        }
+        wx.openDocument({
+          filePath: res.tempFilePath,
+          fileType: 'xlsx',
+          showMenu: true,
+          fail: () => wx.showToast({ title: '无法打开名单文件', icon: 'none' })
+        })
+      },
+      fail: () => wx.showToast({ title: '名单下载失败', icon: 'none' }),
+      complete: () => wx.hideLoading()
+    })
   },
   openCancel(e) {
     const item = this.data.list.find(row => row.id === e.currentTarget.dataset.id)

@@ -19,6 +19,8 @@
 .status { padding: 7rpx 13rpx; border-radius: 999rpx; color: #0f766e; background: #e6fffb; font-size: 22rpx; }
 .activity-box { margin-top: 16rpx; padding: 16rpx; border-radius: 14rpx; background: #f8fbfb; }
 .activity-title { color: #172033; font-size: 28rpx; font-weight: 800; }
+.export-btn { width: 100%; height: 58rpx; line-height: 58rpx; margin: 14rpx 0 0; padding: 0; border-radius: 12rpx; color: #2563eb; background: #eff6ff; font-size: 23rpx; }
+.export-btn::after { border: 0; }
 .match-box, .ai-box { margin-top: 14rpx; padding: 16rpx; border-radius: 14rpx; background: #f8fbfb; }
 .priority-match-box { margin-top: 14rpx; padding: 16rpx; border-radius: 14rpx; background: #fff7ed; }
 .priority-score { flex: 0 0 auto; padding: 6rpx 14rpx; border-radius: 999rpx; color: #b45309; background: #fef3c7; font-size: 24rpx; font-weight: 800; }

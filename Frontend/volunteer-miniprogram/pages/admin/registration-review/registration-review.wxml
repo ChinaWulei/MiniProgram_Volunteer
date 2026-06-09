@@ -36,6 +36,7 @@
       <view class="meta">{{item.category}} · {{item.location}}</view>
       <view class="meta">{{item.timeText}}</view>
       <view class="meta">报名时间：{{item.createdText}}</view>
+      <button class="export-btn" catchtap="exportApproved" data-id="{{item.activity_id || item.activityId}}">导出本活动录取名单</button>
     </view>
     <view class="match-box">
       <view class="match-head">

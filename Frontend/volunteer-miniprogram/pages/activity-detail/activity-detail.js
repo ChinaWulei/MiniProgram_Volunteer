@@ -107,7 +107,11 @@ Page({
           createdText: this.formatTime(item.created_at || item.createdAt),
           evaluationScore: item.evaluationScore || 5,
           evaluationContent: item.evaluationContent || ''
-        }))
+        })).sort((a, b) => {
+          const priorityDiff = Number(b.priorityScore || 0) - Number(a.priorityScore || 0)
+          if (priorityDiff) return priorityDiff
+          return String(b.created_at || b.createdAt || '').localeCompare(String(a.created_at || a.createdAt || ''))
+        })
         this.setData({ registrations })
       })
       .catch(() => {})

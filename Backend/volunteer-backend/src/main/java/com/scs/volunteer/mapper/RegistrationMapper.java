@@ -178,6 +178,23 @@ public class RegistrationMapper {
         return adminList(null, null, activityId, null, null);
     }
 
+    public List<Map<String, Object>> approvedExportList(Long activityId) {
+        return jdbcTemplate.queryForList("""
+                select u.name as userName,u.identity_no as identityNo,u.phone,
+                       p.college,p.campus,p.department,p.major_class as majorClass,
+                       p.skill_tags as skillTags,p.credit_score as creditScore,
+                       p.total_hours as totalHours,ap.name as positionName,
+                       r.transport_required as transportRequired,
+                       r.boarding_point as boardingPoint,r.status,r.created_at as signupTime
+                from registration r
+                join user u on u.id=r.user_id
+                left join volunteer_profile p on p.user_id=u.id
+                left join activity_position ap on ap.id=r.position_id
+                where r.activity_id=? and r.status in ('已通过','已完成')
+                order by coalesce(ap.sort_order,999),r.created_at
+                """, activityId);
+    }
+
     public List<String> departments() {
         return jdbcTemplate.queryForList("""
                 select distinct p.department

@@ -89,21 +89,29 @@
 
   <view wx:if="{{isAdmin}}" class="detail-section">
     <view class="section-title">报名人员</view>
+    <view class="priority-sort-tip">已按本活动优先条件分从高到低排序，分数相同时按报名时间排序。</view>
     <view class="reg-card" wx:for="{{registrations}}" wx:key="id">
       <image wx:if="{{item.avatarUrl}}" class="reg-avatar" src="{{item.avatarUrl}}" mode="aspectFill"></image>
       <view wx:else class="reg-avatar">{{item.avatarText}}</view>
       <view class="reg-main">
         <view class="reg-row">
-          <view class="reg-name">{{item.userText}}</view>
+          <view class="reg-name">
+            {{item.userText}}
+            <text wx:if="{{item.priorityScore > 0}}" class="priority-badge">优先 {{item.priorityScore}}分</text>
+          </view>
           <view class="reg-status">{{item.status}}</view>
         </view>
-        <view class="reg-meta">{{item.identityNo}} · {{item.college}} · {{item.campus || '未填校区'}} · {{item.majorClass}}</view>
+        <view class="reg-meta">{{item.identityNo}} · {{item.college}} · {{item.department || '未填系别'}} · {{item.campus || '未填校区'}} · {{item.majorClass}}</view>
         <view wx:if="{{item.positionName}}" class="reg-meta">报名岗位：{{item.positionName}}</view>
         <view wx:if="{{item.transportRequired}}" class="reg-meta">需要接送 · 上车点：{{item.boardingPoint || '待确认'}}</view>
         <view class="reg-meta">报名时间：{{item.createdText}}</view>
         <view class="match-panel">
           <view class="match-row"><text>匹配情况</text><text>{{item.matchScore || 0}} 分</text></view>
           <view class="reg-meta">{{item.matchReason}}</view>
+        </view>
+        <view class="priority-panel">
+          <view class="match-row"><text>活动优先条件</text><text>{{item.priorityScore || 0}} 分</text></view>
+          <view class="reg-meta">{{item.priorityReason}}</view>
         </view>
         <view class="ai-panel">
           <view class="match-row"><text>AI历史评价总结</text></view>

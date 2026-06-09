@@ -61,6 +61,7 @@ Page({
     ,courses: []
     ,weekdayOptions: ['周一', '周二', '周三', '周四', '周五', '周六', '周日']
     ,parsingSchedule: false
+    ,coursesExpanded: true
   },
   onShow() {
     const user = app.globalData.user || wx.getStorageSync('user')
@@ -202,6 +203,9 @@ Page({
     request({ url: '/api/course-schedules', silent: true })
       .then(courses => this.setData({ courses: (courses || []).map(item => this.normalizeCourse(item)) }))
       .catch(() => {})
+  },
+  toggleCourses() {
+    this.setData({ coursesExpanded: !this.data.coursesExpanded })
   },
   normalizeCourse(item) {
     const weekday = Number(item.weekday) || 1

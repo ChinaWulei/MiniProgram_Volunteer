@@ -13,6 +13,7 @@ public interface RegistrationService {
     List<Map<String, Object>> adminList(String keyword, String status, Long activityId, String department,
                                         String priorityDepartment, CurrentUser currentUser);
     List<String> adminDepartments(CurrentUser currentUser);
+    byte[] exportApproved(Long activityId, CurrentUser currentUser);
     void review(Long id, ReviewDTO dto, CurrentUser currentUser);
     void cancel(Long id, ReviewDTO dto, CurrentUser currentUser);
 }

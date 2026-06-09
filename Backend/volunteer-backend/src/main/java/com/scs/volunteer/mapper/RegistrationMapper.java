@@ -100,10 +100,16 @@ public class RegistrationMapper {
 
     public boolean hasCompletedActivity(Long userId, String activityKeyword) {
         Integer count = jdbcTemplate.queryForObject("""
-                select count(*)
+                select count(distinct r.id)
                 from registration r
                 join activity a on a.id=r.activity_id
-                where r.user_id=? and r.status='已完成'
+                left join service_record sr
+                  on sr.user_id=r.user_id and sr.activity_id=r.activity_id and sr.hours>0
+                left join activity_checkin c
+                  on c.user_id=r.user_id and c.activity_id=r.activity_id
+                  and c.status in ('CHECKED_IN','LATE_CHECKED_IN','MANUAL_CHECKED_IN')
+                where r.user_id=?
+                  and (r.status='已完成' or sr.id is not null or c.id is not null)
                   and a.name like concat('%',?,'%')
                 """, Integer.class, userId, activityKeyword);
         return count != null && count > 0;
@@ -111,10 +117,17 @@ public class RegistrationMapper {
 
     public boolean hasCompletedActivityCategory(Long userId, String category) {
         Integer count = jdbcTemplate.queryForObject("""
-                select count(*)
+                select count(distinct r.id)
                 from registration r
                 join activity a on a.id=r.activity_id
-                where r.user_id=? and r.status='已完成' and a.category=?
+                left join service_record sr
+                  on sr.user_id=r.user_id and sr.activity_id=r.activity_id and sr.hours>0
+                left join activity_checkin c
+                  on c.user_id=r.user_id and c.activity_id=r.activity_id
+                  and c.status in ('CHECKED_IN','LATE_CHECKED_IN','MANUAL_CHECKED_IN')
+                where r.user_id=?
+                  and (r.status='已完成' or sr.id is not null or c.id is not null)
+                  and a.category=?
                 """, Integer.class, userId, category);
         return count != null && count > 0;
     }
@@ -232,6 +245,22 @@ public class RegistrationMapper {
 
     public void review(Long id, String status, String remark) {
         jdbcTemplate.update("update registration set status=?,review_remark=? where id=?", status, remark, id);
+    }
+
+    public int approvedCount(Long activityId) {
+        Integer count = jdbcTemplate.queryForObject("""
+                select count(*) from registration
+                where activity_id=? and status in ('已通过','已完成')
+                """, Integer.class, activityId);
+        return count == null ? 0 : count;
+    }
+
+    public int approvedPositionCount(Long positionId) {
+        Integer count = jdbcTemplate.queryForObject("""
+                select count(*) from registration
+                where position_id=? and status in ('已通过','已完成')
+                """, Integer.class, positionId);
+        return count == null ? 0 : count;
     }
 
     public List<Map<String, Object>> pendingCandidates(Long activityId, Long positionId) {

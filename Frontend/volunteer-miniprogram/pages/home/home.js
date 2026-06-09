@@ -18,9 +18,9 @@ function getStatusClass(status) {
 
 function getRecommendReason(activity) {
   const remaining = getRemainingSlots(activity)
-  const registered = toNumber(activity.registeredNumber)
+  const applicants = toNumber(activity.applicantNumber)
   if (activity.status === '报名中' && remaining > 0 && remaining <= 3) return '名额紧张'
-  if (registered >= 8) return '报名热度高'
+  if (applicants >= 8) return '报名热度高'
   if (activity.status === '报名中') return '即将截止'
   return activity.category || '精选活动'
 }
@@ -170,8 +170,8 @@ Page({
     return activities
       .slice()
       .sort((a, b) => {
-        const hotA = toNumber(a.registeredNumber) + (a.status === '报名中' ? 10 : 0) - a.remainingSlots
-        const hotB = toNumber(b.registeredNumber) + (b.status === '报名中' ? 10 : 0) - b.remainingSlots
+        const hotA = toNumber(a.applicantNumber) + (a.status === '报名中' ? 10 : 0) - a.remainingSlots
+        const hotB = toNumber(b.applicantNumber) + (b.status === '报名中' ? 10 : 0) - b.remainingSlots
         return hotB - hotA
       })
       .slice(0, 4)
@@ -179,7 +179,7 @@ Page({
   getStats(activities) {
     if (this.data.isAdmin) {
       const openCount = activities.filter(item => item.status === '报名中' || item.status === '已发布').length
-      const totalRegistrations = activities.reduce((sum, item) => sum + toNumber(item.registeredNumber), 0)
+      const totalRegistrations = activities.reduce((sum, item) => sum + toNumber(item.applicantNumber), 0)
       const totalRecruit = activities.reduce((sum, item) => sum + toNumber(item.recruitNumber), 0)
       const endedCount = activities.filter(item => item.status === '已结束').length
       return [

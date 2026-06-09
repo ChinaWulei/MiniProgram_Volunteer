@@ -12,7 +12,7 @@
     <view class="row"><view class="title">{{item.name}}</view><view class="tag">{{item.status}}</view></view>
     <view class="muted">{{item.category}} · {{item.location}}</view>
     <view class="muted">{{item.startTimeText}} 至 {{item.endTimeText}}</view>
-    <view class="muted">招募 {{item.recruitNumber}} 人，已报名 {{item.registeredNumber}} 人</view>
+    <view class="muted">招募 {{item.recruitNumber}} 人，申请 {{item.applicantNumber || 0}} 人，已录取 {{item.registeredNumber}} 人</view>
     <view class="tag">{{item.skillRequirements}}</view>
     <view class="activity-actions">
       <button class="detail-btn" bindtap="goDetail" data-id="{{item.id}}">查看详情</button>

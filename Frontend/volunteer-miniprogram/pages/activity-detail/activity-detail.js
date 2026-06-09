@@ -178,7 +178,8 @@ Page({
     } else if (activity.signupDeadline && new Date(String(activity.signupDeadline).replace(/-/g, '/')) < now) {
       buttonText = '报名已截止'
       buttonDisabled = true
-    } else if (activity.status === '已满员' || activity.remainingNumber <= 0) {
+    } else if (activity.reviewMethod === '自动通过' &&
+      (activity.status === '已满员' || activity.remainingNumber <= 0)) {
       buttonText = '名额已满'
       buttonDisabled = true
     } else if (activity.signupStatus === '待审核') {

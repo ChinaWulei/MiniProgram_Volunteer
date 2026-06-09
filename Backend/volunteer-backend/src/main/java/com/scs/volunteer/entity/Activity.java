@@ -18,6 +18,7 @@ public class Activity {
     private LocalDateTime checkinEndTime;
     private Integer recruitNumber;
     private Integer registeredNumber;
+    private Integer applicantNumber;
     private String skillRequirements;
     private String description;
     private String signupRequirement;
@@ -61,6 +62,8 @@ public class Activity {
     public void setRecruitNumber(Integer recruitNumber) { this.recruitNumber = recruitNumber; }
     public Integer getRegisteredNumber() { return registeredNumber; }
     public void setRegisteredNumber(Integer registeredNumber) { this.registeredNumber = registeredNumber; }
+    public Integer getApplicantNumber() { return applicantNumber; }
+    public void setApplicantNumber(Integer applicantNumber) { this.applicantNumber = applicantNumber; }
     public String getSkillRequirements() { return skillRequirements; }
     public void setSkillRequirements(String skillRequirements) { this.skillRequirements = skillRequirements; }
     public String getDescription() { return description; }

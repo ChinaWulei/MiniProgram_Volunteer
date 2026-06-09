@@ -94,6 +94,7 @@ public class ActivityServiceImpl implements ActivityService {
         vo.setCheckinEndTime(activity.getCheckinEndTime());
         vo.setRecruitNumber(activity.getRecruitNumber());
         vo.setRegisteredNumber(activity.getRegisteredNumber());
+        vo.setApplicantNumber(activity.getApplicantNumber());
         vo.setRemainingNumber(Math.max(0, activity.getRecruitNumber() - activity.getRegisteredNumber()));
         vo.setSkillRequirements(activity.getSkillRequirements());
         vo.setDescription(activity.getDescription());

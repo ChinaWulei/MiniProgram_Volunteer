@@ -19,6 +19,7 @@ public class ActivityDetailVO {
     private LocalDateTime checkinEndTime;
     private Integer recruitNumber;
     private Integer registeredNumber;
+    private Integer applicantNumber;
     private Integer remainingNumber;
     private String skillRequirements;
     private String description;
@@ -66,6 +67,8 @@ public class ActivityDetailVO {
     public void setRecruitNumber(Integer recruitNumber) { this.recruitNumber = recruitNumber; }
     public Integer getRegisteredNumber() { return registeredNumber; }
     public void setRegisteredNumber(Integer registeredNumber) { this.registeredNumber = registeredNumber; }
+    public Integer getApplicantNumber() { return applicantNumber; }
+    public void setApplicantNumber(Integer applicantNumber) { this.applicantNumber = applicantNumber; }
     public Integer getRemainingNumber() { return remainingNumber; }
     public void setRemainingNumber(Integer remainingNumber) { this.remainingNumber = remainingNumber; }
     public String getSkillRequirements() { return skillRequirements; }

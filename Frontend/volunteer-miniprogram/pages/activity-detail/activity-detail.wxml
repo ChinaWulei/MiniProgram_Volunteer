@@ -8,9 +8,9 @@
 
   <view class="quota-panel">
     <view class="quota-item"><view class="quota-num">{{activity.recruitNumber}}</view><view class="quota-label">招募人数</view></view>
-    <view class="quota-item"><view class="quota-num">{{activity.registeredNumber}}</view><view class="quota-label">已报名</view></view>
-    <view class="quota-item"><view class="quota-num">{{activity.remainingNumber}}</view><view class="quota-label">剩余名额</view></view>
-    <view class="quota-item"><view class="quota-num">{{activity.serviceHours}}</view><view class="quota-label">服务时长</view></view>
+    <view class="quota-item"><view class="quota-num">{{activity.applicantNumber}}</view><view class="quota-label">申请人数</view></view>
+    <view class="quota-item"><view class="quota-num">{{activity.registeredNumber}}</view><view class="quota-label">已录取</view></view>
+    <view class="quota-item"><view class="quota-num">{{activity.remainingNumber}}</view><view class="quota-label">剩余录取</view></view>
   </view>
 
   <view class="detail-section">
@@ -20,6 +20,7 @@
     <view class="info-line"><text>报名截止</text><text>{{activity.signupDeadlineText || '以活动通知为准'}}</text></view>
     <view class="info-line"><text>活动地点</text><text>{{activity.location}}</text></view>
     <view class="info-line"><text>活动类型</text><text>{{activity.category}}</text></view>
+    <view class="info-line"><text>服务时长</text><text>{{activity.serviceHours}} 小时</text></view>
     <view class="info-line"><text>审核方式</text><text>{{activity.reviewMethod || '人工审核'}}</text></view>
   </view>
 
@@ -78,7 +79,7 @@
     <view class="position-option {{selectedPositionId === item.id ? 'active' : ''}}" wx:for="{{activity.positions}}" wx:key="id" data-id="{{item.id}}" bindtap="selectPosition">
       <view class="position-option-head">
         <text>{{item.name}}</text>
-        <text>剩余 {{item.remainingNumber}} 人</text>
+        <text>申请 {{item.applicantNumber}} 人 · 剩余录取 {{item.remainingNumber}} 人</text>
       </view>
       <view class="position-option-time">{{item.timeText}}</view>
       <view wx:if="{{item.requirements}}" class="position-option-requirement">{{item.requirements}}</view>

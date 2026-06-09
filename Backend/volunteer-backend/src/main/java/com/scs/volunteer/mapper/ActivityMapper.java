@@ -24,17 +24,31 @@ public class ActivityMapper {
 
     public List<Activity> search(String category, String status, String keyword) {
         return jdbcTemplate.query("""
-                select * from activity
-                where (? is null or category=?)
-                  and (? is null or status=? or (?='报名中' and status='已发布'))
-                  and (? is null or name like concat('%',?,'%') or description like concat('%',?,'%'))
-                order by start_time desc
+                select a.*,
+                       (select count(*) from registration r
+                        where r.activity_id=a.id and r.status in ('待审核','已通过','已完成')) as applicant_number
+                from activity a
+                where (? is null or a.category=?)
+                  and (? is null or a.status=? or (?='报名中' and a.status='已发布'))
+                  and (? is null or a.name like concat('%',?,'%') or a.description like concat('%',?,'%'))
+                order by a.start_time desc
                 """, new BeanPropertyRowMapper<>(Activity.class),
                 n(category), n(category), n(status), n(status), n(status), n(keyword), n(keyword), n(keyword));
     }
 
     public Optional<Activity> findById(Long id) {
-        List<Activity> list = jdbcTemplate.query("select * from activity where id=?",
+        List<Activity> list = jdbcTemplate.query("""
+                        select a.*,
+                               (select count(*) from registration r
+                                where r.activity_id=a.id and r.status in ('待审核','已通过','已完成')) as applicant_number
+                        from activity a where a.id=?
+                        """,
+                new BeanPropertyRowMapper<>(Activity.class), id);
+        return list.stream().findFirst();
+    }
+
+    public Optional<Activity> findByIdForUpdate(Long id) {
+        List<Activity> list = jdbcTemplate.query("select * from activity where id=? for update",
                 new BeanPropertyRowMapper<>(Activity.class), id);
         return list.stream().findFirst();
     }
@@ -114,14 +128,6 @@ public class ActivityMapper {
                 """, String.class, id);
     }
 
-    public void increaseRegistered(Long id) {
-        jdbcTemplate.update("update activity set registered_number=registered_number+1, status=if(registered_number+1>=recruit_number,'已满员',status) where id=?", id);
-    }
-
-    public void decreaseRegistered(Long id) {
-        jdbcTemplate.update("update activity set registered_number=greatest(registered_number-1,0), status=if(status='已满员','已发布',status) where id=?", id);
-    }
-
     public void finishExpired() {
         jdbcTemplate.update("update activity set status='已结束' where end_time<? and status in ('报名中','已发布')", LocalDateTime.now());
     }
@@ -134,13 +140,39 @@ public class ActivityMapper {
                 set status = case
                     when finished_at is not null then '已结束'
                     when end_time < ? then '已结束'
-                    when registered_number >= recruit_number then '已满员'
+                    when review_method='自动通过' and registered_number >= recruit_number then '已满员'
                     when coalesce(signup_start_time, published_at, created_at) <= ?
                          and coalesce(signup_deadline, start_time) >= ? then '报名中'
                     else '已发布'
                 end
                 where status not in ('草稿','已取消')
                 """, now, now, now);
+    }
+
+    public void refreshActivityState(Long id) {
+        LocalDateTime now = LocalDateTime.now();
+        jdbcTemplate.update("""
+                update activity a
+                set registered_number = (
+                    select count(*)
+                    from registration r
+                    where r.activity_id = a.id
+                      and r.status in ('已通过','已完成')
+                )
+                where a.id=?
+                """, id);
+        jdbcTemplate.update("""
+                update activity
+                set status = case
+                    when finished_at is not null then '已结束'
+                    when end_time < ? then '已结束'
+                    when review_method='自动通过' and registered_number >= recruit_number then '已满员'
+                    when coalesce(signup_start_time, published_at, created_at) <= ?
+                         and coalesce(signup_deadline, start_time) >= ? then '报名中'
+                    else '已发布'
+                end
+                where id=? and status not in ('草稿','已取消')
+                """, now, now, now, id);
     }
 
     public void refreshRegisteredNumbers() {
@@ -150,7 +182,7 @@ public class ActivityMapper {
                     select count(*)
                     from registration r
                     where r.activity_id = a.id
-                      and r.status in ('待审核','已通过','已完成')
+                      and r.status in ('已通过','已完成')
                 )
                 """);
     }
@@ -162,7 +194,7 @@ public class ActivityMapper {
                 from activity
                 where end_time > ?
                   and status in ('报名中','已发布')
-                  and registered_number < recruit_number
+                  and (review_method<>'自动通过' or registered_number < recruit_number)
                 order by start_time asc
                 limit 50
                 """, new BeanPropertyRowMapper<>(AiActivityCandidateVO.class), LocalDateTime.now());
@@ -170,11 +202,14 @@ public class ActivityMapper {
 
     public List<Activity> openActivities() {
         return jdbcTemplate.query("""
-                select * from activity
-                where end_time > ?
-                  and status in ('报名中','已发布')
-                  and registered_number < recruit_number
-                order by start_time asc
+                select a.*,
+                       (select count(*) from registration r
+                        where r.activity_id=a.id and r.status in ('待审核','已通过','已完成')) as applicant_number
+                from activity a
+                where a.end_time > ?
+                  and a.status in ('报名中','已发布')
+                  and (a.review_method<>'自动通过' or a.registered_number < a.recruit_number)
+                order by a.start_time asc
                 limit 50
                 """, new BeanPropertyRowMapper<>(Activity.class), LocalDateTime.now());
     }

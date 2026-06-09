@@ -21,7 +21,8 @@ public class ActivityPositionMapper {
                 select p.id,p.activity_id as activityId,p.name,p.start_time as startTime,p.end_time as endTime,
                        p.recruit_number as recruitNumber,p.requirements,p.requires_rehearsal as requiresRehearsal,
                        p.rehearsal_start_time as rehearsalStartTime,p.rehearsal_end_time as rehearsalEndTime,
-                       greatest(p.recruit_number-count(r.id),0) as remainingNumber
+                       count(r.id) as applicantNumber,
+                       greatest(p.recruit_number-count(case when r.status in ('已通过','已完成') then 1 end),0) as remainingNumber
                 from activity_position p
                 left join registration r on r.position_id=p.id and r.status in ('待审核','已通过','已完成')
                 where p.activity_id=?
@@ -32,7 +33,8 @@ public class ActivityPositionMapper {
 
     public Map<String, Object> find(Long id, Long activityId) {
         List<Map<String, Object>> rows = jdbcTemplate.queryForList("""
-                select p.*,greatest(p.recruit_number-count(r.id),0) as remaining_number
+                select p.*,
+                       greatest(p.recruit_number-count(case when r.status in ('已通过','已完成') then 1 end),0) as remaining_number
                 from activity_position p
                 left join registration r on r.position_id=p.id and r.status in ('待审核','已通过','已完成')
                 where p.id=? and p.activity_id=?

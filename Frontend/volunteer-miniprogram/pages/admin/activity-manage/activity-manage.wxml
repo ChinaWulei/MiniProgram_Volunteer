@@ -27,7 +27,7 @@
       </view>
       <view class="meta">{{item.category}} · {{item.location}}</view>
       <view class="meta">{{item.timeText}}</view>
-      <view class="meta">招募 {{item.recruitNumber}} 人 · 已报名 {{item.registeredNumber}} 人 · 剩余 {{item.remainingNumber}}</view>
+      <view class="meta">招募 {{item.recruitNumber}} 人 · 申请 {{item.applicantNumber || 0}} 人 · 已录取 {{item.registeredNumber}} 人</view>
       <view class="actions">
         <button bindtap="detail" data-id="{{item.id}}">详情</button>
         <button class="edit" bindtap="edit" data-id="{{item.id}}">编辑</button>

@@ -73,15 +73,19 @@ public class RegistrationServiceImpl implements RegistrationService {
     }
 
     @Override
+    @Transactional
     public void register(RegistrationDTO dto, CurrentUser currentUser) {
         if (currentUser == null || !"VOLUNTEER".equals(currentUser.getRole())) {
             throw new BizException("仅志愿者可报名");
         }
-        Activity activity = activityMapper.findById(dto.getActivityId()).orElseThrow(() -> new BizException("活动不存在"));
-        if (!"报名中".equals(activity.getStatus()) && !"已发布".equals(activity.getStatus())) {
+        Activity activity = activityMapper.findByIdForUpdate(dto.getActivityId())
+                .orElseThrow(() -> new BizException("活动不存在"));
+        boolean automaticReview = "自动通过".equals(activity.getReviewMethod());
+        boolean manualFullStatus = !automaticReview && "已满员".equals(activity.getStatus());
+        if (!"报名中".equals(activity.getStatus()) && !"已发布".equals(activity.getStatus()) && !manualFullStatus) {
             throw new BizException("当前活动不可报名");
         }
-        if (activity.getRegisteredNumber() >= activity.getRecruitNumber()) {
+        if (automaticReview && registrationMapper.approvedCount(activity.getId()) >= activity.getRecruitNumber()) {
             throw new BizException("活动已满员");
         }
         if (registrationMapper.exists(dto.getActivityId(), currentUser.getId())) {
@@ -94,7 +98,10 @@ public class RegistrationServiceImpl implements RegistrationService {
         if (activity.getSignupStartTime() != null && now.isBefore(activity.getSignupStartTime())) {
             throw new BizException("报名尚未开始");
         }
-        if (activity.getSignupDeadline() != null && now.isAfter(activity.getSignupDeadline())) {
+        java.time.LocalDateTime signupDeadline = activity.getSignupDeadline() == null
+                ? activity.getStartTime()
+                : activity.getSignupDeadline();
+        if (signupDeadline != null && now.isAfter(signupDeadline)) {
             throw new BizException("报名已截止");
         }
         java.time.LocalDateTime selectedStart = activity.getStartTime();
@@ -106,7 +113,9 @@ public class RegistrationServiceImpl implements RegistrationService {
             if (dto.getPositionId() == null) throw new BizException("请选择报名岗位");
             Map<String, Object> position = activityPositionMapper.find(dto.getPositionId(), activity.getId());
             if (position == null) throw new BizException("所选岗位不存在");
-            if (((Number) position.get("remaining_number")).intValue() <= 0) throw new BizException("所选岗位已满员");
+            if (automaticReview && ((Number) position.get("remaining_number")).intValue() <= 0) {
+                throw new BizException("所选岗位已满员");
+            }
             selectedStart = dateTime(position.get("start_time"));
             selectedEnd = dateTime(position.get("end_time"));
             if (Boolean.TRUE.equals(booleanValue(position.get("requires_rehearsal")))) {
@@ -118,11 +127,10 @@ public class RegistrationServiceImpl implements RegistrationService {
         if (rehearsalStart != null && rehearsalEnd != null) {
             ensureNoConflict(currentUser.getId(), activity.getId(), rehearsalStart, rehearsalEnd, "彩排");
         }
-        String signupStatus = "自动通过".equals(activity.getReviewMethod()) ? "已通过" : "待审核";
+        String signupStatus = automaticReview ? "已通过" : "待审核";
         registrationMapper.insert(dto.getActivityId(), currentUser.getId(), dto.getPositionId(),
                 Boolean.TRUE.equals(dto.getTransportRequired()), dto.getBoardingPoint(), signupStatus);
-        activityMapper.increaseRegistered(dto.getActivityId());
-        activityMapper.refreshRegisteredNumbers();
+        activityMapper.refreshActivityState(activity.getId());
     }
 
     @Override
@@ -376,15 +384,34 @@ public class RegistrationServiceImpl implements RegistrationService {
     }
 
     @Override
+    @Transactional
     public void review(Long id, ReviewDTO dto, CurrentUser currentUser) {
         if (currentUser == null || !"ADMIN".equals(currentUser.getRole())) {
             throw new BizException("仅管理员可审核");
         }
         Map<String, Object> reg = registrationMapper.findMap(id);
+        String targetStatus = dto.getStatus();
+        if ("已通过".equals(targetStatus) && "待审核".equals(text(reg.get("status")))) {
+            Long activityId = ((Number) reg.get("activity_id")).longValue();
+            Activity activity = activityMapper.findByIdForUpdate(activityId)
+                    .orElseThrow(() -> new BizException("活动不存在"));
+            if (registrationMapper.approvedCount(activityId) >= activity.getRecruitNumber()) {
+                throw new BizException("录取名额已满，可保留该同学为待审核候选人");
+            }
+            Long positionId = reg.get("position_id") instanceof Number number ? number.longValue() : null;
+            if (positionId != null) {
+                Map<String, Object> position = activityPositionMapper.find(positionId, activityId);
+                if (position == null) throw new BizException("报名岗位不存在");
+                int positionRecruitNumber = ((Number) position.get("recruit_number")).intValue();
+                if (registrationMapper.approvedPositionCount(positionId) >= positionRecruitNumber) {
+                    throw new BizException("该岗位录取名额已满，可保留该同学为待审核候选人");
+                }
+            }
+        }
         registrationMapper.review(id, dto.getStatus(), dto.getReviewRemark());
-        activityMapper.refreshRegisteredNumbers();
         Long noticeUserId = ((Number) reg.get("user_id")).longValue();
         Long noticeActivityId = ((Number) reg.get("activity_id")).longValue();
+        activityMapper.refreshActivityState(noticeActivityId);
         Activity noticeActivity = activityMapper.findById(noticeActivityId).orElse(null);
         if (noticeActivity != null) {
             notificationMapper.insert(noticeUserId, "REGISTRATION_REVIEW", "报名审核结果",
@@ -414,7 +441,8 @@ public class RegistrationServiceImpl implements RegistrationService {
         Map<String, Object> reg = registrationMapper.findMap(id);
         Long userId = ((Number) reg.get("user_id")).longValue();
         Long activityId = ((Number) reg.get("activity_id")).longValue();
-        Activity activity = activityMapper.findById(activityId).orElseThrow(() -> new BizException("活动不存在"));
+        Activity activity = activityMapper.findByIdForUpdate(activityId)
+                .orElseThrow(() -> new BizException("活动不存在"));
         removeRegistrationAndPromote(reg, activity);
         notificationMapper.insert(userId, "REGISTRATION_CANCELLED", "报名已取消",
                 "你报名的《" + activity.getName() + "》已由管理员取消。原因：" + reason,
@@ -435,7 +463,8 @@ public class RegistrationServiceImpl implements RegistrationService {
             throw new BizException("当前报名状态不可取消");
         }
         Long activityId = ((Number) reg.get("activity_id")).longValue();
-        Activity activity = activityMapper.findById(activityId).orElseThrow(() -> new BizException("活动不存在"));
+        Activity activity = activityMapper.findByIdForUpdate(activityId)
+                .orElseThrow(() -> new BizException("活动不存在"));
         if (activity.getStartTime() == null || !java.time.LocalDateTime.now().isBefore(activity.getStartTime())) {
             throw new BizException("活动已开始，无法自行取消，请联系管理员");
         }
@@ -451,8 +480,7 @@ public class RegistrationServiceImpl implements RegistrationService {
                 && java.time.LocalDateTime.now().isBefore(activity.getStartTime());
         Long positionId = reg.get("position_id") instanceof Number number ? number.longValue() : null;
         registrationMapper.delete(((Number) reg.get("id")).longValue());
-        activityMapper.decreaseRegistered(activity.getId());
-        activityMapper.refreshRegisteredNumbers();
+        activityMapper.refreshActivityState(activity.getId());
         if (shouldPromote) promoteNextCandidate(activity, positionId);
     }
 
@@ -490,7 +518,7 @@ public class RegistrationServiceImpl implements RegistrationService {
 
             Long registrationId = ((Number) candidate.get("id")).longValue();
             registrationMapper.review(registrationId, "已通过", "录取人员取消，系统按优先分和匹配分自动递补");
-            activityMapper.refreshRegisteredNumbers();
+            activityMapper.refreshActivityState(activity.getId());
             notificationMapper.insert(candidateUserId, "REGISTRATION_REVIEW", "报名自动递补成功",
                     "《" + activity.getName() + "》出现空缺，你已按活动优先条件和综合匹配分自动递补录取，请及时确认活动安排。",
                     "ACTIVITY", activity.getId());

@@ -1,8 +1,12 @@
 package com.scs.volunteer.mapper;
 
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.support.GeneratedKeyHolder;
+import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
 
+import java.sql.PreparedStatement;
+import java.sql.Statement;
 import java.util.List;
 import java.util.Map;
 
@@ -14,18 +18,55 @@ public class NotificationMapper {
         this.jdbcTemplate = jdbcTemplate;
     }
 
-    public void insert(Long userId, String type, String title, String content, String targetType, Long targetId) {
-        jdbcTemplate.update("""
-                insert into notification(user_id,type,title,content,target_type,target_id)
-                values(?,?,?,?,?,?)
-                """, userId, type, title, content, targetType, targetId);
+    public Long insert(Long userId, String type, String title, String content, String targetType, Long targetId) {
+        KeyHolder keyHolder = new GeneratedKeyHolder();
+        jdbcTemplate.update(connection -> {
+            PreparedStatement statement = connection.prepareStatement("""
+                    insert into notification(user_id,type,title,content,target_type,target_id)
+                    values(?,?,?,?,?,?)
+                    """, Statement.RETURN_GENERATED_KEYS);
+            statement.setLong(1, userId);
+            statement.setString(2, type);
+            statement.setString(3, title);
+            statement.setString(4, content);
+            statement.setString(5, targetType);
+            if (targetId == null) statement.setObject(6, null); else statement.setLong(6, targetId);
+            return statement;
+        }, keyHolder);
+        return keyHolder.getKey() == null ? null : keyHolder.getKey().longValue();
     }
 
     public List<Map<String, Object>> list(Long userId) {
-        return jdbcTemplate.queryForList("""
+        List<Map<String, Object>> rows = jdbcTemplate.queryForList("""
                 select id,type,title,content,target_type as targetType,target_id as targetId,read_at as readAt,created_at as createdAt
                 from notification where user_id=? order by created_at desc limit 50
                 """, userId);
+        for (Map<String, Object> row : rows) {
+            row.put("attachments", attachments(((Number) row.get("id")).longValue()));
+        }
+        return rows;
+    }
+
+    public void addAttachments(Long notificationId, List<Long> ruleFileIds) {
+        if (notificationId == null || ruleFileIds == null) return;
+        for (Long ruleFileId : ruleFileIds) {
+            if (ruleFileId == null) continue;
+            jdbcTemplate.update("""
+                    insert ignore into notification_attachment(notification_id,rule_file_id)
+                    values(?,?)
+                    """, notificationId, ruleFileId);
+        }
+    }
+
+    public List<Map<String, Object>> attachments(Long notificationId) {
+        return jdbcTemplate.queryForList("""
+                select a.rule_file_id as ruleFileId,f.original_name as fileName,
+                       f.file_type as fileType,f.s3_url as url
+                from notification_attachment a
+                join rule_file f on f.id=a.rule_file_id
+                where a.notification_id=?
+                order by a.id
+                """, notificationId);
     }
 
     public int unreadCount(Long userId) {

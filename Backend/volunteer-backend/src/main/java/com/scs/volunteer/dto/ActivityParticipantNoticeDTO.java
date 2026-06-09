@@ -4,6 +4,7 @@ public class ActivityParticipantNoticeDTO {
     private String title;
     private String content;
     private String scope;
+    private java.util.List<Long> ruleFileIds;
 
     public String getTitle() {
         return title;
@@ -27,5 +28,13 @@ public class ActivityParticipantNoticeDTO {
 
     public void setScope(String scope) {
         this.scope = scope;
+    }
+
+    public java.util.List<Long> getRuleFileIds() {
+        return ruleFileIds;
+    }
+
+    public void setRuleFileIds(java.util.List<Long> ruleFileIds) {
+        this.ruleFileIds = ruleFileIds;
     }
 }

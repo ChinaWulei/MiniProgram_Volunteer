@@ -1,4 +1,4 @@
-const { request } = require('../../../utils/request')
+const { request, uploadFile } = require('../../../utils/request')
 
 function normalize(item) {
   return Object.assign({}, item, {
@@ -26,7 +26,7 @@ Page({
     aiSummaryLoading: false,
     showNotice: false,
     noticeActivity: null,
-    noticeForm: { title: '', content: '', scope: 'APPROVED' },
+    noticeForm: { title: '', content: '', scope: 'APPROVED', attachments: [] },
     noticeScopes: [
       { label: '已通过/已完成志愿者', value: 'APPROVED' },
       { label: '全部报名志愿者', value: 'ALL' },
@@ -149,7 +149,8 @@ Page({
       noticeForm: {
         title: activity ? `${activity.title}活动通知` : '活动通知',
         content: '',
-        scope: 'APPROVED'
+        scope: 'APPROVED',
+        attachments: []
       },
       noticeScopeIndex: 0,
       noticeScopeLabel: '已通过/已完成志愿者'
@@ -171,6 +172,42 @@ Page({
       'noticeForm.scope': scope.value
     })
   },
+  chooseNoticeAttachment() {
+    if ((this.data.noticeForm.attachments || []).length >= 5) {
+      wx.showToast({ title: '最多上传5个附件', icon: 'none' })
+      return
+    }
+    wx.chooseMessageFile({
+      count: 1,
+      type: 'file',
+      extension: ['pdf', 'docx', 'txt'],
+      success: res => {
+        const file = (res.tempFiles || [])[0]
+        const filePath = file && (file.path || file.tempFilePath)
+        if (!filePath) {
+          wx.showToast({ title: '文件路径无效，请重新选择', icon: 'none' })
+          return
+        }
+        wx.showLoading({ title: '上传附件中' })
+        uploadFile({
+          url: '/api/admin/activity-notifications/attachments',
+          filePath,
+          name: 'file',
+          formData: { originalName: file.name || '' }
+        })
+          .then(data => {
+            const attachments = (this.data.noticeForm.attachments || []).concat([data])
+            this.setData({ 'noticeForm.attachments': attachments })
+          })
+          .finally(() => wx.hideLoading())
+      }
+    })
+  },
+  removeNoticeAttachment(e) {
+    const attachments = (this.data.noticeForm.attachments || []).slice()
+    attachments.splice(Number(e.currentTarget.dataset.index), 1)
+    this.setData({ 'noticeForm.attachments': attachments })
+  },
   sendNotice() {
     const activity = this.data.noticeActivity
     const form = this.data.noticeForm
@@ -187,7 +224,12 @@ Page({
     request({
       url: `/api/admin/activities/${activity.id}/notifications`,
       method: 'POST',
-      data: form
+      data: {
+        title: form.title,
+        content: form.content,
+        scope: form.scope,
+        ruleFileIds: (form.attachments || []).map(item => item.id)
+      }
     })
       .then(data => {
         wx.showToast({ title: `已发送${data.sentCount || 0}人`, icon: 'none' })

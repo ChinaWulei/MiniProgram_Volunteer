@@ -82,6 +82,17 @@ public class DatabaseStartupCheck implements ApplicationRunner {
                     )
                     """);
             jdbcTemplate.execute("""
+                    create table if not exists notification_attachment (
+                        id bigint primary key auto_increment,
+                        notification_id bigint not null,
+                        rule_file_id bigint not null,
+                        created_at datetime not null default current_timestamp,
+                        unique key uk_notification_rule_file(notification_id, rule_file_id),
+                        index idx_notification_attachment(notification_id),
+                        index idx_notification_attachment_file(rule_file_id)
+                    )
+                    """);
+            jdbcTemplate.execute("""
                     create table if not exists checkin_adjustment (
                         id bigint primary key auto_increment,
                         activity_id bigint not null,

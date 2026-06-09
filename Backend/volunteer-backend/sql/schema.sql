@@ -190,6 +190,19 @@ create table notification (
     created_at datetime not null default current_timestamp,
     constraint fk_notice_user foreign key(user_id) references user(id) on delete cascade
 ) comment='系统与报名审核通知';
+
+create table notification_attachment (
+    id bigint primary key auto_increment,
+    notification_id bigint not null,
+    rule_file_id bigint not null,
+    created_at datetime not null default current_timestamp,
+    unique key uk_notification_rule_file(notification_id, rule_file_id),
+    index idx_notification_attachment(notification_id),
+    index idx_notification_attachment_file(rule_file_id),
+    constraint fk_notification_attachment_notice foreign key(notification_id) references notification(id) on delete cascade,
+    constraint fk_notification_attachment_file foreign key(rule_file_id) references rule_file(id) on delete cascade
+) comment='活动通知附件关联';
+
 create table user_activity_subscription (
     id bigint primary key auto_increment,
     user_id bigint not null,

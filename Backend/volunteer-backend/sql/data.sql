@@ -156,6 +156,7 @@ set foreign_key_checks = 0;
 truncate table ai_report;
 truncate table chat_block;
 truncate table announcement_attachment;
+truncate table notification_attachment;
 truncate table announcement_image;
 truncate table announcement;
 truncate table rule_file;

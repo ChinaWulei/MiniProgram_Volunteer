@@ -80,6 +80,7 @@ Page({
                       : '系统通知',
           title: item.title,
           summary: item.content,
+          attachments: item.attachments || [],
           targetType: item.targetType,
           targetId: item.targetId,
           unread: !item.readAt,
@@ -121,5 +122,26 @@ Page({
     } else if (item.targetType === 'ACTIVITY') {
       wx.navigateTo({ url: `/pages/activity-detail/activity-detail?id=${item.targetId}` })
     }
+  },
+  openAttachment(e) {
+    const url = e.currentTarget.dataset.url
+    if (!url) return
+    wx.showLoading({ title: '打开中' })
+    wx.downloadFile({
+      url,
+      success: res => {
+        if (res.statusCode === 200) {
+          wx.openDocument({
+            filePath: res.tempFilePath,
+            showMenu: true,
+            fail: () => wx.setClipboardData({ data: url })
+          })
+        } else {
+          wx.setClipboardData({ data: url })
+        }
+      },
+      fail: () => wx.setClipboardData({ data: url }),
+      complete: () => wx.hideLoading()
+    })
   }
 })

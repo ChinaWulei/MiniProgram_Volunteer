@@ -9,12 +9,14 @@ import com.scs.volunteer.dto.ActivityDTO;
 import com.scs.volunteer.dto.CreditRuleDTO;
 import com.scs.volunteer.dto.ManualCheckinRequest;
 import com.scs.volunteer.entity.Activity;
+import com.scs.volunteer.entity.RuleFile;
 import com.scs.volunteer.mapper.ActivityMapper;
 import com.scs.volunteer.service.ActivityAiGenerateService;
 import com.scs.volunteer.service.ActivityService;
 import com.scs.volunteer.service.CheckinService;
 import com.scs.volunteer.service.S3StorageService;
 import com.scs.volunteer.service.StatisticsService;
+import com.scs.volunteer.service.RuleFileService;
 import com.scs.volunteer.mapper.CreditMapper;
 import com.scs.volunteer.mapper.NotificationMapper;
 import com.scs.volunteer.mapper.RegistrationMapper;
@@ -28,6 +30,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Map;
 import com.scs.volunteer.vo.ActivityAiGenerateVO;
@@ -44,10 +47,12 @@ public class AdminController extends BaseController {
     private final ActivityMapper activityMapper;
     private final RegistrationMapper registrationMapper;
     private final NotificationMapper notificationMapper;
+    private final RuleFileService ruleFileService;
 
     public AdminController(StatisticsService statisticsService, ActivityService activityService, S3StorageService s3StorageService,
                            CheckinService checkinService, CreditMapper creditMapper, ActivityAiGenerateService activityAiGenerateService,
-                           ActivityMapper activityMapper, RegistrationMapper registrationMapper, NotificationMapper notificationMapper) {
+                           ActivityMapper activityMapper, RegistrationMapper registrationMapper,
+                           NotificationMapper notificationMapper, RuleFileService ruleFileService) {
         this.statisticsService = statisticsService;
         this.activityService = activityService;
         this.s3StorageService = s3StorageService;
@@ -57,6 +62,7 @@ public class AdminController extends BaseController {
         this.activityMapper = activityMapper;
         this.registrationMapper = registrationMapper;
         this.notificationMapper = notificationMapper;
+        this.ruleFileService = ruleFileService;
     }
 
     @GetMapping("/statistics")
@@ -112,6 +118,7 @@ public class AdminController extends BaseController {
     }
 
     @PostMapping("/activities/{id}/notifications")
+    @Transactional
     public ApiResponse<Map<String, Integer>> sendActivityNotice(HttpServletRequest request,
                                                                 @PathVariable Long id,
                                                                 @RequestBody ActivityParticipantNoticeDTO dto) {
@@ -122,14 +129,39 @@ public class AdminController extends BaseController {
         if (dto.getContent() == null || dto.getContent().isBlank()) {
             throw new BizException("请填写通知内容");
         }
+        java.util.List<Long> ruleFileIds = dto.getRuleFileIds() == null
+                ? java.util.List.of()
+                : dto.getRuleFileIds().stream().filter(java.util.Objects::nonNull).distinct().toList();
+        if (ruleFileIds.size() > 5) {
+            throw new BizException("单次通知最多上传5个附件");
+        }
+        for (Long ruleFileId : ruleFileIds) {
+            ruleFileService.detail(ruleFileId);
+        }
         Activity activity = activityMapper.findById(id).orElseThrow(() -> new BizException("活动不存在"));
         java.util.List<Long> userIds = registrationMapper.participantUserIds(id, dto.getScope());
         String title = limit(dto.getTitle().trim(), 120);
         String content = limit("《" + activity.getName() + "》：" + dto.getContent().trim(), 500);
         for (Long userId : userIds) {
-            notificationMapper.insert(userId, "ACTIVITY_NOTICE", title, content, "ACTIVITY", id);
+            Long notificationId = notificationMapper.insert(userId, "ACTIVITY_NOTICE", title, content, "ACTIVITY", id);
+            notificationMapper.addAttachments(notificationId, ruleFileIds);
         }
         return ApiResponse.ok(Map.of("sentCount", userIds.size()));
+    }
+
+    @PostMapping("/activity-notifications/attachments")
+    public ApiResponse<Map<String, Object>> uploadActivityNoticeAttachment(
+            HttpServletRequest request,
+            @RequestParam("file") MultipartFile file,
+            @RequestParam(value = "originalName", required = false) String originalName) {
+        RuleFile uploaded = ruleFileService.upload(file, currentUser(request), originalName);
+        return ApiResponse.ok(Map.of(
+                "id", uploaded.getId(),
+                "fileName", uploaded.getOriginalName(),
+                "fileType", uploaded.getFileType(),
+                "url", uploaded.getS3Url(),
+                "status", uploaded.getStatus()
+        ));
     }
 
     @GetMapping("/activities/{id}/summary")

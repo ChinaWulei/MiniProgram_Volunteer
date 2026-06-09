@@ -31,6 +31,10 @@
     <view class="notice-type">{{item.type}}</view>
     <view class="notice-title">{{item.title}}</view>
     <view class="notice-summary">{{item.summary}}</view>
+    <view class="notice-file" wx:for="{{item.attachments}}" wx:for-item="file" wx:key="ruleFileId"
+      catchtap="openAttachment" data-url="{{file.url}}">
+      附件：{{file.fileName}}
+    </view>
     <view class="notice-time">{{item.time}}</view>
   </view>
 </view>

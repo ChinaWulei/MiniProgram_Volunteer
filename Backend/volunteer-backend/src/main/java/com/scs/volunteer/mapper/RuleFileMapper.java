@@ -64,6 +64,7 @@ public class RuleFileMapper {
 
     public void deleteAnnouncementRefs(Long id) {
         jdbcTemplate.update("delete from announcement_attachment where rule_file_id=?", id);
+        jdbcTemplate.update("delete from notification_attachment where rule_file_id=?", id);
     }
 
     public void delete(Long id) {

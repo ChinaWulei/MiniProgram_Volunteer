@@ -38,6 +38,20 @@
     <view><text class="tag" wx:for="{{skills}}" wx:key="*this">{{item}}</text></view>
   </view>
 
+  <view wx:if="{{activity.priorityRules && activity.priorityRules.length}}" class="detail-section">
+    <view class="section-title">优先录取条件</view>
+    <view class="priority-rule-tip">以下条件用于计算审核优先级，不代表自动录取。</view>
+    <view class="priority-rule-item" wx:for="{{activity.priorityRules}}" wx:key="id">
+      <view>
+        <view class="priority-rule-name">{{item.ruleType}}</view>
+        <view class="priority-rule-value">
+          {{item.ruleType === '历史活动' ? '参加过：' : item.ruleType === '历史活动类型' ? '参加过该类型：' : item.ruleType === '最低信用分' ? '信用分达到：' : item.ruleType === '最低服务时长' ? '累计服务时长达到：' : ''}}{{item.ruleValue}}{{item.ruleType === '最低服务时长' ? ' 小时' : ''}}
+        </view>
+      </view>
+      <view class="priority-rule-score">+{{item.weight}}分</view>
+    </view>
+  </view>
+
   <view class="detail-section">
     <view class="section-title">活动简介</view>
     <view class="paragraph">{{activity.description || '暂无活动简介'}}</view>

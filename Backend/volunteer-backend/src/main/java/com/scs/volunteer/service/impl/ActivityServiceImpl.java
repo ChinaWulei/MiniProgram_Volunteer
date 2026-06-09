@@ -261,7 +261,7 @@ public class ActivityServiceImpl implements ActivityService {
     private void validatePriorityRules(List<com.scs.volunteer.dto.ActivityPriorityRuleDTO> rules) {
         if (rules == null) return;
         java.util.Set<String> supported = java.util.Set.of(
-                "历史活动", "系别", "校区", "技能", "最低信用分", "最低服务时长");
+                "历史活动", "历史活动类型", "系别", "校区", "技能", "最低信用分", "最低服务时长");
         for (com.scs.volunteer.dto.ActivityPriorityRuleDTO rule : rules) {
             if (rule == null || blank(rule.getRuleType()) || !supported.contains(rule.getRuleType())) {
                 throw new BizException("请选择正确的优先条件类型");

@@ -109,6 +109,16 @@ public class RegistrationMapper {
         return count != null && count > 0;
     }
 
+    public boolean hasCompletedActivityCategory(Long userId, String category) {
+        Integer count = jdbcTemplate.queryForObject("""
+                select count(*)
+                from registration r
+                join activity a on a.id=r.activity_id
+                where r.user_id=? and r.status='已完成' and a.category=?
+                """, Integer.class, userId, category);
+        return count != null && count > 0;
+    }
+
     public Map<String, Object> monthlyStats(Long userId, java.time.LocalDateTime start, java.time.LocalDateTime end) {
         return jdbcTemplate.queryForMap("""
                 select

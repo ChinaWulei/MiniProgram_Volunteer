@@ -4,6 +4,7 @@ import com.scs.volunteer.common.BizException;
 import com.scs.volunteer.common.CurrentUser;
 import com.scs.volunteer.entity.Activity;
 import com.scs.volunteer.mapper.ActivityMapper;
+import com.scs.volunteer.mapper.ActivityPriorityRuleMapper;
 import com.scs.volunteer.mapper.RegistrationMapper;
 import com.scs.volunteer.service.ActivityAiAnalysisService;
 import com.scs.volunteer.service.AiModelClient;
@@ -28,15 +29,18 @@ public class ActivityAiAnalysisServiceImpl implements ActivityAiAnalysisService 
     private static final DateTimeFormatter TIME_FORMAT = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
 
     private final ActivityMapper activityMapper;
+    private final ActivityPriorityRuleMapper activityPriorityRuleMapper;
     private final UserProfileService userProfileService;
     private final RegistrationMapper registrationMapper;
     private final AiModelClient aiModelClient;
 
     public ActivityAiAnalysisServiceImpl(ActivityMapper activityMapper,
+                                         ActivityPriorityRuleMapper activityPriorityRuleMapper,
                                          UserProfileService userProfileService,
                                          RegistrationMapper registrationMapper,
                                          AiModelClient aiModelClient) {
         this.activityMapper = activityMapper;
+        this.activityPriorityRuleMapper = activityPriorityRuleMapper;
         this.userProfileService = userProfileService;
         this.registrationMapper = registrationMapper;
         this.aiModelClient = aiModelClient;
@@ -53,9 +57,11 @@ public class ActivityAiAnalysisServiceImpl implements ActivityAiAnalysisService 
         Activity activity = activityMapper.findById(activityId).orElseThrow(() -> new BizException("活动不存在"));
         UserProfileVO profile = userProfileService.profile(currentUser.getId());
         List<Map<String, Object>> history = registrationMapper.aiHistory(currentUser.getId());
+        List<Map<String, Object>> priorityRules = activityPriorityRuleMapper.list(activityId);
         String analysis;
         try {
-            analysis = aiModelClient.chat(buildPrompt(profile, history, activity, question));
+            analysis = aiModelClient.chat(buildPrompt(
+                    profile, history, priorityRules, currentUser.getId(), activity, question));
         } catch (HttpServerErrorException.ServiceUnavailable | ResourceAccessException e) {
             log.warn("AI activity analysis upstream busy activityId={}, userId={}, error={}",
                     activityId, currentUser.getId(), e.getMessage(), e);
@@ -77,7 +83,9 @@ public class ActivityAiAnalysisServiceImpl implements ActivityAiAnalysisService 
         return new AiActivityAnalysisVO(activityId, analysis.trim());
     }
 
-    private String buildPrompt(UserProfileVO profile, List<Map<String, Object>> history, Activity activity, String question) {
+    private String buildPrompt(UserProfileVO profile, List<Map<String, Object>> history,
+                               List<Map<String, Object>> priorityRules, Long userId,
+                               Activity activity, String question) {
         String historyText = history.stream()
                 .limit(20)
                 .map(this::historyLine)
@@ -96,21 +104,38 @@ public class ActivityAiAnalysisServiceImpl implements ActivityAiAnalysisService 
         if (categoryPreference.isBlank()) {
             categoryPreference = "暂无明显偏好";
         }
+        int priorityScore = 0;
+        List<String> priorityLines = new java.util.ArrayList<>();
+        for (Map<String, Object> rule : priorityRules) {
+            String type = text(rule.get("ruleType"));
+            String value = text(rule.get("ruleValue"));
+            int weight = rule.get("weight") instanceof Number number ? number.intValue() : 0;
+            boolean matched = priorityRuleMatches(type, value, profile, userId);
+            if (matched) priorityScore += weight;
+            priorityLines.add("- " + type + "：" + value + "，分值：" + weight
+                    + "，当前志愿者：" + (matched ? "已命中" : "未命中"));
+        }
+        String priorityText = priorityLines.isEmpty()
+                ? "该活动未配置优先录取条件"
+                : String.join("\n", priorityLines) + "\n当前累计优先分：" + priorityScore;
 
         return """
                 你是学院志愿服务小程序中的AI活动分析助手。请只基于下方真实业务数据，判断该活动是否适合当前志愿者报名。
 
                 严格要求：
                 1. 必须使用自然、直接、适合小程序展示的中文表达。
-                2. 不要只套固定模板，但必须覆盖：综合匹配度、技能匹配分析、时间匹配分析、历史经验匹配分析、是否推荐报名、活动注意事项，并在最后用一段自然的话收束；不要输出“自然语言总结”这几个字。
+                2. 不要只套固定模板，但必须覆盖：综合匹配度、技能匹配分析、时间匹配分析、历史经验匹配分析、优先条件分析、是否推荐报名、活动注意事项，并在最后用一段自然的话收束；不要输出“自然语言总结”这几个字。
                 3. 综合匹配度用百分比表示，并解释主要依据。
                 4. 如果技能或时间不匹配，也要给出可执行建议。
                 5. 禁止编造不存在的数据；数据缺失时明确说明“平台暂未提供”或“暂无记录”。
                 6. 不要输出JSON，不要输出Markdown表格。
+                7. “活动优先录取条件及系统判定”由平台后端计算，属于确定事实，不得自行改变命中结果或优先分；需要说明命中项、未命中项及其对审核排序的影响。
 
                 当前志愿者：
                 姓名/昵称：%s
                 学院：%s
+                所属系：%s
+                校区：%s
                 专业班级：%s
                 技能标签：%s
                 可服务时间：%s
@@ -131,6 +156,8 @@ public class ActivityAiAnalysisServiceImpl implements ActivityAiAnalysisService 
                 招募人数：%s
                 已报名人数：%s
                 活动简介：%s
+                活动优先录取条件及系统判定：
+                %s
 
                 用户追问：%s
 
@@ -139,6 +166,8 @@ public class ActivityAiAnalysisServiceImpl implements ActivityAiAnalysisService 
                 """.formatted(
                 first(profile.getNickname(), profile.getName(), "平台暂未提供"),
                 empty(profile.getCollege()),
+                empty(profile.getDepartment()),
+                empty(profile.getCampus()),
                 empty(profile.getMajorClass()),
                 empty(profile.getSkillTags()),
                 empty(profile.getAvailableTime()),
@@ -157,7 +186,41 @@ public class ActivityAiAnalysisServiceImpl implements ActivityAiAnalysisService 
                 activity.getRecruitNumber() == null ? "平台暂未提供" : activity.getRecruitNumber(),
                 activity.getRegisteredNumber() == null ? "平台暂未提供" : activity.getRegisteredNumber(),
                 empty(activity.getDescription()),
+                priorityText,
                 question == null || question.isBlank() ? "" : question.trim());
+    }
+
+    private boolean priorityRuleMatches(String type, String value, UserProfileVO profile, Long userId) {
+        return switch (type) {
+            case "历史活动" -> registrationMapper.hasCompletedActivity(userId, value);
+            case "历史活动类型" -> registrationMapper.hasCompletedActivityCategory(userId, value);
+            case "系别" -> value.equals(text(profile.getDepartment()));
+            case "校区" -> value.equals(text(profile.getCampus()));
+            case "技能" -> split(profile.getSkillTags()).contains(value);
+            case "最低信用分" -> number(profile.getCreditScore()) >= parseNumber(value);
+            case "最低服务时长" -> number(profile.getTotalHours()) >= parseNumber(value);
+            default -> false;
+        };
+    }
+
+    private java.util.Set<String> split(String value) {
+        if (value == null || value.isBlank()) return java.util.Set.of();
+        return java.util.Arrays.stream(value.split("[,;|，、\\s]+"))
+                .map(String::trim)
+                .filter(item -> !item.isBlank())
+                .collect(Collectors.toSet());
+    }
+
+    private double number(Number value) {
+        return value == null ? 0 : value.doubleValue();
+    }
+
+    private double parseNumber(String value) {
+        try {
+            return Double.parseDouble(value);
+        } catch (Exception e) {
+            return Double.MAX_VALUE;
+        }
     }
 
     private String historyLine(Map<String, Object> item) {

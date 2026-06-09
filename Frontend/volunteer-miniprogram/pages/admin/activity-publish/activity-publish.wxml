@@ -108,7 +108,22 @@
       <picker mode="selector" range="{{priorityRuleTypes}}" data-index="{{index}}" bindchange="pickPriorityRuleType">
         <view class="priority-rule-picker">条件类型：{{item.ruleType}}</view>
       </picker>
-      <input
+      <picker wx:if="{{item.ruleType === '系别'}}" mode="selector" range="{{priorityDepartmentOptions}}" data-index="{{index}}" data-type="系别" bindchange="pickPriorityRuleValue">
+        <view class="priority-value-picker">所属系：{{item.ruleValue || '请选择'}}</view>
+      </picker>
+      <picker wx:elif="{{item.ruleType === '历史活动'}}" mode="selector" range="{{priorityHistoryOptions}}" data-index="{{index}}" data-type="历史活动" bindchange="pickPriorityRuleValue">
+        <view class="priority-value-picker">历史活动：{{item.ruleValue || (priorityHistoryOptions.length ? '请选择' : '暂无已结束活动')}}</view>
+      </picker>
+      <picker wx:elif="{{item.ruleType === '历史活动类型'}}" mode="selector" range="{{priorityHistoryCategoryOptions}}" data-index="{{index}}" data-type="历史活动类型" bindchange="pickPriorityRuleValue">
+        <view class="priority-value-picker">活动类型：{{item.ruleValue || '请选择'}}</view>
+      </picker>
+      <picker wx:elif="{{item.ruleType === '校区'}}" mode="selector" range="{{priorityCampusOptions}}" data-index="{{index}}" data-type="校区" bindchange="pickPriorityRuleValue">
+        <view class="priority-value-picker">校区：{{item.ruleValue || '请选择'}}</view>
+      </picker>
+      <picker wx:elif="{{item.ruleType === '技能'}}" mode="selector" range="{{prioritySkillOptions}}" data-index="{{index}}" data-type="技能" bindchange="pickPriorityRuleValue">
+        <view class="priority-value-picker">技能：{{item.ruleValue || '请选择'}}</view>
+      </picker>
+      <input wx:else
         placeholder="{{item.ruleType === '历史活动' ? '活动名称关键词，如 十五运手球赛' : item.ruleType === '最低信用分' ? '最低信用分，如 80' : item.ruleType === '最低服务时长' ? '最低累计小时，如 20' : '条件内容'}}"
         value="{{item.ruleValue}}" data-index="{{index}}" data-key="ruleValue" bindinput="inputPriorityRule"
       />

@@ -12,7 +12,7 @@ import java.util.Set;
 @Repository
 public class ActivityPriorityRuleMapper {
     private static final Set<String> TYPES = Set.of(
-            "历史活动", "系别", "校区", "技能", "最低信用分", "最低服务时长"
+            "历史活动", "历史活动类型", "系别", "校区", "技能", "最低信用分", "最低服务时长"
     );
 
     private final JdbcTemplate jdbcTemplate;

@@ -86,14 +86,35 @@ Page({
     submitting: false,
     positions: [],
     priorityRules: [],
-    priorityRuleTypes: ['历史活动', '系别', '校区', '技能', '最低信用分', '最低服务时长']
+    priorityRuleTypes: ['历史活动', '历史活动类型', '系别', '校区', '技能', '最低信用分', '最低服务时长'],
+    priorityDepartmentOptions: ['数学系', '计算机系'],
+    priorityCampusOptions: ['东海岸校区', '桑浦山校区'],
+    prioritySkillOptions: skillNames,
+    priorityHistoryOptions: [],
+    priorityHistoryCategoryOptions: activityCategories
   },
   onLoad(options) {
+    this.loadPriorityHistoryOptions()
     if (options.id) {
       this.setData({ id: options.id })
       wx.setNavigationBarTitle({ title: '编辑活动' })
       this.loadActivity(options.id)
     }
+  },
+  loadPriorityHistoryOptions() {
+    request({ url: '/api/activities', data: { status: '已结束' }, silent: true })
+      .then(list => {
+        const names = []
+        const categories = activityCategories.slice()
+        ;(list || []).forEach(item => {
+          if (item.name && String(item.id) !== String(this.data.id) && names.indexOf(item.name) < 0) {
+            names.push(item.name)
+          }
+          if (item.category && categories.indexOf(item.category) < 0) categories.push(item.category)
+        })
+        this.setData({ priorityHistoryOptions: names, priorityHistoryCategoryOptions: categories })
+      })
+      .catch(() => {})
   },
   loadActivity(id) {
     wx.showLoading({ title: '加载中' })
@@ -244,6 +265,20 @@ Page({
     const key = e.currentTarget.dataset.key
     const value = key === 'weight' ? Number(e.detail.value) : e.detail.value
     this.setData({ [`priorityRules[${e.currentTarget.dataset.index}].${key}`]: value })
+  },
+  pickPriorityRuleValue(e) {
+    const index = Number(e.currentTarget.dataset.index)
+    const type = e.currentTarget.dataset.type
+    const options = type === '历史活动'
+      ? this.data.priorityHistoryOptions
+      : type === '历史活动类型'
+        ? this.data.priorityHistoryCategoryOptions
+      : type === '系别'
+        ? this.data.priorityDepartmentOptions
+        : type === '校区'
+          ? this.data.priorityCampusOptions
+          : this.data.prioritySkillOptions
+    this.setData({ [`priorityRules[${index}].ruleValue`]: options[Number(e.detail.value)] })
   },
   removePriorityRule(e) {
     const priorityRules = this.data.priorityRules.slice()

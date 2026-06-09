@@ -252,6 +252,7 @@ public class RegistrationServiceImpl implements RegistrationService {
     private boolean priorityRuleMatches(String type, String value, Map<String, Object> row, Long userId) {
         return switch (type) {
             case "历史活动" -> registrationMapper.hasCompletedActivity(userId, value);
+            case "历史活动类型" -> registrationMapper.hasCompletedActivityCategory(userId, value);
             case "系别" -> value.equals(text(row.get("department")));
             case "校区" -> value.equals(text(row.get("campus")));
             case "技能" -> split(text(row.get("skillTags"))).contains(value);
@@ -264,6 +265,7 @@ public class RegistrationServiceImpl implements RegistrationService {
     private String priorityRuleLabel(String type, String value) {
         return switch (type) {
             case "历史活动" -> "参加过《" + value + "》";
+            case "历史活动类型" -> "参加过" + value + "类活动";
             case "最低信用分" -> "信用分达到" + value;
             case "最低服务时长" -> "服务时长达到" + value + "小时";
             default -> type + "：" + value;

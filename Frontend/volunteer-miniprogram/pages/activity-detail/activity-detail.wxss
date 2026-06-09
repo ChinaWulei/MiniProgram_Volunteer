@@ -167,6 +167,11 @@
 .priority-sort-tip { margin-bottom: 14rpx; padding: 14rpx; border-radius: 12rpx; color: #667085; background: #f8fafc; font-size: 22rpx; line-height: 1.45; }
 .priority-panel { margin-top: 12rpx; padding: 14rpx; border-radius: 12rpx; background: #eff6ff; }
 .priority-badge { display: inline-block; margin-left: 8rpx; padding: 4rpx 9rpx; border-radius: 999rpx; color: #b45309; background: #fef3c7; font-size: 19rpx; vertical-align: middle; }
+.priority-rule-tip { margin-bottom: 12rpx; color: #667085; font-size: 22rpx; line-height: 1.45; }
+.priority-rule-item { display: flex; align-items: center; justify-content: space-between; gap: 18rpx; margin-top: 12rpx; padding: 16rpx; border-radius: 12rpx; background: #fff7ed; }
+.priority-rule-name { color: #172033; font-size: 25rpx; font-weight: 800; }
+.priority-rule-value { margin-top: 6rpx; color: #667085; font-size: 23rpx; }
+.priority-rule-score { flex: 0 0 auto; padding: 6rpx 12rpx; border-radius: 999rpx; color: #b45309; background: #fef3c7; font-size: 23rpx; font-weight: 800; }
 .match-row { display: flex; justify-content: space-between; gap: 12rpx; color: #172033; font-size: 24rpx; font-weight: 800; }
 .reg-actions { display: flex; flex-wrap: wrap; gap: 10rpx; margin-top: 12rpx; }
 .reg-actions button { display: flex; align-items: center; justify-content: center; width: auto; height: 54rpx; line-height: 1; margin: 0; padding: 0 18rpx; border-radius: 14rpx; color: #0f766e; background: #eefaf7; font-size: 22rpx; }

@@ -36,6 +36,9 @@ Page({
     aiSheetWidth: 0,
     buttonText: '立即报名',
     buttonDisabled: false
+    ,selectedPositionId: null
+    ,transportRequired: false
+    ,boardingPoint: ''
   },
   onLoad(options) {
     const user = app.globalData.user || wx.getStorageSync('user')
@@ -71,7 +74,16 @@ Page({
         const canEvaluate = this.data.isAdmin
           ? this.isActivityEnded(activity)
           : this.isActivityEnded(activity) && this.isParticipantCompleted(activity.signupStatus)
-        this.setData({ activity, skills: this.splitTags(activity.skillRequirements), canEvaluate })
+        const positions = (activity.positions || []).map(item => Object.assign({}, item, {
+          timeText: `${this.formatTime(item.startTime)} 至 ${this.formatTime(item.endTime)}`
+        }))
+        activity.positions = positions
+        this.setData({
+          activity,
+          skills: this.splitTags(activity.skillRequirements),
+          canEvaluate,
+          selectedPositionId: positions.length === 1 ? positions[0].id : this.data.selectedPositionId
+        })
         this.refreshButton(activity)
         if (!this.data.isAdmin) this.loadCheckinStatus()
         this.loadGrowthExperience()
@@ -114,6 +126,15 @@ Page({
     request({ url: `/api/activities/${this.data.id}/growth-experience`, silent: true })
       .then(data => this.setData({ growthAdvice: data.advice || '', excellentReflections: data.items || [] }))
       .catch(() => {})
+  },
+  selectPosition(e) {
+    this.setData({ selectedPositionId: Number(e.currentTarget.dataset.id) })
+  },
+  toggleTransport(e) {
+    this.setData({ transportRequired: e.detail.value })
+  },
+  inputBoardingPoint(e) {
+    this.setData({ boardingPoint: e.detail.value })
   },
   loadActivityEvaluations() {
     request({ url: `/api/activities/${this.data.id}/evaluations/public`, silent: true })
@@ -169,9 +190,26 @@ Page({
       wx.showModal({ title: '信用分受限', content: '当前信用分低于70分，暂不能报名，请联系管理员处理。', showCancel: false })
       return
     }
+    if (this.data.activity.positions && this.data.activity.positions.length && !this.data.selectedPositionId) {
+      wx.showToast({ title: '请先选择报名岗位', icon: 'none' })
+      return
+    }
+    if (this.data.transportRequired && !String(this.data.boardingPoint || '').trim()) {
+      wx.showToast({ title: '请填写上车点', icon: 'none' })
+      return
+    }
     const submit = () => {
       wx.showLoading({ title: '报名中' })
-      request({ url: `/api/activity/${this.data.id}/signup`, method: 'POST', silent: true })
+      request({
+        url: `/api/activity/${this.data.id}/signup`,
+        method: 'POST',
+        silent: true,
+        data: {
+          positionId: this.data.selectedPositionId,
+          transportRequired: this.data.transportRequired,
+          boardingPoint: this.data.transportRequired ? this.data.boardingPoint : ''
+        }
+      })
         .then(() => {
           wx.hideLoading()
           wx.showToast({ title: '报名成功' })

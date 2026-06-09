@@ -34,8 +34,10 @@ public class ActivityApiController extends BaseController {
     }
 
     @PostMapping("/{id}/signup")
-    public ApiResponse<Void> signup(@PathVariable Long id, HttpServletRequest request) {
-        RegistrationDTO dto = new RegistrationDTO();
+    public ApiResponse<Void> signup(@PathVariable Long id,
+                                    @org.springframework.web.bind.annotation.RequestBody(required = false) RegistrationDTO body,
+                                    HttpServletRequest request) {
+        RegistrationDTO dto = body == null ? new RegistrationDTO() : body;
         dto.setActivityId(id);
         registrationService.register(dto, currentUser(request));
         return ApiResponse.ok(null);

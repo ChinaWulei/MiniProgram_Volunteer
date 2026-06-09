@@ -60,6 +60,7 @@
     <view wx:if="{{!editing}}">
       <view class="info-row"><text>昵称</text><text>{{profile.nicknameText}}</text></view>
       <view class="info-row"><text>学院</text><text>{{profile.collegeText}}</text></view>
+      <view class="info-row"><text>所在校区</text><text>{{profile.campusText}}</text></view>
       <view class="info-row"><text>专业班级</text><text>{{profile.majorClassText}}</text></view>
       <view class="info-row"><text>手机号</text><text>{{profile.phoneText}}</text></view>
       <view class="info-row column"><text>技能标签</text><view><text class="tag" wx:for="{{selectedSkills}}" wx:key="*this">{{item}}</text></view></view>
@@ -70,6 +71,9 @@
     <view wx:else>
       <input placeholder="昵称" value="{{form.nickname}}" data-key="nickname" bindinput="input" />
       <input placeholder="学院" value="{{form.college}}" data-key="college" bindinput="input" />
+      <picker mode="selector" range="{{campusOptions}}" bindchange="pickCampus">
+        <view class="profile-picker">所在校区：{{form.campus || '请选择'}}</view>
+      </picker>
       <input placeholder="专业班级" value="{{form.majorClass}}" data-key="majorClass" bindinput="input" />
       <input placeholder="手机号" value="{{form.phone}}" data-key="phone" bindinput="input" />
       <view class="skill-grid">
@@ -78,6 +82,23 @@
       <textarea placeholder="可服务时间" value="{{form.availableTime}}" data-key="availableTime" bindinput="input"></textarea>
       <textarea placeholder="个人简介" value="{{form.bio}}" data-key="bio" bindinput="input"></textarea>
     </view>
+  </view>
+
+  <view class="section" wx:if="{{!isAdmin}}">
+    <view class="section-head">
+      <view class="section-title no-margin">考试安排</view>
+      <button class="mini-add" bindtap="addExam">添加</button>
+    </view>
+    <view class="exam-tip">用于报名时检测岗位与考试时间冲突，格式：2026-06-25 14:00</view>
+    <view class="exam-card" wx:for="{{exams}}" wx:key="index">
+      <input placeholder="课程名称" value="{{item.courseName}}" data-index="{{index}}" data-key="courseName" bindinput="inputExam" />
+      <input placeholder="开始时间：2026-06-25 14:00" value="{{item.startTime}}" data-index="{{index}}" data-key="startTime" bindinput="inputExam" />
+      <input placeholder="结束时间：2026-06-25 16:00" value="{{item.endTime}}" data-index="{{index}}" data-key="endTime" bindinput="inputExam" />
+      <input placeholder="考试地点（选填）" value="{{item.location}}" data-index="{{index}}" data-key="location" bindinput="inputExam" />
+      <button class="exam-remove" data-index="{{index}}" bindtap="removeExam">删除</button>
+    </view>
+    <view wx:if="{{exams.length === 0}}" class="empty-badge">暂未填写考试安排</view>
+    <button class="reminder-btn" bindtap="saveExams">保存考试安排</button>
   </view>
 
   <view class="section" wx:if="{{!isAdmin}}">

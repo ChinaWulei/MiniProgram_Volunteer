@@ -88,6 +88,16 @@
   line-height: 1.7;
 }
 .paragraph.pre { white-space: pre-wrap; }
+.position-option { margin-top: 14rpx; padding: 18rpx; border: 2rpx solid #e4e7ec; border-radius: 14rpx; background: #f8fafc; }
+.position-option.active { border-color: #0f766e; background: #ecfdf5; }
+.position-option-head { display: flex; justify-content: space-between; gap: 16rpx; color: #172033; font-size: 27rpx; font-weight: 800; }
+.position-option-head text:last-child { flex: 0 0 auto; color: #0f766e; font-size: 23rpx; }
+.position-option-time, .position-option-requirement { margin-top: 10rpx; color: #667085; font-size: 24rpx; line-height: 1.5; }
+.rehearsal-tag { display: inline-flex; margin-top: 10rpx; padding: 6rpx 12rpx; border-radius: 999rpx; color: #c2410c; background: #ffedd5; font-size: 22rpx; }
+.transport-row { display: flex; align-items: center; justify-content: space-between; gap: 20rpx; margin-top: 22rpx; padding-top: 18rpx; border-top: 1rpx solid #edf2f7; }
+.transport-title { color: #172033; font-size: 27rpx; font-weight: 800; }
+.transport-tip { margin-top: 6rpx; color: #667085; font-size: 22rpx; }
+.boarding-input { margin-top: 16rpx; background: #f8fafc; }
 .excellent-card { margin-top: 12rpx; padding: 14rpx; border-radius: 12rpx; color: #475467; background: #f8fbfb; font-size: 24rpx; line-height: 1.55; }
 .contact-section {
   margin-bottom: 28rpx;

@@ -59,6 +59,27 @@
     <view class="paragraph pre">{{growthAdvice}}</view>
   </view>
 
+  <view wx:if="{{!isAdmin && activity.positions && activity.positions.length}}" class="detail-section">
+    <view class="section-title">选择报名岗位</view>
+    <view class="position-option {{selectedPositionId === item.id ? 'active' : ''}}" wx:for="{{activity.positions}}" wx:key="id" data-id="{{item.id}}" bindtap="selectPosition">
+      <view class="position-option-head">
+        <text>{{item.name}}</text>
+        <text>剩余 {{item.remainingNumber}} 人</text>
+      </view>
+      <view class="position-option-time">{{item.timeText}}</view>
+      <view wx:if="{{item.requirements}}" class="position-option-requirement">{{item.requirements}}</view>
+      <view wx:if="{{item.requiresRehearsal}}" class="rehearsal-tag">需参加彩排</view>
+    </view>
+    <view class="transport-row">
+      <view>
+        <view class="transport-title">需要统一接送</view>
+        <view class="transport-tip">当前校区：{{profile.campus || '未填写，请先完善个人信息'}}</view>
+      </view>
+      <switch checked="{{transportRequired}}" bindchange="toggleTransport" color="#0f766e" />
+    </view>
+    <input wx:if="{{transportRequired}}" class="boarding-input" placeholder="请输入本次上车点" value="{{boardingPoint}}" bindinput="inputBoardingPoint" />
+  </view>
+
   <view class="detail-section contact-section">
     <view class="section-title">联系人</view>
     <view class="info-line"><text>联系人</text><text>{{activity.contactName || '-'}}</text></view>
@@ -75,7 +96,9 @@
           <view class="reg-name">{{item.userText}}</view>
           <view class="reg-status">{{item.status}}</view>
         </view>
-        <view class="reg-meta">{{item.identityNo}} · {{item.college}} · {{item.majorClass}}</view>
+        <view class="reg-meta">{{item.identityNo}} · {{item.college}} · {{item.campus || '未填校区'}} · {{item.majorClass}}</view>
+        <view wx:if="{{item.positionName}}" class="reg-meta">报名岗位：{{item.positionName}}</view>
+        <view wx:if="{{item.transportRequired}}" class="reg-meta">需要接送 · 上车点：{{item.boardingPoint || '待确认'}}</view>
         <view class="reg-meta">报名时间：{{item.createdText}}</view>
         <view class="match-panel">
           <view class="match-row"><text>匹配情况</text><text>{{item.matchScore || 0}} 分</text></view>

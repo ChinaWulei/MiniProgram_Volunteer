@@ -124,6 +124,39 @@ public class DatabaseStartupCheck implements ApplicationRunner {
                     )
                     """);
             ensureColumn("activity", "tips", "alter table activity add column tips text null after service_hours");
+            ensureColumn("volunteer_profile", "campus", "alter table volunteer_profile add column campus varchar(50) null after college");
+            ensureColumn("registration", "position_id", "alter table registration add column position_id bigint null after user_id");
+            ensureColumn("registration", "transport_required", "alter table registration add column transport_required tinyint(1) not null default 0 after review_remark");
+            ensureColumn("registration", "boarding_point", "alter table registration add column boarding_point varchar(120) null after transport_required");
+            jdbcTemplate.execute("""
+                    create table if not exists activity_position (
+                        id bigint primary key auto_increment,
+                        activity_id bigint not null,
+                        name varchar(100) not null,
+                        start_time datetime not null,
+                        end_time datetime not null,
+                        recruit_number int not null,
+                        requirements varchar(500),
+                        requires_rehearsal tinyint(1) not null default 0,
+                        sort_order int not null default 0,
+                        created_at datetime not null default current_timestamp,
+                        updated_at datetime not null default current_timestamp on update current_timestamp,
+                        index idx_position_activity(activity_id, sort_order)
+                    )
+                    """);
+            jdbcTemplate.execute("""
+                    create table if not exists exam_schedule (
+                        id bigint primary key auto_increment,
+                        user_id bigint not null,
+                        course_name varchar(120) not null,
+                        start_time datetime not null,
+                        end_time datetime not null,
+                        location varchar(120),
+                        created_at datetime not null default current_timestamp,
+                        updated_at datetime not null default current_timestamp on update current_timestamp,
+                        index idx_exam_user_time(user_id, start_time, end_time)
+                    )
+                    """);
             log.info("Database connection check succeeded");
         } catch (Exception e) {
             log.error("Database connection check failed", e);

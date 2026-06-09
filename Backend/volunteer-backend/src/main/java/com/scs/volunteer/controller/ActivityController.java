@@ -35,8 +35,8 @@ public class ActivityController extends BaseController {
     }
 
     @GetMapping("/{id}")
-    public ApiResponse<Activity> detail(@PathVariable Long id) {
-        return ApiResponse.ok(activityService.detail(id));
+    public ApiResponse<com.scs.volunteer.vo.ActivityDetailVO> detail(@PathVariable Long id, HttpServletRequest request) {
+        return ApiResponse.ok(activityService.detail(id, currentUser(request)));
     }
 
     @PostMapping("/{id}/ai-analysis")

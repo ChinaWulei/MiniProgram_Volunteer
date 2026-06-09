@@ -9,6 +9,7 @@ public class UserProfileVO {
     private String name;
     private String volunteerNo;
     private String college;
+    private String campus;
     private String majorClass;
     private String phone;
     private String skillTags;
@@ -41,6 +42,8 @@ public class UserProfileVO {
     public void setVolunteerNo(String volunteerNo) { this.volunteerNo = volunteerNo; }
     public String getCollege() { return college; }
     public void setCollege(String college) { this.college = college; }
+    public String getCampus() { return campus; }
+    public void setCampus(String campus) { this.campus = campus; }
     public String getMajorClass() { return majorClass; }
     public void setMajorClass(String majorClass) { this.majorClass = majorClass; }
     public String getPhone() { return phone; }

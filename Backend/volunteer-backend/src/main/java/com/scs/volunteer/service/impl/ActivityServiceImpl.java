@@ -5,6 +5,7 @@ import com.scs.volunteer.common.CurrentUser;
 import com.scs.volunteer.dto.ActivityDTO;
 import com.scs.volunteer.entity.Activity;
 import com.scs.volunteer.mapper.ActivityMapper;
+import com.scs.volunteer.mapper.ActivityPositionMapper;
 import com.scs.volunteer.mapper.NotificationMapper;
 import com.scs.volunteer.mapper.RegistrationMapper;
 import com.scs.volunteer.mapper.VolunteerMapper;
@@ -24,16 +25,18 @@ import java.util.List;
 public class ActivityServiceImpl implements ActivityService {
     private static final DateTimeFormatter FORM_FORMAT = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
     private final ActivityMapper activityMapper;
+    private final ActivityPositionMapper activityPositionMapper;
     private final RegistrationMapper registrationMapper;
     private final VolunteerMapper volunteerMapper;
     private final ActivitySubscriptionService activitySubscriptionService;
     private final NotificationMapper notificationMapper;
     private final WechatMiniProgramService wechatMiniProgramService;
 
-    public ActivityServiceImpl(ActivityMapper activityMapper, RegistrationMapper registrationMapper, VolunteerMapper volunteerMapper,
+    public ActivityServiceImpl(ActivityMapper activityMapper, ActivityPositionMapper activityPositionMapper, RegistrationMapper registrationMapper, VolunteerMapper volunteerMapper,
                                ActivitySubscriptionService activitySubscriptionService, NotificationMapper notificationMapper,
                                WechatMiniProgramService wechatMiniProgramService) {
         this.activityMapper = activityMapper;
+        this.activityPositionMapper = activityPositionMapper;
         this.registrationMapper = registrationMapper;
         this.volunteerMapper = volunteerMapper;
         this.activitySubscriptionService = activitySubscriptionService;
@@ -97,6 +100,7 @@ public class ActivityServiceImpl implements ActivityService {
         vo.setStatus(activity.getStatus());
         vo.setCreatedBy(activity.getCreatedBy());
         vo.setSignupStatus(currentUser == null ? null : registrationMapper.findStatus(id, currentUser.getId()));
+        vo.setPositions(activityPositionMapper.list(id));
         return vo;
     }
 
@@ -106,6 +110,9 @@ public class ActivityServiceImpl implements ActivityService {
         Activity a = toEntity(dto);
         a.setCreatedBy(currentUser.getId());
         Long id = activityMapper.insert(a);
+        if (dto.getPositions() != null) {
+            activityPositionMapper.replace(id, dto.getPositions(), value -> parseDateTime(value, "岗位时间"));
+        }
         a.setId(id);
         if (a.getPublishedAt() != null) {
             activitySubscriptionService.notifyActivityPublished(a);
@@ -118,6 +125,9 @@ public class ActivityServiceImpl implements ActivityService {
         requireAdmin(currentUser);
         detail(id);
         activityMapper.update(id, toEntity(dto));
+        if (dto.getPositions() != null) {
+            activityPositionMapper.replace(id, dto.getPositions(), value -> parseDateTime(value, "岗位时间"));
+        }
     }
 
     @Override
@@ -176,6 +186,13 @@ public class ActivityServiceImpl implements ActivityService {
         LocalDateTime signupStartTime = blank(dto.getSignupStartTime()) ? null : parseDateTime(dto.getSignupStartTime(), "报名开始时间");
         LocalDateTime signupDeadline = blank(dto.getSignupDeadline()) ? null : parseDateTime(dto.getSignupDeadline(), "报名截止时间");
         Integer recruitNumber = dto.getRecruitNumber() == null ? dto.getRecruitCount() : dto.getRecruitNumber();
+        if (dto.getPositions() != null && !dto.getPositions().isEmpty()) {
+            recruitNumber = dto.getPositions().stream()
+                    .map(com.scs.volunteer.dto.ActivityPositionDTO::getRecruitNumber)
+                    .filter(java.util.Objects::nonNull)
+                    .mapToInt(Integer::intValue)
+                    .sum();
+        }
         String status = normalizePublishStatus(first(dto.getStatus(), "已发布"), startTime, endTime, signupStartTime, signupDeadline, recruitNumber, 0);
 
         a.setName(name);
@@ -211,6 +228,13 @@ public class ActivityServiceImpl implements ActivityService {
         if (blank(first(dto.getStartTime(), dto.getActivityTime()))) throw new BizException("活动时间不能为空");
         if (blank(dto.getLocation())) throw new BizException("活动地点不能为空");
         Integer count = dto.getRecruitNumber() == null ? dto.getRecruitCount() : dto.getRecruitNumber();
+        if (dto.getPositions() != null && !dto.getPositions().isEmpty()) {
+            count = dto.getPositions().stream()
+                    .map(com.scs.volunteer.dto.ActivityPositionDTO::getRecruitNumber)
+                    .filter(java.util.Objects::nonNull)
+                    .mapToInt(Integer::intValue)
+                    .sum();
+        }
         if (count == null || count <= 0) throw new BizException("招募人数必须大于 0");
         if ((dto.getServiceHours() == null || dto.getServiceHours() <= 0) && blank(dto.getEndTime())) throw new BizException("服务时长必须大于 0");
     }

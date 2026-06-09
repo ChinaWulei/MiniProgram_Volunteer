@@ -23,11 +23,12 @@ public class RegistrationMapper {
         Integer count = jdbcTemplate.queryForObject("""
                 select count(*)
                 from registration r join activity a on r.activity_id=a.id
+                left join activity_position p on p.id=r.position_id
                 where r.user_id=?
                   and r.activity_id<>?
                   and r.status in ('待审核','已通过')
-                  and a.start_time < ?
-                  and a.end_time > ?
+                  and coalesce(p.start_time,a.start_time) < ?
+                  and coalesce(p.end_time,a.end_time) > ?
                 """, Integer.class, userId, activityId, endTime, startTime);
         return count != null && count > 0;
     }
@@ -39,20 +40,25 @@ public class RegistrationMapper {
         return list.stream().findFirst().orElse(null);
     }
 
-    public void insert(Long activityId, Long userId, String status) {
-        jdbcTemplate.update("insert into registration(activity_id,user_id,status) values(?,?,?)", activityId, userId, status);
+    public void insert(Long activityId, Long userId, Long positionId, boolean transportRequired, String boardingPoint, String status) {
+        jdbcTemplate.update("""
+                insert into registration(activity_id,user_id,position_id,transport_required,boarding_point,status)
+                values(?,?,?,?,?,?)
+                """, activityId, userId, positionId, transportRequired, boardingPoint, status);
     }
 
     public List<Map<String, Object>> my(Long userId) {
         return jdbcTemplate.queryForList("""
                 select r.*,a.name as activity_name,a.category,a.location,a.start_time,a.end_time,
-                       a.service_hours,a.contact_name,a.contact_phone,
+                       a.service_hours,a.contact_name,a.contact_phone,p.name as position_name,
+                       p.start_time as position_start_time,p.end_time as position_end_time,
                        coalesce(e.new_status,c.status, if(now() > a.end_time and r.status in ('已通过','已完成'), 'ABSENT', 'NOT_CHECKED_IN')) as checkin_status,
                        coalesce(e.new_checkin_time,c.checkin_time) as checkin_time,
                        ca.audit_status as adjustment_status,
                        ca.admin_remark as adjustment_admin_remark,
                        ca.reason as adjustment_reason
                 from registration r join activity a on r.activity_id=a.id
+                left join activity_position p on p.id=r.position_id
                 left join activity_checkin c on c.activity_id=r.activity_id and c.user_id=r.user_id
                 left join (
                     select x.*
@@ -130,14 +136,16 @@ public class RegistrationMapper {
         return jdbcTemplate.queryForList("""
                 select r.id,r.activity_id,r.user_id,r.status,r.review_remark,r.created_at,
                        u.name as userName,u.nickname,u.identity_no as identityNo,u.avatar_url as avatarUrl,
-                       p.college,p.major_class as majorClass,p.skill_tags as skillTags,p.available_time as availableTime,
+                       p.college,p.campus,p.major_class as majorClass,p.skill_tags as skillTags,p.available_time as availableTime,
                        p.credit_score as creditScore,p.total_hours as totalHours,p.service_count as serviceCount,
                        a.name as activityName,a.category,a.location,a.start_time as startTime,a.end_time as endTime,
-                       a.skill_requirements as skillRequirements
+                       a.skill_requirements as skillRequirements,ap.name as positionName,
+                       r.transport_required as transportRequired,r.boarding_point as boardingPoint
                 from registration r
                 join user u on r.user_id=u.id
                 left join volunteer_profile p on p.user_id=u.id
                 join activity a on r.activity_id=a.id
+                left join activity_position ap on ap.id=r.position_id
                 where (? is null or r.status=?)
                   and (? is null or r.activity_id=?)
                   and (? is null or u.name like concat('%',?,'%') or u.nickname like concat('%',?,'%')

@@ -31,6 +31,7 @@ public class ActivityDetailVO {
     private String status;
     private Long createdBy;
     private String signupStatus;
+    private java.util.List<java.util.Map<String, Object>> positions;
 
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
@@ -88,4 +89,6 @@ public class ActivityDetailVO {
     public void setCreatedBy(Long createdBy) { this.createdBy = createdBy; }
     public String getSignupStatus() { return signupStatus; }
     public void setSignupStatus(String signupStatus) { this.signupStatus = signupStatus; }
+    public java.util.List<java.util.Map<String, Object>> getPositions() { return positions; }
+    public void setPositions(java.util.List<java.util.Map<String, Object>> positions) { this.positions = positions; }
 }

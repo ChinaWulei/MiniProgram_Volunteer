@@ -6,6 +6,8 @@ import com.scs.volunteer.dto.RegistrationDTO;
 import com.scs.volunteer.dto.ReviewDTO;
 import com.scs.volunteer.entity.Activity;
 import com.scs.volunteer.mapper.ActivityMapper;
+import com.scs.volunteer.mapper.ActivityPositionMapper;
+import com.scs.volunteer.mapper.ExamScheduleMapper;
 import com.scs.volunteer.mapper.CreditMapper;
 import com.scs.volunteer.mapper.EvaluationMapper;
 import com.scs.volunteer.mapper.NotificationMapper;
@@ -27,15 +29,21 @@ import java.util.stream.Collectors;
 public class RegistrationServiceImpl implements RegistrationService {
     private final RegistrationMapper registrationMapper;
     private final ActivityMapper activityMapper;
+    private final ActivityPositionMapper activityPositionMapper;
+    private final ExamScheduleMapper examScheduleMapper;
     private final VolunteerMapper volunteerMapper;
     private final ServiceRecordMapper serviceRecordMapper;
     private final NotificationMapper notificationMapper;
     private final CreditMapper creditMapper;
     private final EvaluationMapper evaluationMapper;
 
-    public RegistrationServiceImpl(RegistrationMapper registrationMapper, ActivityMapper activityMapper, VolunteerMapper volunteerMapper, ServiceRecordMapper serviceRecordMapper, NotificationMapper notificationMapper, CreditMapper creditMapper, EvaluationMapper evaluationMapper) {
+    public RegistrationServiceImpl(RegistrationMapper registrationMapper, ActivityMapper activityMapper, ActivityPositionMapper activityPositionMapper,
+                                   ExamScheduleMapper examScheduleMapper, VolunteerMapper volunteerMapper, ServiceRecordMapper serviceRecordMapper,
+                                   NotificationMapper notificationMapper, CreditMapper creditMapper, EvaluationMapper evaluationMapper) {
         this.registrationMapper = registrationMapper;
         this.activityMapper = activityMapper;
+        this.activityPositionMapper = activityPositionMapper;
+        this.examScheduleMapper = examScheduleMapper;
         this.volunteerMapper = volunteerMapper;
         this.serviceRecordMapper = serviceRecordMapper;
         this.notificationMapper = notificationMapper;
@@ -68,11 +76,27 @@ public class RegistrationServiceImpl implements RegistrationService {
         if (activity.getSignupDeadline() != null && now.isAfter(activity.getSignupDeadline())) {
             throw new BizException("报名已截止");
         }
-        if (registrationMapper.hasTimeConflict(currentUser.getId(), activity.getId(), activity.getStartTime(), activity.getEndTime())) {
+        java.time.LocalDateTime selectedStart = activity.getStartTime();
+        java.time.LocalDateTime selectedEnd = activity.getEndTime();
+        List<Map<String, Object>> positions = activityPositionMapper.list(activity.getId());
+        if (!positions.isEmpty()) {
+            if (dto.getPositionId() == null) throw new BizException("请选择报名岗位");
+            Map<String, Object> position = activityPositionMapper.find(dto.getPositionId(), activity.getId());
+            if (position == null) throw new BizException("所选岗位不存在");
+            if (((Number) position.get("remaining_number")).intValue() <= 0) throw new BizException("所选岗位已满员");
+            selectedStart = dateTime(position.get("start_time"));
+            selectedEnd = dateTime(position.get("end_time"));
+        }
+        List<Map<String, Object>> examConflicts = examScheduleMapper.conflicts(currentUser.getId(), selectedStart, selectedEnd);
+        if (!examConflicts.isEmpty()) {
+            throw new BizException("所选岗位与考试《" + examConflicts.get(0).get("courseName") + "》时间冲突");
+        }
+        if (registrationMapper.hasTimeConflict(currentUser.getId(), activity.getId(), selectedStart, selectedEnd)) {
             throw new BizException("该时间段已报名其他活动，请确认时间安排");
         }
         String signupStatus = "自动通过".equals(activity.getReviewMethod()) ? "已通过" : "待审核";
-        registrationMapper.insert(dto.getActivityId(), currentUser.getId(), signupStatus);
+        registrationMapper.insert(dto.getActivityId(), currentUser.getId(), dto.getPositionId(),
+                Boolean.TRUE.equals(dto.getTransportRequired()), dto.getBoardingPoint(), signupStatus);
         activityMapper.increaseRegistered(dto.getActivityId());
         activityMapper.refreshRegisteredNumbers();
     }
@@ -151,6 +175,12 @@ public class RegistrationServiceImpl implements RegistrationService {
 
     private double number(Object value, double fallback) {
         return value instanceof Number ? ((Number) value).doubleValue() : fallback;
+    }
+
+    private java.time.LocalDateTime dateTime(Object value) {
+        if (value instanceof java.time.LocalDateTime dateTime) return dateTime;
+        if (value instanceof java.sql.Timestamp timestamp) return timestamp.toLocalDateTime();
+        return java.time.LocalDateTime.parse(String.valueOf(value).replace(" ", "T"));
     }
 
     @Override

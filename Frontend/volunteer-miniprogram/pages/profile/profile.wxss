@@ -190,6 +190,15 @@
   font-size: 26rpx;
   text-align: center;
 }
+.section-title.no-margin { margin-bottom: 0; }
+.section-head { display: flex; align-items: center; justify-content: space-between; gap: 16rpx; margin-bottom: 18rpx; }
+.profile-picker { height: 76rpx; line-height: 76rpx; margin-bottom: 18rpx; padding: 0 20rpx; border-radius: 12rpx; background: #f8fafc; color: #344054; font-size: 27rpx; }
+.mini-add { width: 112rpx; height: 58rpx; line-height: 58rpx; margin: 0; padding: 0; border-radius: 12rpx; color: #0f766e; background: #eefaf7; font-size: 24rpx; }
+.mini-add::after, .exam-remove::after { border: 0; }
+.exam-tip { margin-bottom: 14rpx; color: #667085; font-size: 23rpx; line-height: 1.5; }
+.exam-card { margin-top: 14rpx; padding: 16rpx; border-radius: 14rpx; background: #f8fafc; }
+.exam-card input { margin-bottom: 12rpx; background: #fff; }
+.exam-remove { width: 100%; height: 58rpx; line-height: 58rpx; margin: 0; padding: 0; border-radius: 12rpx; color: #dc2626; background: #fee2e2; font-size: 24rpx; }
 .credit-record { display: flex; justify-content: space-between; gap: 18rpx; align-items: center; padding: 18rpx 0; border-bottom: 1rpx solid #edf2f7; }
 .credit-reason { color: #172033; font-size: 26rpx; font-weight: 700; }
 .credit-time { margin-top: 6rpx; color: #98a2b3; font-size: 22rpx; }

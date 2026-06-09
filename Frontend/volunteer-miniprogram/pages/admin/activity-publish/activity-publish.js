@@ -62,7 +62,8 @@ Page({
     aiCoverGenerating: false,
     aiLoadingText: 'AI正在生成活动内容与封面...',
     uploading: false,
-    submitting: false
+    submitting: false,
+    positions: []
   },
   onLoad(options) {
     if (options.id) {
@@ -115,7 +116,16 @@ Page({
             contactPhone: activity.contactPhone,
             auditMode: activity.reviewMethod === '自动通过' ? '自动通过' : '管理员审核',
             status: activity.status || '已发布'
-          }
+          },
+          positions: (activity.positions || []).map(item => ({
+            id: item.id,
+            name: item.name,
+            startTime: String(item.startTime || '').replace('T', ' ').slice(0, 16),
+            endTime: String(item.endTime || '').replace('T', ' ').slice(0, 16),
+            recruitNumber: item.recruitNumber,
+            requirements: item.requirements || '',
+            requiresRehearsal: !!item.requiresRehearsal
+          }))
         })
       })
       .catch(() => {})
@@ -125,6 +135,31 @@ Page({
     const key = e.currentTarget.dataset.key
     const numeric = key === 'recruitCount' || key === 'serviceHours'
     this.setData({ [`form.${key}`]: numeric ? Number(e.detail.value) : e.detail.value })
+  },
+  addPosition() {
+    this.setData({
+      positions: this.data.positions.concat({
+        name: '',
+        startTime: this.data.form.activityTime || '',
+        endTime: this.data.form.endTime || '',
+        recruitNumber: 1,
+        requirements: '',
+        requiresRehearsal: false
+      })
+    })
+  },
+  inputPosition(e) {
+    const key = e.currentTarget.dataset.key
+    const value = key === 'recruitNumber' ? Number(e.detail.value) : e.detail.value
+    this.setData({ [`positions[${e.currentTarget.dataset.index}].${key}`]: value })
+  },
+  togglePositionRehearsal(e) {
+    this.setData({ [`positions[${e.currentTarget.dataset.index}].requiresRehearsal`]: e.detail.value })
+  },
+  removePosition(e) {
+    const positions = this.data.positions.slice()
+    positions.splice(Number(e.currentTarget.dataset.index), 1)
+    this.setData({ positions })
   },
   openAiGenerate() {
     this.setData({ aiPanelVisible: true })
@@ -315,7 +350,10 @@ Page({
   },
   submit() {
     if (this.data.submitting || this.data.uploading) return
-    const form = Object.assign({}, this.data.form, { requiredSkills: compactSkills(this.data.skillOptions) })
+    const form = Object.assign({}, this.data.form, {
+      requiredSkills: compactSkills(this.data.skillOptions),
+      positions: this.data.positions.filter(item => item.name && item.startTime && item.endTime && item.recruitNumber > 0)
+    })
     if (!form.title || !form.activityTime || !form.location || !form.recruitCount || !form.serviceHours) {
       wx.showToast({ title: '请填写必填信息', icon: 'none' })
       return

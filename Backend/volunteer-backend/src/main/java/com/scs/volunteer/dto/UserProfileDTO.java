@@ -3,6 +3,7 @@ package com.scs.volunteer.dto;
 public class UserProfileDTO {
     private String nickname;
     private String college;
+    private String campus;
     private String majorClass;
     private String phone;
     private String skillTags;
@@ -13,6 +14,8 @@ public class UserProfileDTO {
     public void setNickname(String nickname) { this.nickname = nickname; }
     public String getCollege() { return college; }
     public void setCollege(String college) { this.college = college; }
+    public String getCampus() { return campus; }
+    public void setCampus(String campus) { this.campus = campus; }
     public String getMajorClass() { return majorClass; }
     public void setMajorClass(String majorClass) { this.majorClass = majorClass; }
     public String getPhone() { return phone; }

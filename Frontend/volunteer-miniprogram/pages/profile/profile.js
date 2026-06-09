@@ -28,6 +28,7 @@ function normalizeProfile(profile) {
   return Object.assign({}, profile, {
     nicknameText: clean(profile.nickname || profile.name, '未登录'),
     collegeText: clean(profile.college, '数计学院'),
+    campusText: clean(profile.campus, '未填写校区'),
     majorClassText: clean(profile.majorClass, '未填写专业班级'),
     phoneText: clean(profile.phone, '-'),
     availableTimeText: clean(profile.availableTime, '-'),
@@ -53,6 +54,8 @@ Page({
     reminderEmail: '',
     editing: false,
     isAdmin: false
+    ,campusOptions: ['东海岸校区', '桑浦山校区', '其他校区']
+    ,exams: []
   },
   onShow() {
     const user = app.globalData.user || wx.getStorageSync('user')
@@ -60,6 +63,7 @@ Page({
     this.loadProfile()
     if (!user || user.role !== 'ADMIN') {
       this.loadActivitySubscription()
+      this.loadExams()
     }
   },
   loadProfile() {
@@ -156,6 +160,34 @@ Page({
   input(e) {
     const key = e.currentTarget.dataset.key
     this.setData({ [`form.${key}`]: e.detail.value })
+  },
+  pickCampus(e) {
+    this.setData({ 'form.campus': this.data.campusOptions[Number(e.detail.value)] })
+  },
+  loadExams() {
+    request({ url: '/api/exam-schedules', silent: true })
+      .then(exams => this.setData({ exams: (exams || []).map(item => Object.assign({}, item, {
+        startTime: this.formatTime(item.startTime),
+        endTime: this.formatTime(item.endTime)
+      })) }))
+      .catch(() => {})
+  },
+  addExam() {
+    this.setData({ exams: this.data.exams.concat({ courseName: '', startTime: '', endTime: '', location: '' }) })
+  },
+  inputExam(e) {
+    this.setData({ [`exams[${e.currentTarget.dataset.index}].${e.currentTarget.dataset.key}`]: e.detail.value })
+  },
+  removeExam(e) {
+    const exams = this.data.exams.slice()
+    exams.splice(Number(e.currentTarget.dataset.index), 1)
+    this.setData({ exams })
+  },
+  saveExams() {
+    const exams = this.data.exams.filter(item => item.courseName && item.startTime && item.endTime)
+    request({ url: '/api/exam-schedules', method: 'PUT', data: { exams } })
+      .then(() => wx.showToast({ title: '考试安排已保存' }))
+      .catch(() => {})
   },
   inputReminderEmail(e) {
     this.setData({ reminderEmail: e.detail.value })
@@ -272,6 +304,7 @@ Page({
     wx.showLoading({ title: '保存中' })
     request({ url: '/api/user/profile', method: 'PUT', data: form })
       .then(profile => {
+        profile = normalizeProfile(profile || {})
         const selectedSkills = this.splitTags(profile.skillTags)
         this.setData({
           profile,

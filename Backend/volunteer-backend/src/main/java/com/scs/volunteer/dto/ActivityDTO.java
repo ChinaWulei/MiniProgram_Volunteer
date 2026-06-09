@@ -1,6 +1,7 @@
 package com.scs.volunteer.dto;
 
 public class ActivityDTO {
+    private java.util.List<ActivityPositionDTO> positions;
     private String name;
     private String title;
     private String coverImageUrl;
@@ -86,4 +87,6 @@ public class ActivityDTO {
     public void setAuditMode(String auditMode) { this.auditMode = auditMode; }
     public String getStatus() { return status; }
     public void setStatus(String status) { this.status = status; }
+    public java.util.List<ActivityPositionDTO> getPositions() { return positions; }
+    public void setPositions(java.util.List<ActivityPositionDTO> positions) { this.positions = positions; }
 }

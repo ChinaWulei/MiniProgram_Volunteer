@@ -56,7 +56,7 @@ public class UserMapper {
     public Optional<UserProfileVO> findProfile(Long userId) {
         List<UserProfileVO> list = jdbcTemplate.query("""
                 select u.id as user_id,u.avatar_url,u.nickname,u.name,u.identity_no as volunteer_no,u.phone,
-                       p.college,p.major_class,p.skill_tags,p.available_time,p.bio,
+                       p.college,p.campus,p.major_class,p.skill_tags,p.available_time,p.bio,
                        p.total_hours,p.credit_score,p.service_count
                 from user u left join volunteer_profile p on u.id=p.user_id
                 where u.id=?
@@ -70,14 +70,14 @@ public class UserMapper {
         Integer count = jdbcTemplate.queryForObject("select count(*) from volunteer_profile where user_id=?", Integer.class, userId);
         if (count != null && count > 0) {
             jdbcTemplate.update("""
-                    update volunteer_profile set college=?,major_class=?,skill_tags=?,available_time=?,bio=?
+                    update volunteer_profile set college=?,campus=?,major_class=?,skill_tags=?,available_time=?,bio=?
                     where user_id=?
-                    """, dto.getCollege(), dto.getMajorClass(), dto.getSkillTags(), dto.getAvailableTime(), dto.getBio(), userId);
+                    """, dto.getCollege(), dto.getCampus(), dto.getMajorClass(), dto.getSkillTags(), dto.getAvailableTime(), dto.getBio(), userId);
         } else {
             jdbcTemplate.update("""
-                    insert into volunteer_profile(user_id,college,major_class,skill_tags,available_time,bio,total_hours,credit_score,service_count)
-                    values(?,?,?,?,?,?,0,100,0)
-                    """, userId, dto.getCollege(), dto.getMajorClass(), dto.getSkillTags(), dto.getAvailableTime(), dto.getBio());
+                    insert into volunteer_profile(user_id,college,campus,major_class,skill_tags,available_time,bio,total_hours,credit_score,service_count)
+                    values(?,?,?,?,?,?,?,0,100,0)
+                    """, userId, dto.getCollege(), dto.getCampus(), dto.getMajorClass(), dto.getSkillTags(), dto.getAvailableTime(), dto.getBio());
         }
     }
 

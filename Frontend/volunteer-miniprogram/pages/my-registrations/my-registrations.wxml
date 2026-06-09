@@ -18,6 +18,7 @@
       <view class="muted" wx:if="{{item.review_remark}}">报名审核意见：{{item.review_remark}}</view>
     </view>
     <button wx:if="{{item.canApplyAdjustment}}" class="apply-btn" catchtap="openApply" data-index="{{index}}">申请补签</button>
+    <button wx:if="{{item.canWithdraw}}" class="withdraw-btn" catchtap="withdraw" data-index="{{index}}">取消报名</button>
   </view>
   <view class="card muted" wx:if="{{list.length === 0}}">暂无报名记录</view>
 

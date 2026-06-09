@@ -29,13 +29,16 @@ function formatTime(value) {
 function normalize(item) {
   const checkinStatus = item.checkin_status || item.checkinStatus
   const auditStatus = item.adjustment_status || item.adjustmentStatus
+  const startTime = item.start_time || item.startTime
   return Object.assign({}, item, {
     checkinStatus,
     checkinStatusText: statusText(checkinStatus),
     adjustmentStatusText: auditText(auditStatus),
-    startTimeText: formatTime(item.start_time || item.startTime),
+    startTimeText: formatTime(startTime),
     endTimeText: formatTime(item.end_time || item.endTime),
-    canApplyAdjustment: ['ABSENT', 'LATE_CHECKED_IN'].indexOf(checkinStatus) >= 0 && auditStatus !== 'PENDING' && auditStatus !== 'APPROVED'
+    canApplyAdjustment: ['ABSENT', 'LATE_CHECKED_IN'].indexOf(checkinStatus) >= 0 && auditStatus !== 'PENDING' && auditStatus !== 'APPROVED',
+    canWithdraw: ['待审核', '已通过'].indexOf(item.status) >= 0 &&
+      new Date(String(startTime || '').replace(/-/g, '/')).getTime() > Date.now()
   })
 }
 
@@ -65,6 +68,23 @@ Page({
   },
   goDetail(e) {
     wx.navigateTo({ url: `/pages/activity-detail/activity-detail?activityId=${e.currentTarget.dataset.id}` })
+  },
+  withdraw(e) {
+    const item = this.data.list[Number(e.currentTarget.dataset.index)]
+    if (!item) return
+    wx.showModal({
+      title: '取消报名',
+      content: `确定取消《${item.activity_name || item.activityName}》的报名吗？已录取时系统会自动递补下一位志愿者。`,
+      success: res => {
+        if (!res.confirm) return
+        request({ url: `/api/registrations/${item.id}/withdraw`, method: 'POST' })
+          .then(() => {
+            wx.showToast({ title: '报名已取消' })
+            this.load()
+          })
+          .catch(() => {})
+      }
+    })
   },
   openApply(e) {
     const item = this.data.list[e.currentTarget.dataset.index]

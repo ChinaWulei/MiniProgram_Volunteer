@@ -20,8 +20,9 @@
 .adjust-line { display: inline-flex; margin-top: 10rpx; padding: 6rpx 14rpx; border-radius: 999rpx; color: #0f766e; background: #e6fffb; font-size: 22rpx; font-weight: 700; }
 .danger { color: #dc2626; }
 .apply-btn, .growth-btn { position: relative; z-index: 2; display: inline-flex; align-items: center; justify-content: center; width: auto; min-width: 170rpx; height: 58rpx; line-height: 1; margin: 16rpx 12rpx 0 0; padding: 0 20rpx; border-radius: 999rpx; color: #fff; background: #0f766e; font-size: 24rpx; }
+.withdraw-btn { position: relative; z-index: 2; display: inline-flex; align-items: center; justify-content: center; width: auto; min-width: 170rpx; height: 58rpx; line-height: 1; margin: 16rpx 12rpx 0 0; padding: 0 20rpx; border-radius: 999rpx; color: #dc2626; background: #fee2e2; font-size: 24rpx; }
 .growth-btn { background: #2563eb; }
-.apply-btn::after, .primary-btn::after, .ghost-btn::after { border: 0; }
+.apply-btn::after, .withdraw-btn::after, .primary-btn::after, .ghost-btn::after { border: 0; }
 .mask { position: fixed; left: 0; right: 0; top: 0; bottom: 0; z-index: 30; background: rgba(0,0,0,.35); }
 .apply-panel { position: fixed; left: 24rpx; right: 24rpx; bottom: 28rpx; z-index: 31; padding: 24rpx; border-radius: 20rpx; background: #fff; box-shadow: 0 16rpx 48rpx rgba(16,24,40,.18); }
 .panel-title { color: #172033; font-size: 32rpx; font-weight: 800; }

@@ -227,6 +227,40 @@ public class RegistrationMapper {
         jdbcTemplate.update("update registration set status=?,review_remark=? where id=?", status, remark, id);
     }
 
+    public List<Map<String, Object>> pendingCandidates(Long activityId, Long positionId) {
+        return jdbcTemplate.queryForList("""
+                select r.id,r.activity_id,r.user_id,r.position_id,r.status,r.created_at,
+                       u.name as userName,u.nickname,u.identity_no as identityNo,u.avatar_url as avatarUrl,
+                       p.college,p.campus,p.department,p.major_class as majorClass,
+                       p.skill_tags as skillTags,p.available_time as availableTime,
+                       p.credit_score as creditScore,p.total_hours as totalHours,p.service_count as serviceCount,
+                       a.name as activityName,a.category,a.location,a.start_time as startTime,a.end_time as endTime,
+                       a.skill_requirements as skillRequirements,ap.name as positionName,
+                       ap.start_time as positionStartTime,ap.end_time as positionEndTime,
+                       ap.requires_rehearsal as requiresRehearsal,
+                       ap.rehearsal_start_time as rehearsalStartTime,
+                       ap.rehearsal_end_time as rehearsalEndTime
+                from registration r
+                join user u on u.id=r.user_id
+                left join volunteer_profile p on p.user_id=u.id
+                join activity a on a.id=r.activity_id
+                left join activity_position ap on ap.id=r.position_id
+                where r.activity_id=? and r.status='待审核'
+                  and ((? is null and r.position_id is null) or r.position_id=?)
+                order by r.created_at
+                """, activityId, positionId, positionId);
+    }
+
+    public void lockPendingCandidates(Long activityId, Long positionId) {
+        jdbcTemplate.queryForList("""
+                select id
+                from registration
+                where activity_id=? and status='待审核'
+                  and ((? is null and position_id is null) or position_id=?)
+                for update
+                """, Long.class, activityId, positionId, positionId);
+    }
+
     public void markCompleted(Long activityId, Long userId, String remark) {
         jdbcTemplate.update("""
                 update registration

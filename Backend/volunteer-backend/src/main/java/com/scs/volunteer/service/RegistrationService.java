@@ -16,4 +16,5 @@ public interface RegistrationService {
     byte[] exportApproved(Long activityId, CurrentUser currentUser);
     void review(Long id, ReviewDTO dto, CurrentUser currentUser);
     void cancel(Long id, ReviewDTO dto, CurrentUser currentUser);
+    void withdraw(Long id, CurrentUser currentUser);
 }

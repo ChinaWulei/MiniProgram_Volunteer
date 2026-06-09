@@ -69,4 +69,10 @@ public class RegistrationController extends BaseController {
         registrationService.cancel(id, dto, currentUser(request));
         return ApiResponse.ok(null);
     }
+
+    @PostMapping("/{id}/withdraw")
+    public ApiResponse<Void> withdraw(@PathVariable Long id, HttpServletRequest request) {
+        registrationService.withdraw(id, currentUser(request));
+        return ApiResponse.ok(null);
+    }
 }

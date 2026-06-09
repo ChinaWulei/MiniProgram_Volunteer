@@ -18,6 +18,7 @@ import com.scs.volunteer.mapper.ServiceRecordMapper;
 import com.scs.volunteer.mapper.VolunteerMapper;
 import com.scs.volunteer.service.RegistrationService;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.apache.poi.ss.usermodel.CellStyle;
 import org.apache.poi.ss.usermodel.FillPatternType;
 import org.apache.poi.ss.usermodel.Font;
@@ -388,6 +389,7 @@ public class RegistrationServiceImpl implements RegistrationService {
     }
 
     @Override
+    @Transactional
     public void cancel(Long id, ReviewDTO dto, CurrentUser currentUser) {
         if (currentUser == null || !"ADMIN".equals(currentUser.getRole())) {
             throw new BizException("仅管理员可取消报名");
@@ -398,11 +400,86 @@ public class RegistrationServiceImpl implements RegistrationService {
         Long userId = ((Number) reg.get("user_id")).longValue();
         Long activityId = ((Number) reg.get("activity_id")).longValue();
         Activity activity = activityMapper.findById(activityId).orElseThrow(() -> new BizException("活动不存在"));
-        registrationMapper.delete(id);
-        activityMapper.decreaseRegistered(activityId);
-        activityMapper.refreshRegisteredNumbers();
+        removeRegistrationAndPromote(reg, activity);
         notificationMapper.insert(userId, "REGISTRATION_CANCELLED", "报名已取消",
                 "你报名的《" + activity.getName() + "》已由管理员取消。原因：" + reason,
                 "ACTIVITY", activityId);
+    }
+
+    @Override
+    @Transactional
+    public void withdraw(Long id, CurrentUser currentUser) {
+        if (currentUser == null || !"VOLUNTEER".equals(currentUser.getRole())) {
+            throw new BizException("仅志愿者可取消自己的报名");
+        }
+        Map<String, Object> reg = registrationMapper.findMap(id);
+        Long userId = ((Number) reg.get("user_id")).longValue();
+        if (!currentUser.getId().equals(userId)) throw new BizException("无权取消该报名");
+        String status = text(reg.get("status"));
+        if (!"待审核".equals(status) && !"已通过".equals(status)) {
+            throw new BizException("当前报名状态不可取消");
+        }
+        Long activityId = ((Number) reg.get("activity_id")).longValue();
+        Activity activity = activityMapper.findById(activityId).orElseThrow(() -> new BizException("活动不存在"));
+        if (activity.getStartTime() == null || !java.time.LocalDateTime.now().isBefore(activity.getStartTime())) {
+            throw new BizException("活动已开始，无法自行取消，请联系管理员");
+        }
+        removeRegistrationAndPromote(reg, activity);
+        notificationMapper.insert(userId, "REGISTRATION_CANCELLED", "已取消活动报名",
+                "你已取消《" + activity.getName() + "》的报名。",
+                "ACTIVITY", activityId);
+    }
+
+    private void removeRegistrationAndPromote(Map<String, Object> reg, Activity activity) {
+        boolean shouldPromote = "已通过".equals(text(reg.get("status")))
+                && activity.getStartTime() != null
+                && java.time.LocalDateTime.now().isBefore(activity.getStartTime());
+        Long positionId = reg.get("position_id") instanceof Number number ? number.longValue() : null;
+        registrationMapper.delete(((Number) reg.get("id")).longValue());
+        activityMapper.decreaseRegistered(activity.getId());
+        activityMapper.refreshRegisteredNumbers();
+        if (shouldPromote) promoteNextCandidate(activity, positionId);
+    }
+
+    private void promoteNextCandidate(Activity activity, Long positionId) {
+        registrationMapper.lockPendingCandidates(activity.getId(), positionId);
+        List<Map<String, Object>> candidates = registrationMapper.pendingCandidates(activity.getId(), positionId);
+        Map<Long, List<Map<String, Object>>> ruleCache = new HashMap<>();
+        candidates.forEach(candidate -> enrichReviewInfo(candidate, ruleCache));
+        candidates.sort(Comparator
+                .comparingDouble((Map<String, Object> row) -> number(row.get("priorityScore"), 0)).reversed()
+                .thenComparing(Comparator.comparingDouble(
+                        (Map<String, Object> row) -> number(row.get("matchScore"), 0)).reversed())
+                .thenComparing(row -> text(row.get("created_at"))));
+
+        for (Map<String, Object> candidate : candidates) {
+            Long candidateUserId = ((Number) candidate.get("user_id")).longValue();
+            try {
+                java.time.LocalDateTime start = dateTime(candidate.get("positionStartTime"));
+                java.time.LocalDateTime end = dateTime(candidate.get("positionEndTime"));
+                if (start == null || end == null) {
+                    start = activity.getStartTime();
+                    end = activity.getEndTime();
+                }
+                ensureNoConflict(candidateUserId, activity.getId(), start, end, "递补岗位");
+                if (Boolean.TRUE.equals(booleanValue(candidate.get("requiresRehearsal")))) {
+                    java.time.LocalDateTime rehearsalStart = dateTime(candidate.get("rehearsalStartTime"));
+                    java.time.LocalDateTime rehearsalEnd = dateTime(candidate.get("rehearsalEndTime"));
+                    if (rehearsalStart != null && rehearsalEnd != null) {
+                        ensureNoConflict(candidateUserId, activity.getId(), rehearsalStart, rehearsalEnd, "递补彩排");
+                    }
+                }
+            } catch (BizException ignored) {
+                continue;
+            }
+
+            Long registrationId = ((Number) candidate.get("id")).longValue();
+            registrationMapper.review(registrationId, "已通过", "录取人员取消，系统按优先分和匹配分自动递补");
+            activityMapper.refreshRegisteredNumbers();
+            notificationMapper.insert(candidateUserId, "REGISTRATION_REVIEW", "报名自动递补成功",
+                    "《" + activity.getName() + "》出现空缺，你已按活动优先条件和综合匹配分自动递补录取，请及时确认活动安排。",
+                    "ACTIVITY", activity.getId());
+            return;
+        }
     }
 }

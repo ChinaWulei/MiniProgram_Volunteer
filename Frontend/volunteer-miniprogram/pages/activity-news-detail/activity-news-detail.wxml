@@ -8,5 +8,13 @@
     <view>参与 {{news.participantCount || 0}} 人 · 累计 {{news.totalServiceHours || 0}} 小时</view>
   </view>
   <view class="content">{{news.content}}</view>
-  <image wx:for="{{news.imageUrls}}" wx:key="*this" class="news-image" src="{{item}}" mode="widthFix" data-url="{{item}}" bindtap="preview"></image>
+  <image
+    wx:for="{{news.imageUrls}}"
+    wx:key="*this"
+    class="news-image"
+    src="{{item}}"
+    mode="widthFix"
+    data-url="{{item}}"
+    bindtap="preview"
+  ></image>
 </view>

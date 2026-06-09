@@ -394,7 +394,17 @@ Page({
     }).catch(() => {})
   },
   edit() {
-    wx.navigateTo({ url: `/pages/admin/activity-publish/activity-publish?id=${this.data.id}` })
+    if (!this.data.id) {
+      wx.showToast({ title: '活动ID无效', icon: 'none' })
+      return
+    }
+    wx.navigateTo({
+      url: `/pages/admin/activity-publish/activity-publish?id=${this.data.id}`,
+      fail: err => {
+        console.error('open activity edit page failed', err)
+        wx.showToast({ title: '编辑页面打开失败', icon: 'none' })
+      }
+    })
   },
   checkin() {
     wx.getLocation({

@@ -58,7 +58,18 @@ Page({
     wx.navigateTo({ url: '/pages/admin/activity-publish/activity-publish' })
   },
   edit(e) {
-    wx.navigateTo({ url: `/pages/admin/activity-publish/activity-publish?id=${e.currentTarget.dataset.id}` })
+    const id = e.currentTarget.dataset.id
+    if (!id) {
+      wx.showToast({ title: '活动ID无效', icon: 'none' })
+      return
+    }
+    wx.navigateTo({
+      url: `/pages/admin/activity-publish/activity-publish?id=${id}`,
+      fail: err => {
+        console.error('open activity edit page failed', err)
+        wx.showToast({ title: '编辑页面打开失败', icon: 'none' })
+      }
+    })
   },
   detail(e) {
     wx.navigateTo({ url: `/pages/activity-detail/activity-detail?id=${e.currentTarget.dataset.id}` })

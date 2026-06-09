@@ -2,6 +2,7 @@ package com.scs.volunteer.mapper;
 
 import com.scs.volunteer.dto.ActivityPriorityRuleDTO;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.dao.DataAccessException;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -22,13 +23,17 @@ public class ActivityPriorityRuleMapper {
     }
 
     public List<Map<String, Object>> list(Long activityId) {
-        return jdbcTemplate.queryForList("""
-                select id,activity_id as activityId,rule_type as ruleType,
-                       rule_value as ruleValue,weight
-                from activity_priority_rule
-                where activity_id=?
-                order by id
-                """, activityId);
+        try {
+            return jdbcTemplate.queryForList("""
+                    select id,activity_id as activityId,rule_type as ruleType,
+                           rule_value as ruleValue,weight
+                    from activity_priority_rule
+                    where activity_id=?
+                    order by id
+                    """, activityId);
+        } catch (DataAccessException e) {
+            return List.of();
+        }
     }
 
     @Transactional

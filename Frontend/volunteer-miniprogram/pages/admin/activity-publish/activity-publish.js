@@ -94,20 +94,21 @@ Page({
     priorityHistoryCategoryOptions: activityCategories
   },
   onLoad(options) {
-    this.loadPriorityHistoryOptions()
-    if (options.id) {
-      this.setData({ id: options.id })
+    const id = options && options.id ? String(options.id) : null
+    this.setData({ id })
+    this.loadPriorityHistoryOptions(id)
+    if (id) {
       wx.setNavigationBarTitle({ title: '编辑活动' })
-      this.loadActivity(options.id)
+      this.loadActivity(id)
     }
   },
-  loadPriorityHistoryOptions() {
+  loadPriorityHistoryOptions(currentActivityId) {
     request({ url: '/api/activities', data: { status: '已结束' }, silent: true })
       .then(list => {
         const names = []
         const categories = activityCategories.slice()
         ;(list || []).forEach(item => {
-          if (item.name && String(item.id) !== String(this.data.id) && names.indexOf(item.name) < 0) {
+          if (item.name && String(item.id) !== String(currentActivityId || '') && names.indexOf(item.name) < 0) {
             names.push(item.name)
           }
           if (item.category && categories.indexOf(item.category) < 0) categories.push(item.category)
@@ -118,8 +119,9 @@ Page({
   },
   loadActivity(id) {
     wx.showLoading({ title: '加载中' })
-    request({ url: `/api/activities/${id}` })
+    request({ url: `/api/activities/${id}`, silent: true })
       .then(activity => {
+        if (!activity || !activity.id) throw new Error('活动数据为空')
         const skills = (activity.skillRequirements || '').split(',').map(item => item.trim()).filter(Boolean)
         const skillOptions = skillNames.map(name => ({ name, selected: skills.indexOf(name) >= 0 }))
         this.setData({
@@ -180,7 +182,15 @@ Page({
           }))
         })
       })
-      .catch(() => {})
+      .catch(err => {
+        console.error('load activity for edit failed', { id, err })
+        wx.showModal({
+          title: '活动加载失败',
+          content: (err && (err.message || err.errMsg)) || '请确认后端服务已重启并完成数据库升级',
+          showCancel: false,
+          success: () => wx.navigateBack()
+        })
+      })
       .finally(() => wx.hideLoading())
   },
   input(e) {

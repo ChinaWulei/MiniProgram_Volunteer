@@ -73,6 +73,7 @@ Page({
           id: item.id,
           notificationType: item.type,
           type: item.type === 'REGISTRATION_REVIEW' ? '报名审核通知'
+            : item.type === 'REGISTRATION_PROMOTED' ? '递补录取通知'
             : item.type === 'ACTIVITY_NEWS' ? '新闻发布通知'
               : item.type === 'ANNOUNCEMENT' ? '公告通知'
                 : item.type === 'ACTIVITY_SUBSCRIBE' ? '活动提醒'

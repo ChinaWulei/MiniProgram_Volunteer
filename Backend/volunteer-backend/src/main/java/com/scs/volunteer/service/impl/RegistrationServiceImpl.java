@@ -551,7 +551,7 @@ public class RegistrationServiceImpl implements RegistrationService {
             Long registrationId = ((Number) candidate.get("id")).longValue();
             registrationMapper.review(registrationId, "已通过", "录取人员取消，系统按优先分和匹配分自动递补");
             activityMapper.refreshActivityState(activity.getId());
-            notificationMapper.insert(candidateUserId, "REGISTRATION_REVIEW", "报名自动递补成功",
+            notificationMapper.insert(candidateUserId, "REGISTRATION_PROMOTED", "报名自动递补成功",
                     "《" + activity.getName() + "》出现空缺，你已按活动优先条件和综合匹配分自动递补录取，请及时确认活动安排。",
                     "ACTIVITY", activity.getId());
             return;

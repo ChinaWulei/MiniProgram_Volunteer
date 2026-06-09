@@ -11,7 +11,7 @@ public interface RegistrationService {
     void register(RegistrationDTO dto, CurrentUser currentUser);
     List<Map<String, Object>> my(CurrentUser currentUser);
     List<Map<String, Object>> adminList(String keyword, String status, Long activityId, String department,
-                                        String priorityDepartment, CurrentUser currentUser);
+                                        CurrentUser currentUser);
     List<String> adminDepartments(CurrentUser currentUser);
     byte[] exportApproved(Long activityId, CurrentUser currentUser);
     void review(Long id, ReviewDTO dto, CurrentUser currentUser);

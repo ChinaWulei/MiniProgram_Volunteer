@@ -192,9 +192,11 @@
 }
 .section-title.no-margin { margin-bottom: 0; }
 .section-head { display: flex; align-items: center; justify-content: space-between; gap: 16rpx; margin-bottom: 18rpx; }
+.course-section-head { flex-wrap: nowrap; }
+.course-section-head .section-title { flex: 0 0 auto; }
 .section-actions { display: flex; align-items: center; gap: 10rpx; }
 .fold-btn { width: 100rpx; height: 58rpx; line-height: 58rpx; margin: 0; padding: 0; border-radius: 12rpx; color: #475467; background: #f2f4f7; font-size: 24rpx; }
-.fold-summary { padding: 18rpx; border-radius: 14rpx; color: #667085; background: #f8fafc; font-size: 24rpx; text-align: center; }
+.fold-summary { flex: 1; min-width: 0; overflow: hidden; color: #667085; font-size: 23rpx; text-align: right; white-space: nowrap; text-overflow: ellipsis; }
 .profile-picker { height: 76rpx; line-height: 76rpx; margin-bottom: 18rpx; padding: 0 20rpx; border-radius: 12rpx; background: #f8fafc; color: #344054; font-size: 27rpx; }
 .mini-add { width: 112rpx; height: 58rpx; line-height: 58rpx; margin: 0; padding: 0; border-radius: 12rpx; color: #0f766e; background: #eefaf7; font-size: 24rpx; }
 .mini-add::after, .fold-btn::after, .exam-remove::after { border: 0; }

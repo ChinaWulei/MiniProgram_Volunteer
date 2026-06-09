@@ -155,8 +155,7 @@ public class RegistrationMapper {
                 """);
     }
 
-    public List<Map<String, Object>> adminList(String keyword, String status, Long activityId, String department,
-                                               String priorityDepartment) {
+    public List<Map<String, Object>> adminList(String keyword, String status, Long activityId, String department) {
         String k = keyword == null || keyword.isBlank() ? null : keyword;
         return jdbcTemplate.queryForList("""
                 select r.id,r.activity_id,r.user_id,r.status,r.review_remark,r.created_at,
@@ -165,8 +164,7 @@ public class RegistrationMapper {
                        p.credit_score as creditScore,p.total_hours as totalHours,p.service_count as serviceCount,
                        a.name as activityName,a.category,a.location,a.start_time as startTime,a.end_time as endTime,
                        a.skill_requirements as skillRequirements,ap.name as positionName,
-                       r.transport_required as transportRequired,r.boarding_point as boardingPoint,
-                       case when ? is not null and p.department=? then 1 else 0 end as priorityDepartmentMatch
+                       r.transport_required as transportRequired,r.boarding_point as boardingPoint
                 from registration r
                 join user u on r.user_id=u.id
                 left join volunteer_profile p on p.user_id=u.id
@@ -178,14 +176,13 @@ public class RegistrationMapper {
                   and (? is null or u.name like concat('%',?,'%') or u.nickname like concat('%',?,'%')
                        or u.identity_no like concat('%',?,'%') or a.name like concat('%',?,'%')
                        or a.category like concat('%',?,'%') or a.location like concat('%',?,'%'))
-            order by priorityDepartmentMatch desc,r.created_at desc
-            """, n(priorityDepartment), n(priorityDepartment),
-            n(status), n(status), activityId, activityId, n(department), n(department),
+            order by r.created_at
+            """, n(status), n(status), activityId, activityId, n(department), n(department),
             k, k, k, k, k, k, k);
 }
 
     public List<Map<String, Object>> byActivity(Long activityId) {
-        return adminList(null, null, activityId, null, null);
+        return adminList(null, null, activityId, null);
     }
 
     public List<Map<String, Object>> approvedExportList(Long activityId) {

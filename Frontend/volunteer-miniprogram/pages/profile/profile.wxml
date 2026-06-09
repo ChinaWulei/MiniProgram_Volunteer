@@ -89,8 +89,9 @@
   </view>
 
   <view class="section" wx:if="{{!isAdmin}}">
-    <view class="section-head">
+    <view class="section-head course-section-head">
       <view class="section-title no-margin">课程安排</view>
+      <view wx:if="{{!coursesExpanded}}" class="fold-summary">已填写 {{courses.length}} 个上课时段</view>
       <view class="section-actions">
         <button class="fold-btn" bindtap="toggleCourses">{{coursesExpanded ? '收起' : '展开'}}</button>
         <button wx:if="{{coursesExpanded}}" class="mini-add" bindtap="addCourse">添加</button>
@@ -118,7 +119,6 @@
       <view wx:if="{{courses.length === 0}}" class="empty-badge">暂未填写课程安排</view>
       <button class="reminder-btn" bindtap="saveCourses">保存课程安排</button>
     </block>
-    <view wx:else class="fold-summary">已填写 {{courses.length}} 个上课时段</view>
   </view>
 
   <view class="section" wx:if="{{!isAdmin}}">

@@ -21,8 +21,6 @@ Page({
     statuses: ['全部', '待审核', '已通过', '已拒绝'],
     department: '',
     departments: ['全部', '数学系', '计算机系'],
-    priorityDepartment: '',
-    priorityDepartments: ['不设置', '数学系', '计算机系'],
     showCancel: false,
     cancelItem: null,
     cancelReason: ''
@@ -49,11 +47,6 @@ Page({
     this.setData({ department: value === '全部' ? '' : value })
     this.load()
   },
-  pickPriorityDepartment(e) {
-    const value = this.data.priorityDepartments[Number(e.detail.value)]
-    this.setData({ priorityDepartment: value === '不设置' ? '' : value })
-    this.load()
-  },
   loadDepartments() {
     request({ url: '/api/registrations/admin/departments', silent: true })
       .then(list => {
@@ -61,10 +54,7 @@ Page({
         ;(list || []).forEach(item => {
           if (item && departments.indexOf(item) < 0) departments.push(item)
         })
-        this.setData({
-          departments: ['全部'].concat(departments),
-          priorityDepartments: ['不设置'].concat(departments)
-        })
+        this.setData({ departments: ['全部'].concat(departments) })
       })
       .catch(() => {})
   },
@@ -75,8 +65,7 @@ Page({
       data: {
         keyword: this.data.keyword,
         status: this.data.status,
-        department: this.data.department,
-        priorityDepartment: this.data.priorityDepartment
+        department: this.data.department
       }
     })
       .then(list => this.setData({ list: (list || []).map(normalize) }))

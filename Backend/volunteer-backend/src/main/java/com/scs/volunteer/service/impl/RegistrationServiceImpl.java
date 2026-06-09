@@ -132,19 +132,18 @@ public class RegistrationServiceImpl implements RegistrationService {
 
     @Override
     public List<Map<String, Object>> adminList(String keyword, String status, Long activityId, String department,
-                                               String priorityDepartment, CurrentUser currentUser) {
+                                               CurrentUser currentUser) {
         if (currentUser == null || !"ADMIN".equals(currentUser.getRole())) {
             throw new BizException("仅管理员可查看报名列表");
         }
-        List<Map<String, Object>> rows = registrationMapper.adminList(
-                keyword, status, activityId, department, priorityDepartment);
+        List<Map<String, Object>> rows = registrationMapper.adminList(keyword, status, activityId, department);
         Map<Long, List<Map<String, Object>>> ruleCache = new HashMap<>();
         rows.forEach(row -> enrichReviewInfo(row, ruleCache));
         rows.sort(Comparator
-                .comparingDouble((Map<String, Object> row) -> number(row.get("priorityDepartmentMatch"), 0)).reversed()
+                .comparingDouble((Map<String, Object> row) -> number(row.get("priorityScore"), 0)).reversed()
                 .thenComparing(Comparator.comparingDouble(
-                        (Map<String, Object> row) -> number(row.get("priorityScore"), 0)).reversed())
-                .thenComparing(row -> text(row.get("created_at")), Comparator.reverseOrder()));
+                        (Map<String, Object> row) -> number(row.get("matchScore"), 0)).reversed())
+                .thenComparing(row -> text(row.get("created_at"))));
         return rows;
     }
 
@@ -285,18 +284,32 @@ public class RegistrationServiceImpl implements RegistrationService {
         Set<String> skills = split(text(row.get("skillTags")));
         long hits = required.stream().filter(skills::contains).count();
         double skillScore = required.isEmpty() ? 1 : (double) hits / required.size();
+        double timeScore = timeMatched(row.get("startTime"), text(row.get("availableTime"))) ? 1 : 0;
         double creditScore = Math.min(100, number(row.get("creditScore"), 80)) / 100.0;
-        double serviceScore = Math.min(1, number(row.get("serviceCount"), 0) / 5.0);
-        return Math.round((skillScore * 60 + creditScore * 25 + serviceScore * 15) * 10.0) / 10.0;
+        return Math.round((skillScore * 60 + timeScore * 20 + creditScore * 20) * 10.0) / 10.0;
     }
 
     private String matchReason(Map<String, Object> row) {
         Set<String> required = split(text(row.get("skillRequirements")));
         Set<String> skills = split(text(row.get("skillTags")));
         long hits = required.stream().filter(skills::contains).count();
+        boolean timeMatched = timeMatched(row.get("startTime"), text(row.get("availableTime")));
         return "技能匹配 " + hits + "/" + required.size()
-                + "，信用分 " + (int) number(row.get("creditScore"), 80)
-                + "，服务次数 " + (int) number(row.get("serviceCount"), 0);
+                + "，时间" + (timeMatched ? "可服务" : "需确认")
+                + "，信用分 " + (int) number(row.get("creditScore"), 80);
+    }
+
+    private boolean timeMatched(Object startTimeValue, String availableTime) {
+        if (startTimeValue == null || availableTime == null || availableTime.isBlank()) {
+            return false;
+        }
+        java.time.LocalDateTime startTime = dateTime(startTimeValue);
+        String text = availableTime.toLowerCase();
+        int hour = startTime.getHour();
+        return text.contains("全天")
+                || (hour < 12 && text.contains("上午"))
+                || (hour >= 12 && hour < 18 && text.contains("下午"))
+                || (hour >= 18 && text.contains("晚上"));
     }
 
     private String evaluationSummary(Long userId) {

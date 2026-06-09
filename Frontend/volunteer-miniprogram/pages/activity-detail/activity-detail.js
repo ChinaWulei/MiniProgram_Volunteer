@@ -239,6 +239,24 @@ Page({
     }
     submit()
   },
+  withdrawRegistration() {
+    const activity = this.data.activity
+    if (!activity || !activity.canWithdraw || !activity.signupRegistrationId) return
+    wx.showModal({
+      title: '取消报名',
+      content: `确定取消《${activity.name || activity.title}》的报名吗？已录取时系统会自动递补下一位候选者。`,
+      success: res => {
+        if (!res.confirm) return
+        request({
+          url: `/api/registrations/${activity.signupRegistrationId}/withdraw`,
+          method: 'POST'
+        }).then(() => {
+          wx.showToast({ title: '报名已取消' })
+          this.load()
+        }).catch(() => {})
+      }
+    })
+  },
   requestReviewReminderSubscribe() {
     if (!wx.requestSubscribeMessage) return
     wx.requestSubscribeMessage({

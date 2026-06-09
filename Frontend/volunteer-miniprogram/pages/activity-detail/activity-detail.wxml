@@ -233,7 +233,8 @@
   </view>
 
   <view class="bottom-bar">
-    <button wx:if="{{!isAdmin}}" class="signup-btn {{buttonDisabled ? 'disabled' : ''}}" disabled="{{buttonDisabled}}" bindtap="join">{{buttonText}}</button>
+    <button wx:if="{{!isAdmin && activity.canWithdraw}}" class="signup-btn withdraw" bindtap="withdrawRegistration">取消报名</button>
+    <button wx:elif="{{!isAdmin}}" class="signup-btn {{buttonDisabled ? 'disabled' : ''}}" disabled="{{buttonDisabled}}" bindtap="join">{{buttonText}}</button>
     <button wx:if="{{!isAdmin}}" class="admin-edit" bindtap="askAiAboutActivity">引用活动问AI</button>
     <button wx:if="{{!isAdmin}}" class="admin-edit" bindtap="contactAdmin">联系管理员</button>
     <button wx:if="{{isAdmin}}" class="signup-btn" bindtap="goMatch">查看推荐志愿者</button>

@@ -43,6 +43,17 @@ public class RegistrationMapper {
         return list.stream().findFirst().orElse(null);
     }
 
+    public Map<String, Object> findByActivityAndUser(Long activityId, Long userId) {
+        List<Map<String, Object>> rows = jdbcTemplate.queryForList("""
+                select id,status
+                from registration
+                where activity_id=? and user_id=?
+                order by id desc
+                limit 1
+                """, activityId, userId);
+        return rows.isEmpty() ? null : rows.get(0);
+    }
+
     public void insert(Long activityId, Long userId, Long positionId, boolean transportRequired, String boardingPoint, String status) {
         jdbcTemplate.update("""
                 insert into registration(activity_id,user_id,position_id,transport_required,boarding_point,status)

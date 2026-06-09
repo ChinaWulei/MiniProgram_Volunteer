@@ -32,6 +32,8 @@ public class ActivityDetailVO {
     private String status;
     private Long createdBy;
     private String signupStatus;
+    private Long signupRegistrationId;
+    private Boolean canWithdraw;
     private java.util.List<java.util.Map<String, Object>> positions;
     private java.util.List<java.util.Map<String, Object>> priorityRules;
 
@@ -93,6 +95,10 @@ public class ActivityDetailVO {
     public void setCreatedBy(Long createdBy) { this.createdBy = createdBy; }
     public String getSignupStatus() { return signupStatus; }
     public void setSignupStatus(String signupStatus) { this.signupStatus = signupStatus; }
+    public Long getSignupRegistrationId() { return signupRegistrationId; }
+    public void setSignupRegistrationId(Long signupRegistrationId) { this.signupRegistrationId = signupRegistrationId; }
+    public Boolean getCanWithdraw() { return canWithdraw; }
+    public void setCanWithdraw(Boolean canWithdraw) { this.canWithdraw = canWithdraw; }
     public java.util.List<java.util.Map<String, Object>> getPositions() { return positions; }
     public void setPositions(java.util.List<java.util.Map<String, Object>> positions) { this.positions = positions; }
     public java.util.List<java.util.Map<String, Object>> getPriorityRules() { return priorityRules; }

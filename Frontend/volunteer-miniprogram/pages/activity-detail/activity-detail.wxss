@@ -130,6 +130,7 @@
   background: #98a2b3;
   color: #fff;
 }
+.signup-btn.withdraw { color: #fff; background: #dc2626; }
 .admin-edit {
   display: flex;
   align-items: center;

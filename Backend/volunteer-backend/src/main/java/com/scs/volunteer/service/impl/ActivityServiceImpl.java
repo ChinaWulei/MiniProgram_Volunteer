@@ -106,7 +106,20 @@ public class ActivityServiceImpl implements ActivityService {
         vo.setReviewMethod(activity.getReviewMethod());
         vo.setStatus(activity.getStatus());
         vo.setCreatedBy(activity.getCreatedBy());
-        vo.setSignupStatus(currentUser == null ? null : registrationMapper.findStatus(id, currentUser.getId()));
+        if (currentUser != null && "VOLUNTEER".equals(currentUser.getRole())) {
+            java.util.Map<String, Object> registration =
+                    registrationMapper.findByActivityAndUser(id, currentUser.getId());
+            if (registration != null) {
+                String signupStatus = String.valueOf(registration.get("status"));
+                vo.setSignupStatus(signupStatus);
+                vo.setSignupRegistrationId(((Number) registration.get("id")).longValue());
+                vo.setCanWithdraw(
+                        ("待审核".equals(signupStatus) || "已通过".equals(signupStatus))
+                                && activity.getStartTime() != null
+                                && LocalDateTime.now().isBefore(activity.getStartTime())
+                );
+            }
+        }
         vo.setPositions(activityPositionMapper.list(id));
         vo.setPriorityRules(activityPriorityRuleMapper.list(id));
         return vo;

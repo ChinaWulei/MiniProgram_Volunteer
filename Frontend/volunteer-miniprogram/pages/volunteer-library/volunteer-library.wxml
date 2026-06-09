@@ -14,6 +14,14 @@
       <input placeholder="专业班级" value="{{majorClass}}" data-key="majorClass" bindinput="input" bindconfirm="load" />
     </view>
     <view class="filter-row">
+      <picker mode="selector" range="{{departmentOptions}}" bindchange="pickDepartment">
+        <view class="filter-chip">系别：{{department || '全部'}}</view>
+      </picker>
+      <picker mode="selector" range="{{campusOptions}}" bindchange="pickCampus">
+        <view class="filter-chip">校区：{{campus || '全部'}}</view>
+      </picker>
+    </view>
+    <view class="filter-row">
       <picker mode="selector" range="{{skillOptions}}" bindchange="pickSkill">
         <view class="filter-chip">技能：{{skillTag || '全部'}}</view>
       </picker>
@@ -34,7 +42,7 @@
         <view class="name">{{item.displayName}}</view>
         <view class="level">{{item.volunteerLevelText}}</view>
       </view>
-      <view class="meta">{{item.collegeText}} · {{item.majorClassText}}</view>
+      <view class="meta">{{item.collegeText}} · {{item.departmentText}} · {{item.campusText}} · {{item.majorClassText}}</view>
       <view class="stats">{{item.totalHours || 0}} 小时 · {{item.volunteerPoints || item.creditScore || 0}} 积分</view>
       <view class="tags"><text class="tag" wx:for="{{item.tags}}" wx:key="*this">{{item}}</text></view>
       <view class="recent">最近参与：{{item.recentActivity}}</view>

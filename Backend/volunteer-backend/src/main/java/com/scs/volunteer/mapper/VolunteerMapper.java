@@ -23,7 +23,8 @@ public class VolunteerMapper {
                 userId, dto.getCollege(), dto.getMajorClass(), dto.getSkillTags(), dto.getAvailableTime());
     }
 
-    public List<VolunteerVO> search(String college, String majorClass, String skillTag, String keyword, String sortBy) {
+    public List<VolunteerVO> search(String college, String campus, String department, String majorClass,
+                                    String skillTag, String keyword, String sortBy) {
         String orderBy = "p.credit_score desc,p.total_hours desc";
         if ("hours".equalsIgnoreCase(sortBy) || "totalHours".equalsIgnoreCase(sortBy)) {
             orderBy = "p.total_hours desc,p.credit_score desc";
@@ -32,7 +33,7 @@ public class VolunteerMapper {
         }
         String sql = """
                 select u.id as user_id,u.name,u.nickname,u.avatar_url,u.identity_no,null as phone,
-                       p.college,p.major_class,p.skill_tags,p.available_time,p.bio,p.total_hours,
+                       p.college,p.campus,p.department,p.major_class,p.skill_tags,p.available_time,p.bio,p.total_hours,
                        p.credit_score,p.service_count,
                        case when p.total_hours >= 30 then 'Lv4 先锋志愿者'
                             when p.total_hours >= 15 then 'Lv3 骨干志愿者'
@@ -47,22 +48,29 @@ public class VolunteerMapper {
                 from user u join volunteer_profile p on u.id=p.user_id
                 where u.role='VOLUNTEER'
                   and (? is null or p.college=?)
+                  and (? is null or p.campus=?)
+                  and (? is null or p.department=?)
                   and (? is null or p.major_class like concat('%',?,'%'))
                   and (? is null or p.skill_tags like concat('%',?,'%'))
-                  and (? is null or u.name like concat('%',?,'%') or u.nickname like concat('%',?,'%') or p.major_class like concat('%',?,'%') or p.skill_tags like concat('%',?,'%'))
+                  and (? is null or u.name like concat('%',?,'%') or u.nickname like concat('%',?,'%')
+                       or p.department like concat('%',?,'%') or p.campus like concat('%',?,'%')
+                       or p.major_class like concat('%',?,'%') or p.skill_tags like concat('%',?,'%'))
                 order by 
                 """ + orderBy;
         return jdbcTemplate.query(sql, new BeanPropertyRowMapper<>(VolunteerVO.class),
                 emptyToNull(college), emptyToNull(college),
+                emptyToNull(campus), emptyToNull(campus),
+                emptyToNull(department), emptyToNull(department),
                 emptyToNull(majorClass), emptyToNull(majorClass),
                 emptyToNull(skillTag), emptyToNull(skillTag),
-                emptyToNull(keyword), emptyToNull(keyword), emptyToNull(keyword), emptyToNull(keyword), emptyToNull(keyword));
+                emptyToNull(keyword), emptyToNull(keyword), emptyToNull(keyword), emptyToNull(keyword),
+                emptyToNull(keyword), emptyToNull(keyword), emptyToNull(keyword));
     }
 
     public Optional<VolunteerVO> findByUserId(Long userId) {
         List<VolunteerVO> list = jdbcTemplate.query("""
                 select u.id as user_id,u.name,u.nickname,u.avatar_url,u.identity_no,null as phone,
-                       p.college,p.major_class,p.skill_tags,p.available_time,p.bio,p.total_hours,
+                       p.college,p.campus,p.department,p.major_class,p.skill_tags,p.available_time,p.bio,p.total_hours,
                        p.credit_score,p.service_count,
                        case when p.total_hours >= 30 then 'Lv4 先锋志愿者'
                             when p.total_hours >= 15 then 'Lv3 骨干志愿者'

@@ -10,6 +10,8 @@ function clean(value, fallback = '') {
 function normalizeMatch(item) {
   const volunteer = item.volunteer || {}
   const name = clean(volunteer.name || volunteer.nickname, '志愿者')
+  const department = clean(volunteer.department)
+  const campus = clean(volunteer.campus)
   const majorClass = clean(volunteer.majorClass)
   const skillTags = clean(volunteer.skillTags, '暂无技能标签')
   return Object.assign({}, item, {
@@ -17,7 +19,7 @@ function normalizeMatch(item) {
       name,
       majorClassText: majorClass,
       skillTagsText: skillTags,
-      metaText: [majorClass, skillTags].filter(Boolean).join(' · ')
+      metaText: [department, campus, majorClass, skillTags].filter(Boolean).join(' · ')
     }),
     reason: clean(item.reason, '暂无匹配说明')
   })

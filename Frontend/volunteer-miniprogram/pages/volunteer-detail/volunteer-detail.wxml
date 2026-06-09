@@ -7,7 +7,7 @@
     <view class="hero-main">
       <view class="name">{{profile.displayName}}</view>
       <view class="no">志愿者编号 {{profile.identityText}}</view>
-      <view class="school">{{profile.collegeText}} · {{profile.majorClassText}}</view>
+      <view class="school">{{profile.collegeText}} · {{profile.departmentText}} · {{profile.campusText}} · {{profile.majorClassText}}</view>
     </view>
   </view>
 

@@ -11,6 +11,8 @@ public class VolunteerVO {
     private String identityNo;
     private String phone;
     private String college;
+    private String campus;
+    private String department;
     private String majorClass;
     private String skillTags;
     private String availableTime;
@@ -38,6 +40,10 @@ public class VolunteerVO {
     public void setPhone(String phone) { this.phone = phone; }
     public String getCollege() { return college; }
     public void setCollege(String college) { this.college = college; }
+    public String getCampus() { return campus; }
+    public void setCampus(String campus) { this.campus = campus; }
+    public String getDepartment() { return department; }
+    public void setDepartment(String department) { this.department = department; }
     public String getMajorClass() { return majorClass; }
     public void setMajorClass(String majorClass) { this.majorClass = majorClass; }
     public String getSkillTags() { return skillTags; }

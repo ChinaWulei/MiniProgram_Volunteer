@@ -33,6 +33,8 @@ function normalizeProfile(profile) {
     avatarText: displayName.substring(0, 1),
     identityText: clean(profile.identityNo || profile.volunteerNo || profile.userId, '-'),
     collegeText: clean(profile.college, '未填写学院'),
+    campusText: clean(profile.campus, '未填写校区'),
+    departmentText: clean(profile.department, '未填写所属系'),
     majorClassText: clean(profile.majorClass, '未填写专业班级'),
     volunteerLevelText: clean(profile.volunteerLevel, '普通志愿者'),
     availableTimeText: clean(profile.availableTime, '-'),

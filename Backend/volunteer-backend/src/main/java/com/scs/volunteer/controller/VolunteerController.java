@@ -17,8 +17,10 @@ public class VolunteerController {
     }
 
     @GetMapping
-    public ApiResponse<List<VolunteerVO>> list(String college, String majorClass, String skillTag, String keyword, String sortBy) {
-        return ApiResponse.ok(volunteerService.list(college, majorClass, skillTag, keyword, sortBy));
+    public ApiResponse<List<VolunteerVO>> list(String college, String campus, String department,
+                                               String majorClass, String skillTag, String keyword, String sortBy) {
+        return ApiResponse.ok(volunteerService.list(
+                college, campus, department, majorClass, skillTag, keyword, sortBy));
     }
 
     @GetMapping("/{id}")

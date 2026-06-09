@@ -3,11 +3,17 @@
     <input placeholder="姓名关键词" value="{{keyword}}" data-k="keyword" bindinput="input" />
     <input placeholder="专业班级" value="{{major}}" data-k="major" bindinput="input" />
     <input placeholder="技能标签" value="{{skill}}" data-k="skill" bindinput="input" />
+    <picker mode="selector" range="{{departmentOptions}}" bindchange="pickDepartment">
+      <view class="picker-field">所属系：{{department || '全部'}}</view>
+    </picker>
+    <picker mode="selector" range="{{campusOptions}}" bindchange="pickCampus">
+      <view class="picker-field">校区：{{campus || '全部'}}</view>
+    </picker>
     <button class="primary-btn" bindtap="load">搜索</button>
   </view>
   <view class="card" wx:for="{{list}}" wx:key="userId" bindtap="goVolunteer" data-id="{{item.userId}}">
     <view class="row"><view class="title">{{item.nameText}}</view><view class="tag">信用 {{item.creditScore || 100}}</view></view>
-    <view class="muted">{{item.majorClassText}} · {{item.phoneText}}</view>
+    <view class="muted">{{item.departmentText}} · {{item.campusText}} · {{item.majorClassText}} · {{item.phoneText}}</view>
     <view class="muted">累计 {{item.totalHours}} 小时 · 服务 {{item.serviceCount}} 次</view>
     <view class="tag">{{item.skillTagsText}}</view>
     <view class="muted">可服务：{{item.availableTimeText}}</view>

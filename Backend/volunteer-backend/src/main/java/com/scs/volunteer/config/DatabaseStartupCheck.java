@@ -126,6 +126,16 @@ public class DatabaseStartupCheck implements ApplicationRunner {
             ensureColumn("activity", "tips", "alter table activity add column tips text null after service_hours");
             ensureColumn("volunteer_profile", "campus", "alter table volunteer_profile add column campus varchar(50) null after college");
             ensureColumn("volunteer_profile", "department", "alter table volunteer_profile add column department varchar(80) null after campus");
+            jdbcTemplate.update("""
+                    update volunteer_profile
+                    set department=case when mod(user_id,2)=0 then '计算机系' else '数学系' end
+                    where department is null or trim(department)=''
+                    """);
+            jdbcTemplate.update("""
+                    update volunteer_profile
+                    set campus=case when mod(user_id,3)=0 then '桑浦山校区' else '东海岸校区' end
+                    where campus is null or trim(campus)=''
+                    """);
             ensureColumn("registration", "position_id", "alter table registration add column position_id bigint null after user_id");
             ensureColumn("registration", "transport_required", "alter table registration add column transport_required tinyint(1) not null default 0 after review_remark");
             ensureColumn("registration", "boarding_point", "alter table registration add column boarding_point varchar(120) null after transport_required");

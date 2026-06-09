@@ -17,8 +17,9 @@ public class VolunteerServiceImpl implements VolunteerService {
     }
 
     @Override
-    public List<VolunteerVO> list(String college, String majorClass, String skillTag, String keyword, String sortBy) {
-        return volunteerMapper.search(college, majorClass, skillTag, keyword, sortBy);
+    public List<VolunteerVO> list(String college, String campus, String department, String majorClass,
+                                  String skillTag, String keyword, String sortBy) {
+        return volunteerMapper.search(college, campus, department, majorClass, skillTag, keyword, sortBy);
     }
 
     @Override

@@ -31,7 +31,7 @@ public class MatchServiceImpl implements MatchService {
             throw new BizException("仅管理员可查看智能匹配");
         }
         Activity activity = activityMapper.findById(activityId).orElseThrow(() -> new BizException("活动不存在"));
-        return volunteerMapper.search(null, null, null, null, "points").stream()
+        return volunteerMapper.search(null, null, null, null, null, null, "points").stream()
                 .map(v -> score(activity, v))
                 .sorted((a, b) -> Double.compare(b.getScore(), a.getScore()))
                 .limit(5)

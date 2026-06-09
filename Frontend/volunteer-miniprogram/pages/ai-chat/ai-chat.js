@@ -3,6 +3,7 @@ const { request } = require('../../utils/request')
 const quickQuestions = {
   weekend: '周末有什么适合我的活动？',
   photo: '我适合摄影类志愿吗？',
+  autoReview: '有哪些不用人工审核、报名后自动通过的活动？',
   points: '如何提升志愿积分？'
 }
 

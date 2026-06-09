@@ -157,7 +157,7 @@ public class ActivityMapper {
 
     public List<AiActivityCandidateVO> availableForAi() {
         return jdbcTemplate.query("""
-                select id,name,category,location,start_time,end_time,skill_requirements,description,service_hours,
+                select id,name,category,location,start_time,end_time,skill_requirements,description,service_hours,review_method,
                        greatest(recruit_number - registered_number, 0) as remaining_slots
                 from activity
                 where end_time > ?

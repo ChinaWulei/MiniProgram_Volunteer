@@ -3,6 +3,7 @@
     <view class="quick-row">
       <view class="quick-chip" bindtap="quickAsk" data-key="weekend">周末活动</view>
       <view class="quick-chip" bindtap="quickAsk" data-key="photo">摄影志愿</view>
+      <view class="quick-chip" bindtap="quickAsk" data-key="autoReview">自动通过</view>
       <view class="quick-chip" bindtap="quickAsk" data-key="points">提升积分</view>
     </view>
     <view wx:if="{{activityId}}" class="ref-card">已引用活动：{{activityName}}</view>
@@ -20,6 +21,7 @@
             <view class="activity-title">{{activity.title}}</view>
             <view class="activity-meta">{{activity.time}} · {{activity.location}}</view>
             <view class="activity-meta">剩余 {{activity.remainingSlots}} 个名额</view>
+            <view class="activity-meta">审核方式：{{activity.reviewMethod || '人工审核'}}</view>
             <view class="activity-reason">{{activity.reason}}</view>
           </view>
         </view>

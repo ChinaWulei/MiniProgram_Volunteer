@@ -282,7 +282,7 @@ public class AiChatServiceImpl implements AiChatService {
                     请把用户的志愿活动推荐需求解析为结构化条件，只输出JSON，不要markdown。
                     可选topic值：COMPETITION, ENVIRONMENT, WELCOME, ACADEMIC, COMMUNITY, PROGRAMMING, LOGISTICS, GUIDE, ANY。
                     字段：
-                    {"topic":"主题或ANY","keywords":["用户关心的关键词"],"excludeTopics":["明确不想要的主题"],"timePreference":"周末/工作日/上午/下午/晚上/不限","skillPreference":["技能偏好"],"preferNewCategory":true/false}
+                    {"topic":"主题或ANY","keywords":["用户关心的关键词"],"excludeTopics":["明确不想要的主题"],"timePreference":"周末/工作日/上午/下午/晚上/不限","skillPreference":["技能偏好"],"reviewPreference":"AUTO/MANUAL/ANY","preferNewCategory":true/false}
                     语义说明：
                     COMPETITION 包含比赛、竞赛、赛事、赛务、运动会、评比、挑战赛等说法。
                     ENVIRONMENT 包含环保、低碳、垃圾分类、清洁、绿色校园等说法。
@@ -290,6 +290,8 @@ public class AiChatServiceImpl implements AiChatService {
                     ACADEMIC 包含讲座、论坛、会议、学术活动等说法。
                     COMMUNITY 包含社区、助老、公益服务等说法。
                     PROGRAMMING 包含编程、程序设计、机房技术支持、代码等说法。
+                    用户要求不用人工审核、无需审核、免审、自动通过或报名后直接通过时，reviewPreference 为 AUTO。
+                    用户明确要求人工审核或需要审核的活动时，reviewPreference 为 MANUAL；没有审核偏好时为 ANY。
                     当用户表达新领域、未尝试、没参加过、换个类型、不想和以前类似时，preferNewCategory 为 true。
 
                     用户需求：%s
@@ -303,6 +305,10 @@ public class AiChatServiceImpl implements AiChatService {
             String timePreference = text(parsed.get("timePreference"));
             if (!timePreference.isBlank() && !"不限".equals(timePreference)) criteria.timePreference = timePreference;
             criteria.skillPreference.addAll(listValue(parsed.get("skillPreference")));
+            String reviewPreference = text(parsed.get("reviewPreference")).toUpperCase();
+            if ("AUTO".equals(reviewPreference) || "MANUAL".equals(reviewPreference)) {
+                criteria.reviewPreference = reviewPreference;
+            }
             String preferNewCategory = text(parsed.get("preferNewCategory"));
             if (parsed.get("preferNewCategory") instanceof Boolean booleanValue) {
                 criteria.preferNewCategory = booleanValue;
@@ -334,6 +340,12 @@ public class AiChatServiceImpl implements AiChatService {
         else if (containsAny(message, "上午")) criteria.timePreference = "上午";
         else if (containsAny(message, "下午")) criteria.timePreference = "下午";
         else if (containsAny(message, "晚上")) criteria.timePreference = "晚上";
+        if (containsAny(message, "不用人工审核", "无需人工审核", "不需要人工审核", "免审核", "免审",
+                "自动通过", "直接通过", "报名就通过", "报名后直接通过")) {
+            criteria.reviewPreference = "AUTO";
+        } else if (containsAny(message, "人工审核的活动", "需要人工审核", "需要审核的活动")) {
+            criteria.reviewPreference = "MANUAL";
+        }
         return criteria;
     }
 
@@ -343,6 +355,8 @@ public class AiChatServiceImpl implements AiChatService {
             if (matchesTopic(activity, excludeTopic)) return false;
         }
         if (criteria.timePreference != null && !matchesTimePreference(activity, criteria.timePreference)) return false;
+        if ("AUTO".equals(criteria.reviewPreference) && !"自动通过".equals(activity.getReviewMethod())) return false;
+        if ("MANUAL".equals(criteria.reviewPreference) && "自动通过".equals(activity.getReviewMethod())) return false;
         return true;
     }
 
@@ -440,6 +454,13 @@ public class AiChatServiceImpl implements AiChatService {
             score += 50;
             reasons.add("活动主题符合你的需求");
         }
+        if ("AUTO".equals(criteria.reviewPreference)) {
+            score += 35;
+            reasons.add("报名后自动通过，无需人工审核");
+        } else if ("MANUAL".equals(criteria.reviewPreference)) {
+            score += 20;
+            reasons.add("该活动采用人工审核");
+        }
         for (String skill : criteria.skillPreference) {
             if (!skill.isBlank() && skills.contains(skill)) {
                 score += 20;
@@ -502,6 +523,7 @@ public class AiChatServiceImpl implements AiChatService {
     private static class ActivityRequestCriteria {
         private String topic;
         private String timePreference;
+        private String reviewPreference;
         private boolean preferNewCategory;
         private final List<String> keywords = new ArrayList<>();
         private final List<String> excludeTopics = new ArrayList<>();
@@ -541,6 +563,7 @@ public class AiChatServiceImpl implements AiChatService {
             vo.setTime(item.getStartTime() == null ? "" : TIME_FORMAT.format(item.getStartTime()));
             vo.setLocation(item.getLocation());
             vo.setRemainingSlots(item.getRemainingSlots());
+            vo.setReviewMethod(item.getReviewMethod());
             vo.setReason(item.getReason());
             return vo;
         }).collect(Collectors.toList());
@@ -582,7 +605,8 @@ public class AiChatServiceImpl implements AiChatService {
     private String candidatesText(List<AiActivityCandidateVO> candidates) {
         return candidates.stream().map(item ->
                 item.getId() + "." + item.getName() + "/" + item.getCategory() + "/" + item.getSkillRequirements()
-                        + "/" + item.getStartTime() + "/" + item.getLocation() + "/剩余" + item.getRemainingSlots()
+                        + "/" + item.getStartTime() + "/" + item.getLocation() + "/审核方式=" + item.getReviewMethod()
+                        + "/剩余" + item.getRemainingSlots()
                         + "/推荐理由=" + item.getReason())
                 .collect(Collectors.joining("; "));
     }

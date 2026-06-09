@@ -12,6 +12,7 @@ public class AiActivityCandidateVO {
     private String skillRequirements;
     private String description;
     private Double serviceHours;
+    private String reviewMethod;
     private Integer remainingSlots;
     private String reason;
     private Integer score;
@@ -34,6 +35,8 @@ public class AiActivityCandidateVO {
     public void setDescription(String description) { this.description = description; }
     public Double getServiceHours() { return serviceHours; }
     public void setServiceHours(Double serviceHours) { this.serviceHours = serviceHours; }
+    public String getReviewMethod() { return reviewMethod; }
+    public void setReviewMethod(String reviewMethod) { this.reviewMethod = reviewMethod; }
     public Integer getRemainingSlots() { return remainingSlots; }
     public void setRemainingSlots(Integer remainingSlots) { this.remainingSlots = remainingSlots; }
     public String getReason() { return reason; }

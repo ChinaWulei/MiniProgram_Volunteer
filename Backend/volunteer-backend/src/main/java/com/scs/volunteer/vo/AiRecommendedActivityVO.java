@@ -6,6 +6,7 @@ public class AiRecommendedActivityVO {
     private String time;
     private String location;
     private Integer remainingSlots;
+    private String reviewMethod;
     private String reason;
 
     public Long getId() { return id; }
@@ -18,6 +19,8 @@ public class AiRecommendedActivityVO {
     public void setLocation(String location) { this.location = location; }
     public Integer getRemainingSlots() { return remainingSlots; }
     public void setRemainingSlots(Integer remainingSlots) { this.remainingSlots = remainingSlots; }
+    public String getReviewMethod() { return reviewMethod; }
+    public void setReviewMethod(String reviewMethod) { this.reviewMethod = reviewMethod; }
     public String getReason() { return reason; }
     public void setReason(String reason) { this.reason = reason; }
 }

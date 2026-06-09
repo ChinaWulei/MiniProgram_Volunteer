@@ -1,5 +1,5 @@
 <view class="page" wx:if="{{detail}}">
-  <view class="label">活动通知</view>
+  <view class="label">{{detail.typeLabel}}</view>
   <view class="title">{{detail.title}}</view>
   <view class="time">{{detail.createdAtText}}</view>
   <view class="content">{{detail.content}}</view>

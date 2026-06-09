@@ -119,7 +119,7 @@ Page({
         .then(() => this.load())
         .catch(() => {})
     }
-    if (item.notificationType === 'ACTIVITY_NOTICE') {
+    if (item.notificationType === 'ACTIVITY_NOTICE' || item.notificationType === 'REGISTRATION_PROMOTED') {
       wx.navigateTo({ url: `/pages/activity-notice-detail/activity-notice-detail?id=${item.id}` })
     } else if (item.targetType === 'ACTIVITY_NEWS') {
       wx.navigateTo({ url: `/pages/activity-news-detail/activity-news-detail?id=${item.targetId}` })

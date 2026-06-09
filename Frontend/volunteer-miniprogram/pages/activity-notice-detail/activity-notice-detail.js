@@ -24,8 +24,11 @@ Page({
         const attachments = (data.attachments || []).map(file => Object.assign({}, file, {
           isImage: isImage(file)
         }))
+        const typeLabel = data.type === 'REGISTRATION_PROMOTED' ? '递补录取通知' : '活动通知'
+        wx.setNavigationBarTitle({ title: `${typeLabel}详情` })
         this.setData({
           detail: Object.assign({}, data, {
+            typeLabel,
             createdAtText: formatTime(data.createdAt),
             images: attachments.filter(file => file.isImage),
             files: attachments.filter(file => !file.isImage)

@@ -28,6 +28,11 @@
 .position-card input { background: #fff; }
 .position-card .position-requirements { min-height: 110rpx; background: #fff; }
 .position-switch { display: flex; align-items: center; justify-content: space-between; min-height: 68rpx; color: #344054; font-size: 25rpx; }
+.position-time-title { margin: 8rpx 0 10rpx; color: #475467; font-size: 23rpx; font-weight: 700; }
+.position-time-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12rpx; margin-bottom: 14rpx; }
+.position-time-row picker { width: auto; min-width: 0; margin: 0; padding: 0; border: 0; background: transparent; }
+.position-picker { height: 68rpx; line-height: 68rpx; padding: 0 12rpx; border: 1rpx solid #d0d5dd; border-radius: 12rpx; color: #0f766e; background: #fff; text-align: center; font-size: 23rpx; box-sizing: border-box; }
+.rehearsal-box { margin: 10rpx 0 14rpx; padding: 16rpx; border-radius: 12rpx; background: #fff7ed; border: 1rpx solid #fed7aa; }
 .position-remove { width: 100%; height: 60rpx; line-height: 60rpx; margin: 10rpx 0 0; padding: 0; border-radius: 12rpx; color: #dc2626; background: #fee2e2; font-size: 24rpx; }
 .position-add::after, .position-remove::after { border: 0; }
 .location-btn { display: flex; align-items: center; justify-content: center; height: 72rpx; line-height: 1; margin: 0 0 14rpx; border-radius: 14rpx; color: #fff; background: #0f766e; font-size: 26rpx; }

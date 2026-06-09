@@ -30,6 +30,27 @@ function uniqueSkills(existing, generated) {
   return existing.map(item => (generated || []).indexOf(item.name) >= 0 ? Object.assign({}, item, { selected: true }) : item)
 }
 
+function positionForm(item) {
+  const startTime = String(item.startTime || '').replace('T', ' ').slice(0, 16)
+  const endTime = String(item.endTime || '').replace('T', ' ').slice(0, 16)
+  const rehearsalStartTime = String(item.rehearsalStartTime || '').replace('T', ' ').slice(0, 16)
+  const rehearsalEndTime = String(item.rehearsalEndTime || '').replace('T', ' ').slice(0, 16)
+  return Object.assign({}, item, {
+    startTime,
+    endTime,
+    rehearsalStartTime,
+    rehearsalEndTime,
+    startDate: datePart(startTime),
+    startClock: timePart(startTime),
+    endDate: datePart(endTime),
+    endClock: timePart(endTime),
+    rehearsalStartDate: datePart(rehearsalStartTime),
+    rehearsalStartClock: timePart(rehearsalStartTime),
+    rehearsalEndDate: datePart(rehearsalEndTime),
+    rehearsalEndClock: timePart(rehearsalEndTime)
+  })
+}
+
 Page({
   data: {
     id: null,
@@ -117,14 +138,16 @@ Page({
             auditMode: activity.reviewMethod === '自动通过' ? '自动通过' : '管理员审核',
             status: activity.status || '已发布'
           },
-          positions: (activity.positions || []).map(item => ({
+          positions: (activity.positions || []).map(item => positionForm({
             id: item.id,
             name: item.name,
-            startTime: String(item.startTime || '').replace('T', ' ').slice(0, 16),
-            endTime: String(item.endTime || '').replace('T', ' ').slice(0, 16),
+            startTime: item.startTime,
+            endTime: item.endTime,
             recruitNumber: item.recruitNumber,
             requirements: item.requirements || '',
-            requiresRehearsal: !!item.requiresRehearsal
+            requiresRehearsal: !!item.requiresRehearsal,
+            rehearsalStartTime: item.rehearsalStartTime,
+            rehearsalEndTime: item.rehearsalEndTime
           }))
         })
       })
@@ -138,14 +161,16 @@ Page({
   },
   addPosition() {
     this.setData({
-      positions: this.data.positions.concat({
+      positions: this.data.positions.concat(positionForm({
         name: '',
         startTime: this.data.form.activityTime || '',
         endTime: this.data.form.endTime || '',
         recruitNumber: 1,
         requirements: '',
-        requiresRehearsal: false
-      })
+        requiresRehearsal: false,
+        rehearsalStartTime: '',
+        rehearsalEndTime: ''
+      }))
     })
   },
   inputPosition(e) {
@@ -154,7 +179,37 @@ Page({
     this.setData({ [`positions[${e.currentTarget.dataset.index}].${key}`]: value })
   },
   togglePositionRehearsal(e) {
-    this.setData({ [`positions[${e.currentTarget.dataset.index}].requiresRehearsal`]: e.detail.value })
+    const index = e.currentTarget.dataset.index
+    const enabled = e.detail.value
+    const updates = { [`positions[${index}].requiresRehearsal`]: enabled }
+    if (!enabled) {
+      Object.assign(updates, {
+        [`positions[${index}].rehearsalStartDate`]: '',
+        [`positions[${index}].rehearsalStartClock`]: '',
+        [`positions[${index}].rehearsalEndDate`]: '',
+        [`positions[${index}].rehearsalEndClock`]: '',
+        [`positions[${index}].rehearsalStartTime`]: '',
+        [`positions[${index}].rehearsalEndTime`]: ''
+      })
+    }
+    this.setData(updates)
+  },
+  pickPositionDate(e) {
+    this.updatePositionTimePart(e.currentTarget.dataset.index, e.currentTarget.dataset.field, 'Date', e.detail.value)
+  },
+  pickPositionClock(e) {
+    this.updatePositionTimePart(e.currentTarget.dataset.index, e.currentTarget.dataset.field, 'Clock', e.detail.value)
+  },
+  updatePositionTimePart(index, field, part, value) {
+    const item = this.data.positions[index]
+    const dateKey = `${field}Date`
+    const clockKey = `${field}Clock`
+    const date = part === 'Date' ? value : item[dateKey]
+    const clock = part === 'Clock' ? value : item[clockKey]
+    this.setData({
+      [`positions[${index}].${field}${part}`]: value,
+      [`positions[${index}].${field}Time`]: combineDateTime(date, clock)
+    })
   },
   removePosition(e) {
     const positions = this.data.positions.slice()
@@ -350,6 +405,14 @@ Page({
   },
   submit() {
     if (this.data.submitting || this.data.uploading) return
+    const invalidPosition = this.data.positions.find(item =>
+      !item.name || !item.startTime || !item.endTime || !item.recruitNumber ||
+      (item.requiresRehearsal && (!item.rehearsalStartTime || !item.rehearsalEndTime))
+    )
+    if (invalidPosition) {
+      wx.showToast({ title: '请完整填写岗位及彩排时间', icon: 'none' })
+      return
+    }
     const form = Object.assign({}, this.data.form, {
       requiredSkills: compactSkills(this.data.skillOptions),
       positions: this.data.positions.filter(item => item.name && item.startTime && item.endTime && item.recruitNumber > 0)

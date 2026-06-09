@@ -61,6 +61,7 @@
       <view class="info-row"><text>昵称</text><text>{{profile.nicknameText}}</text></view>
       <view class="info-row"><text>学院</text><text>{{profile.collegeText}}</text></view>
       <view class="info-row"><text>所在校区</text><text>{{profile.campusText}}</text></view>
+      <view class="info-row"><text>所属系</text><text>{{profile.departmentText}}</text></view>
       <view class="info-row"><text>专业班级</text><text>{{profile.majorClassText}}</text></view>
       <view class="info-row"><text>手机号</text><text>{{profile.phoneText}}</text></view>
       <view class="info-row column"><text>技能标签</text><view><text class="tag" wx:for="{{selectedSkills}}" wx:key="*this">{{item}}</text></view></view>
@@ -74,6 +75,7 @@
       <picker mode="selector" range="{{campusOptions}}" bindchange="pickCampus">
         <view class="profile-picker">所在校区：{{form.campus || '请选择'}}</view>
       </picker>
+      <input placeholder="所属系，如 计算机系" value="{{form.department}}" data-key="department" bindinput="input" />
       <input placeholder="专业班级" value="{{form.majorClass}}" data-key="majorClass" bindinput="input" />
       <input placeholder="手机号" value="{{form.phone}}" data-key="phone" bindinput="input" />
       <view class="skill-grid">

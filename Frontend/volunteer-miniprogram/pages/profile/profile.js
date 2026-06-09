@@ -29,6 +29,7 @@ function normalizeProfile(profile) {
     nicknameText: clean(profile.nickname || profile.name, '未登录'),
     collegeText: clean(profile.college, '数计学院'),
     campusText: clean(profile.campus, '未填写校区'),
+    departmentText: clean(profile.department, '未填写所属系'),
     majorClassText: clean(profile.majorClass, '未填写专业班级'),
     phoneText: clean(profile.phone, '-'),
     availableTimeText: clean(profile.availableTime, '-'),

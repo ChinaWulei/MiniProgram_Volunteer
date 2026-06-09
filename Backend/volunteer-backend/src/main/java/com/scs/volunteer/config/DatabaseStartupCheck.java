@@ -125,6 +125,7 @@ public class DatabaseStartupCheck implements ApplicationRunner {
                     """);
             ensureColumn("activity", "tips", "alter table activity add column tips text null after service_hours");
             ensureColumn("volunteer_profile", "campus", "alter table volunteer_profile add column campus varchar(50) null after college");
+            ensureColumn("volunteer_profile", "department", "alter table volunteer_profile add column department varchar(80) null after campus");
             ensureColumn("registration", "position_id", "alter table registration add column position_id bigint null after user_id");
             ensureColumn("registration", "transport_required", "alter table registration add column transport_required tinyint(1) not null default 0 after review_remark");
             ensureColumn("registration", "boarding_point", "alter table registration add column boarding_point varchar(120) null after transport_required");
@@ -138,12 +139,16 @@ public class DatabaseStartupCheck implements ApplicationRunner {
                         recruit_number int not null,
                         requirements varchar(500),
                         requires_rehearsal tinyint(1) not null default 0,
+                        rehearsal_start_time datetime null,
+                        rehearsal_end_time datetime null,
                         sort_order int not null default 0,
                         created_at datetime not null default current_timestamp,
                         updated_at datetime not null default current_timestamp on update current_timestamp,
                         index idx_position_activity(activity_id, sort_order)
                     )
                     """);
+            ensureColumn("activity_position", "rehearsal_start_time", "alter table activity_position add column rehearsal_start_time datetime null after requires_rehearsal");
+            ensureColumn("activity_position", "rehearsal_end_time", "alter table activity_position add column rehearsal_end_time datetime null after rehearsal_start_time");
             jdbcTemplate.execute("""
                     create table if not exists exam_schedule (
                         id bigint primary key auto_increment,

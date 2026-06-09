@@ -19,6 +19,8 @@ Page({
     keyword: '',
     status: '',
     statuses: ['全部', '待审核', '已通过', '已拒绝'],
+    department: '',
+    departments: ['全部'],
     showCancel: false,
     cancelItem: null,
     cancelReason: ''
@@ -29,6 +31,7 @@ Page({
     }
   },
   onShow() {
+    this.loadDepartments()
     this.load()
   },
   input(e) {
@@ -39,9 +42,22 @@ Page({
     this.setData({ status: value === '全部' ? '' : value })
     this.load()
   },
+  pickDepartment(e) {
+    const value = this.data.departments[Number(e.detail.value)]
+    this.setData({ department: value === '全部' ? '' : value })
+    this.load()
+  },
+  loadDepartments() {
+    request({ url: '/api/registrations/admin/departments', silent: true })
+      .then(list => this.setData({ departments: ['全部'].concat(list || []) }))
+      .catch(() => {})
+  },
   load() {
     wx.showLoading({ title: '加载中' })
-    request({ url: '/api/registrations/admin', data: { keyword: this.data.keyword, status: this.data.status } })
+    request({
+      url: '/api/registrations/admin',
+      data: { keyword: this.data.keyword, status: this.data.status, department: this.data.department }
+    })
       .then(list => this.setData({ list: (list || []).map(normalize) }))
       .catch(() => {})
       .finally(() => wx.hideLoading())

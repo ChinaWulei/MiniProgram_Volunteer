@@ -237,6 +237,30 @@ public class ActivityServiceImpl implements ActivityService {
         }
         if (count == null || count <= 0) throw new BizException("招募人数必须大于 0");
         if ((dto.getServiceHours() == null || dto.getServiceHours() <= 0) && blank(dto.getEndTime())) throw new BizException("服务时长必须大于 0");
+        validatePositions(dto.getPositions());
+    }
+
+    private void validatePositions(List<com.scs.volunteer.dto.ActivityPositionDTO> positions) {
+        if (positions == null) return;
+        for (com.scs.volunteer.dto.ActivityPositionDTO position : positions) {
+            if (blank(position.getName())) throw new BizException("岗位名称不能为空");
+            if (position.getRecruitNumber() == null || position.getRecruitNumber() <= 0) {
+                throw new BizException("岗位招募人数必须大于 0");
+            }
+            LocalDateTime start = parseDateTime(position.getStartTime(), "岗位开始时间");
+            LocalDateTime end = parseDateTime(position.getEndTime(), "岗位结束时间");
+            if (!end.isAfter(start)) throw new BizException("岗位结束时间必须晚于开始时间");
+            if (Boolean.TRUE.equals(position.getRequiresRehearsal())) {
+                if (blank(position.getRehearsalStartTime()) || blank(position.getRehearsalEndTime())) {
+                    throw new BizException("开启彩排后必须填写彩排开始和结束时间");
+                }
+                LocalDateTime rehearsalStart = parseDateTime(position.getRehearsalStartTime(), "彩排开始时间");
+                LocalDateTime rehearsalEnd = parseDateTime(position.getRehearsalEndTime(), "彩排结束时间");
+                if (!rehearsalEnd.isAfter(rehearsalStart)) {
+                    throw new BizException("彩排结束时间必须晚于开始时间");
+                }
+            }
+        }
     }
 
     private LocalDateTime parseDateTime(String value, String label) {

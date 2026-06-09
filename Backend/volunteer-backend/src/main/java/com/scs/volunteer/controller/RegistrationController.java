@@ -31,8 +31,14 @@ public class RegistrationController extends BaseController {
     }
 
     @GetMapping("/admin")
-    public ApiResponse<List<Map<String, Object>>> adminList(String keyword, String status, Long activityId, HttpServletRequest request) {
-        return ApiResponse.ok(registrationService.adminList(keyword, status, activityId, currentUser(request)));
+    public ApiResponse<List<Map<String, Object>>> adminList(String keyword, String status, Long activityId,
+                                                            String department, HttpServletRequest request) {
+        return ApiResponse.ok(registrationService.adminList(keyword, status, activityId, department, currentUser(request)));
+    }
+
+    @GetMapping("/admin/departments")
+    public ApiResponse<List<String>> adminDepartments(HttpServletRequest request) {
+        return ApiResponse.ok(registrationService.adminDepartments(currentUser(request)));
     }
 
     @PutMapping("/{id}/review")

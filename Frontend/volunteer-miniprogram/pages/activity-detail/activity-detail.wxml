@@ -69,6 +69,7 @@
       <view class="position-option-time">{{item.timeText}}</view>
       <view wx:if="{{item.requirements}}" class="position-option-requirement">{{item.requirements}}</view>
       <view wx:if="{{item.requiresRehearsal}}" class="rehearsal-tag">需参加彩排</view>
+      <view wx:if="{{item.requiresRehearsal}}" class="position-option-requirement">彩排：{{item.rehearsalTimeText}}</view>
     </view>
     <view class="transport-row">
       <view>

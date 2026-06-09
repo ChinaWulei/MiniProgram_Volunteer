@@ -27,9 +27,12 @@ public class RegistrationMapper {
                 where r.user_id=?
                   and r.activity_id<>?
                   and r.status in ('待审核','已通过')
-                  and coalesce(p.start_time,a.start_time) < ?
-                  and coalesce(p.end_time,a.end_time) > ?
-                """, Integer.class, userId, activityId, endTime, startTime);
+                  and (
+                    (coalesce(p.start_time,a.start_time) < ? and coalesce(p.end_time,a.end_time) > ?)
+                    or
+                    (p.requires_rehearsal=1 and p.rehearsal_start_time < ? and p.rehearsal_end_time > ?)
+                  )
+                """, Integer.class, userId, activityId, endTime, startTime, endTime, startTime);
         return count != null && count > 0;
     }
 
@@ -131,12 +134,12 @@ public class RegistrationMapper {
                 """);
     }
 
-    public List<Map<String, Object>> adminList(String keyword, String status, Long activityId) {
+    public List<Map<String, Object>> adminList(String keyword, String status, Long activityId, String department) {
         String k = keyword == null || keyword.isBlank() ? null : keyword;
         return jdbcTemplate.queryForList("""
                 select r.id,r.activity_id,r.user_id,r.status,r.review_remark,r.created_at,
                        u.name as userName,u.nickname,u.identity_no as identityNo,u.avatar_url as avatarUrl,
-                       p.college,p.campus,p.major_class as majorClass,p.skill_tags as skillTags,p.available_time as availableTime,
+                       p.college,p.campus,p.department,p.major_class as majorClass,p.skill_tags as skillTags,p.available_time as availableTime,
                        p.credit_score as creditScore,p.total_hours as totalHours,p.service_count as serviceCount,
                        a.name as activityName,a.category,a.location,a.start_time as startTime,a.end_time as endTime,
                        a.skill_requirements as skillRequirements,ap.name as positionName,
@@ -148,16 +151,27 @@ public class RegistrationMapper {
                 left join activity_position ap on ap.id=r.position_id
                 where (? is null or r.status=?)
                   and (? is null or r.activity_id=?)
+                  and (? is null or p.department=?)
                   and (? is null or u.name like concat('%',?,'%') or u.nickname like concat('%',?,'%')
                        or u.identity_no like concat('%',?,'%') or a.name like concat('%',?,'%')
                        or a.category like concat('%',?,'%') or a.location like concat('%',?,'%'))
             order by r.created_at desc
-            """, n(status), n(status), activityId, activityId,
+            """, n(status), n(status), activityId, activityId, n(department), n(department),
             k, k, k, k, k, k, k);
 }
 
     public List<Map<String, Object>> byActivity(Long activityId) {
-        return adminList(null, null, activityId);
+        return adminList(null, null, activityId, null);
+    }
+
+    public List<String> departments() {
+        return jdbcTemplate.queryForList("""
+                select distinct p.department
+                from registration r
+                join volunteer_profile p on p.user_id=r.user_id
+                where p.department is not null and trim(p.department)<>''
+                order by p.department
+                """, String.class);
     }
 
     public List<Long> participantUserIds(Long activityId, String scope) {

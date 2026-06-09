@@ -78,6 +78,8 @@ public class RegistrationServiceImpl implements RegistrationService {
         }
         java.time.LocalDateTime selectedStart = activity.getStartTime();
         java.time.LocalDateTime selectedEnd = activity.getEndTime();
+        java.time.LocalDateTime rehearsalStart = null;
+        java.time.LocalDateTime rehearsalEnd = null;
         List<Map<String, Object>> positions = activityPositionMapper.list(activity.getId());
         if (!positions.isEmpty()) {
             if (dto.getPositionId() == null) throw new BizException("请选择报名岗位");
@@ -86,13 +88,14 @@ public class RegistrationServiceImpl implements RegistrationService {
             if (((Number) position.get("remaining_number")).intValue() <= 0) throw new BizException("所选岗位已满员");
             selectedStart = dateTime(position.get("start_time"));
             selectedEnd = dateTime(position.get("end_time"));
+            if (Boolean.TRUE.equals(booleanValue(position.get("requires_rehearsal")))) {
+                rehearsalStart = dateTime(position.get("rehearsal_start_time"));
+                rehearsalEnd = dateTime(position.get("rehearsal_end_time"));
+            }
         }
-        List<Map<String, Object>> examConflicts = examScheduleMapper.conflicts(currentUser.getId(), selectedStart, selectedEnd);
-        if (!examConflicts.isEmpty()) {
-            throw new BizException("所选岗位与考试《" + examConflicts.get(0).get("courseName") + "》时间冲突");
-        }
-        if (registrationMapper.hasTimeConflict(currentUser.getId(), activity.getId(), selectedStart, selectedEnd)) {
-            throw new BizException("该时间段已报名其他活动，请确认时间安排");
+        ensureNoConflict(currentUser.getId(), activity.getId(), selectedStart, selectedEnd, "所选岗位");
+        if (rehearsalStart != null && rehearsalEnd != null) {
+            ensureNoConflict(currentUser.getId(), activity.getId(), rehearsalStart, rehearsalEnd, "彩排");
         }
         String signupStatus = "自动通过".equals(activity.getReviewMethod()) ? "已通过" : "待审核";
         registrationMapper.insert(dto.getActivityId(), currentUser.getId(), dto.getPositionId(),
@@ -107,13 +110,21 @@ public class RegistrationServiceImpl implements RegistrationService {
     }
 
     @Override
-    public List<Map<String, Object>> adminList(String keyword, String status, Long activityId, CurrentUser currentUser) {
+    public List<Map<String, Object>> adminList(String keyword, String status, Long activityId, String department, CurrentUser currentUser) {
         if (currentUser == null || !"ADMIN".equals(currentUser.getRole())) {
             throw new BizException("仅管理员可查看报名列表");
         }
-        return registrationMapper.adminList(keyword, status, activityId).stream()
+        return registrationMapper.adminList(keyword, status, activityId, department).stream()
                 .map(this::enrichReviewInfo)
                 .toList();
+    }
+
+    @Override
+    public List<String> adminDepartments(CurrentUser currentUser) {
+        if (currentUser == null || !"ADMIN".equals(currentUser.getRole())) {
+            throw new BizException("仅管理员可查看系别列表");
+        }
+        return registrationMapper.departments();
     }
 
     private Map<String, Object> enrichReviewInfo(Map<String, Object> row) {
@@ -178,9 +189,27 @@ public class RegistrationServiceImpl implements RegistrationService {
     }
 
     private java.time.LocalDateTime dateTime(Object value) {
+        if (value == null) return null;
         if (value instanceof java.time.LocalDateTime dateTime) return dateTime;
         if (value instanceof java.sql.Timestamp timestamp) return timestamp.toLocalDateTime();
         return java.time.LocalDateTime.parse(String.valueOf(value).replace(" ", "T"));
+    }
+
+    private void ensureNoConflict(Long userId, Long activityId, java.time.LocalDateTime start,
+                                  java.time.LocalDateTime end, String label) {
+        List<Map<String, Object>> examConflicts = examScheduleMapper.conflicts(userId, start, end);
+        if (!examConflicts.isEmpty()) {
+            throw new BizException(label + "与考试《" + examConflicts.get(0).get("courseName") + "》时间冲突");
+        }
+        if (registrationMapper.hasTimeConflict(userId, activityId, start, end)) {
+            throw new BizException(label + "与已报名活动时间冲突");
+        }
+    }
+
+    private Boolean booleanValue(Object value) {
+        if (value instanceof Boolean bool) return bool;
+        if (value instanceof Number number) return number.intValue() != 0;
+        return "true".equalsIgnoreCase(String.valueOf(value)) || "1".equals(String.valueOf(value));
     }
 
     @Override

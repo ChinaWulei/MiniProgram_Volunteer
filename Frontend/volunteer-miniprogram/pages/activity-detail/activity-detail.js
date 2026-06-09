@@ -75,7 +75,10 @@ Page({
           ? this.isActivityEnded(activity)
           : this.isActivityEnded(activity) && this.isParticipantCompleted(activity.signupStatus)
         const positions = (activity.positions || []).map(item => Object.assign({}, item, {
-          timeText: `${this.formatTime(item.startTime)} 至 ${this.formatTime(item.endTime)}`
+          timeText: `${this.formatTime(item.startTime)} 至 ${this.formatTime(item.endTime)}`,
+          rehearsalTimeText: item.requiresRehearsal
+            ? `${this.formatTime(item.rehearsalStartTime)} 至 ${this.formatTime(item.rehearsalEndTime)}`
+            : ''
         }))
         activity.positions = positions
         this.setData({

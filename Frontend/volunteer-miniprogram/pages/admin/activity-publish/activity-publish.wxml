@@ -106,11 +106,47 @@
     </view>
     <view class="position-card" wx:for="{{positions}}" wx:key="index">
       <input placeholder="岗位名称，如 入场引导" value="{{item.name}}" data-index="{{index}}" data-key="name" bindinput="inputPosition" />
-      <input placeholder="开始时间：2026-06-25 14:00" value="{{item.startTime}}" data-index="{{index}}" data-key="startTime" bindinput="inputPosition" />
-      <input placeholder="结束时间：2026-06-25 18:00" value="{{item.endTime}}" data-index="{{index}}" data-key="endTime" bindinput="inputPosition" />
+      <view class="position-time-title">岗位开始时间</view>
+      <view class="position-time-row">
+        <picker mode="date" value="{{item.startDate}}" data-index="{{index}}" data-field="start" bindchange="pickPositionDate">
+          <view class="position-picker">{{item.startDate || '选择日期'}}</view>
+        </picker>
+        <picker mode="time" value="{{item.startClock}}" data-index="{{index}}" data-field="start" bindchange="pickPositionClock">
+          <view class="position-picker">{{item.startClock || '选择时间'}}</view>
+        </picker>
+      </view>
+      <view class="position-time-title">岗位结束时间</view>
+      <view class="position-time-row">
+        <picker mode="date" value="{{item.endDate}}" data-index="{{index}}" data-field="end" bindchange="pickPositionDate">
+          <view class="position-picker">{{item.endDate || '选择日期'}}</view>
+        </picker>
+        <picker mode="time" value="{{item.endClock}}" data-index="{{index}}" data-field="end" bindchange="pickPositionClock">
+          <view class="position-picker">{{item.endClock || '选择时间'}}</view>
+        </picker>
+      </view>
       <input placeholder="招募人数" type="number" value="{{item.recruitNumber}}" data-index="{{index}}" data-key="recruitNumber" bindinput="inputPosition" />
       <textarea class="position-requirements" placeholder="岗位要求（选填）" value="{{item.requirements}}" data-index="{{index}}" data-key="requirements" bindinput="inputPosition"></textarea>
       <view class="position-switch"><text>必须参加彩排</text><switch checked="{{item.requiresRehearsal}}" data-index="{{index}}" bindchange="togglePositionRehearsal" color="#0f766e" /></view>
+      <view wx:if="{{item.requiresRehearsal}}" class="rehearsal-box">
+        <view class="position-time-title">彩排开始时间</view>
+        <view class="position-time-row">
+          <picker mode="date" value="{{item.rehearsalStartDate}}" data-index="{{index}}" data-field="rehearsalStart" bindchange="pickPositionDate">
+            <view class="position-picker">{{item.rehearsalStartDate || '选择日期'}}</view>
+          </picker>
+          <picker mode="time" value="{{item.rehearsalStartClock}}" data-index="{{index}}" data-field="rehearsalStart" bindchange="pickPositionClock">
+            <view class="position-picker">{{item.rehearsalStartClock || '选择时间'}}</view>
+          </picker>
+        </view>
+        <view class="position-time-title">彩排结束时间</view>
+        <view class="position-time-row">
+          <picker mode="date" value="{{item.rehearsalEndDate}}" data-index="{{index}}" data-field="rehearsalEnd" bindchange="pickPositionDate">
+            <view class="position-picker">{{item.rehearsalEndDate || '选择日期'}}</view>
+          </picker>
+          <picker mode="time" value="{{item.rehearsalEndClock}}" data-index="{{index}}" data-field="rehearsalEnd" bindchange="pickPositionClock">
+            <view class="position-picker">{{item.rehearsalEndClock || '选择时间'}}</view>
+          </picker>
+        </view>
+      </view>
       <button class="position-remove" data-index="{{index}}" bindtap="removePosition">删除岗位</button>
     </view>
 

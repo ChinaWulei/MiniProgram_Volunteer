@@ -199,6 +199,11 @@
 .exam-card { margin-top: 14rpx; padding: 16rpx; border-radius: 14rpx; background: #f8fafc; }
 .exam-card input { margin-bottom: 12rpx; background: #fff; }
 .exam-remove { width: 100%; height: 58rpx; line-height: 58rpx; margin: 0; padding: 0; border-radius: 12rpx; color: #dc2626; background: #fee2e2; font-size: 24rpx; }
+.schedule-upload { display: flex; align-items: center; justify-content: center; width: 100%; height: 72rpx; margin: 0 0 18rpx; padding: 0; border-radius: 14rpx; color: #2563eb; background: #eff6ff; font-size: 26rpx; font-weight: 700; }
+.schedule-upload::after { border: 0; }
+.course-picker { width: 100%; height: 68rpx; line-height: 68rpx; margin-bottom: 12rpx; padding: 0 16rpx; border: 1rpx solid #e4e7ec; border-radius: 12rpx; color: #0f766e; background: #fff; font-size: 25rpx; box-sizing: border-box; }
+.course-time-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12rpx; }
+.course-time-row picker { width: auto; min-width: 0; margin: 0; padding: 0; border: 0; background: transparent; }
 .credit-record { display: flex; justify-content: space-between; gap: 18rpx; align-items: center; padding: 18rpx 0; border-bottom: 1rpx solid #edf2f7; }
 .credit-reason { color: #172033; font-size: 26rpx; font-weight: 700; }
 .credit-time { margin-top: 6rpx; color: #98a2b3; font-size: 22rpx; }

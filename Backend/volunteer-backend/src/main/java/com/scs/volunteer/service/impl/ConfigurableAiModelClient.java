@@ -12,6 +12,7 @@ import org.springframework.web.client.RestTemplate;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Base64;
 
 @Service
 public class ConfigurableAiModelClient implements AiModelClient {
@@ -41,6 +42,64 @@ public class ConfigurableAiModelClient implements AiModelClient {
             return openAiChat(prompt);
         }
         return geminiChat(prompt);
+    }
+
+    @Override
+    public String chatWithImage(String prompt, byte[] imageBytes, String mimeType) {
+        if (imageBytes == null || imageBytes.length == 0) return "";
+        if ("openai".equalsIgnoreCase(properties.getProvider())) {
+            return openAiImageChat(prompt, imageBytes, mimeType);
+        }
+        return geminiImageChat(prompt, imageBytes, mimeType);
+    }
+
+    @SuppressWarnings("unchecked")
+    private String geminiImageChat(String prompt, byte[] imageBytes, String mimeType) {
+        String baseUrl = blank(properties.getBaseUrl()) ? GEMINI_BASE_URL : properties.getBaseUrl();
+        String model = blank(properties.getModel()) ? GEMINI_MODEL : properties.getModel();
+        String url = trimTrailingSlash(baseUrl) + "/v1beta/models/" + model + ":generateContent";
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        headers.set("x-goog-api-key", properties.getApiKey());
+        Map<String, Object> body = Map.of(
+                "contents", List.of(Map.of("role", "user", "parts", List.of(
+                        Map.of("text", prompt),
+                        Map.of("inlineData", Map.of(
+                                "mimeType", safeMime(mimeType),
+                                "data", Base64.getEncoder().encodeToString(imageBytes)
+                        ))
+                ))),
+                "generationConfig", Map.of("temperature", 0.1, "maxOutputTokens", 4000)
+        );
+        ResponseEntity<Map> response = restTemplate.exchange(url, HttpMethod.POST,
+                new HttpEntity<>(body, headers), Map.class);
+        return extractGeminiText(response.getBody());
+    }
+
+    @SuppressWarnings("unchecked")
+    private String openAiImageChat(String prompt, byte[] imageBytes, String mimeType) {
+        String baseUrl = blank(properties.getBaseUrl()) ? OPENAI_BASE_URL : properties.getBaseUrl();
+        String model = blank(properties.getModel()) ? OPENAI_MODEL : properties.getModel();
+        String url = trimTrailingSlash(baseUrl) + "/v1/responses";
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        headers.setBearerAuth(properties.getApiKey());
+        String dataUrl = "data:" + safeMime(mimeType) + ";base64," + Base64.getEncoder().encodeToString(imageBytes);
+        Map<String, Object> body = Map.of(
+                "model", model,
+                "input", List.of(Map.of(
+                        "role", "user",
+                        "content", List.of(
+                                Map.of("type", "input_text", "text", prompt),
+                                Map.of("type", "input_image", "image_url", dataUrl)
+                        )
+                )),
+                "temperature", 0.1,
+                "max_output_tokens", 4000
+        );
+        ResponseEntity<Map> response = restTemplate.exchange(url, HttpMethod.POST,
+                new HttpEntity<>(body, headers), Map.class);
+        return extractOpenAiText(response.getBody());
     }
 
     @SuppressWarnings("unchecked")
@@ -162,5 +221,9 @@ public class ConfigurableAiModelClient implements AiModelClient {
 
     private String trimTrailingSlash(String value) {
         return value.endsWith("/") ? value.substring(0, value.length() - 1) : value;
+    }
+
+    private String safeMime(String mimeType) {
+        return mimeType == null || !mimeType.startsWith("image/") ? MediaType.IMAGE_JPEG_VALUE : mimeType;
     }
 }

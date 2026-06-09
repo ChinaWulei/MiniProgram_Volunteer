@@ -8,6 +8,7 @@ import com.scs.volunteer.entity.Activity;
 import com.scs.volunteer.mapper.ActivityMapper;
 import com.scs.volunteer.mapper.ActivityPositionMapper;
 import com.scs.volunteer.mapper.ExamScheduleMapper;
+import com.scs.volunteer.mapper.CourseScheduleMapper;
 import com.scs.volunteer.mapper.CreditMapper;
 import com.scs.volunteer.mapper.EvaluationMapper;
 import com.scs.volunteer.mapper.NotificationMapper;
@@ -31,6 +32,7 @@ public class RegistrationServiceImpl implements RegistrationService {
     private final ActivityMapper activityMapper;
     private final ActivityPositionMapper activityPositionMapper;
     private final ExamScheduleMapper examScheduleMapper;
+    private final CourseScheduleMapper courseScheduleMapper;
     private final VolunteerMapper volunteerMapper;
     private final ServiceRecordMapper serviceRecordMapper;
     private final NotificationMapper notificationMapper;
@@ -38,12 +40,14 @@ public class RegistrationServiceImpl implements RegistrationService {
     private final EvaluationMapper evaluationMapper;
 
     public RegistrationServiceImpl(RegistrationMapper registrationMapper, ActivityMapper activityMapper, ActivityPositionMapper activityPositionMapper,
-                                   ExamScheduleMapper examScheduleMapper, VolunteerMapper volunteerMapper, ServiceRecordMapper serviceRecordMapper,
+                                   ExamScheduleMapper examScheduleMapper, CourseScheduleMapper courseScheduleMapper,
+                                   VolunteerMapper volunteerMapper, ServiceRecordMapper serviceRecordMapper,
                                    NotificationMapper notificationMapper, CreditMapper creditMapper, EvaluationMapper evaluationMapper) {
         this.registrationMapper = registrationMapper;
         this.activityMapper = activityMapper;
         this.activityPositionMapper = activityPositionMapper;
         this.examScheduleMapper = examScheduleMapper;
+        this.courseScheduleMapper = courseScheduleMapper;
         this.volunteerMapper = volunteerMapper;
         this.serviceRecordMapper = serviceRecordMapper;
         this.notificationMapper = notificationMapper;
@@ -200,6 +204,10 @@ public class RegistrationServiceImpl implements RegistrationService {
         List<Map<String, Object>> examConflicts = examScheduleMapper.conflicts(userId, start, end);
         if (!examConflicts.isEmpty()) {
             throw new BizException(label + "与考试《" + examConflicts.get(0).get("courseName") + "》时间冲突");
+        }
+        List<Map<String, Object>> courseConflicts = courseScheduleMapper.conflicts(userId, start, end);
+        if (!courseConflicts.isEmpty()) {
+            throw new BizException(label + "与课程《" + courseConflicts.get(0).get("courseName") + "》时间冲突");
         }
         if (registrationMapper.hasTimeConflict(userId, activityId, start, end)) {
             throw new BizException(label + "与已报名活动时间冲突");

@@ -56,7 +56,11 @@ Page({
     editing: false,
     isAdmin: false
     ,campusOptions: ['东海岸校区', '桑浦山校区', '其他校区']
+    ,departmentOptions: ['数学系', '计算机系']
     ,exams: []
+    ,courses: []
+    ,weekdayOptions: ['周一', '周二', '周三', '周四', '周五', '周六', '周日']
+    ,parsingSchedule: false
   },
   onShow() {
     const user = app.globalData.user || wx.getStorageSync('user')
@@ -65,6 +69,7 @@ Page({
     if (!user || user.role !== 'ADMIN') {
       this.loadActivitySubscription()
       this.loadExams()
+      this.loadCourses()
     }
   },
   loadProfile() {
@@ -165,6 +170,9 @@ Page({
   pickCampus(e) {
     this.setData({ 'form.campus': this.data.campusOptions[Number(e.detail.value)] })
   },
+  pickDepartment(e) {
+    this.setData({ 'form.department': this.data.departmentOptions[Number(e.detail.value)] })
+  },
   loadExams() {
     request({ url: '/api/exam-schedules', silent: true })
       .then(exams => this.setData({ exams: (exams || []).map(item => Object.assign({}, item, {
@@ -189,6 +197,101 @@ Page({
     request({ url: '/api/exam-schedules', method: 'PUT', data: { exams } })
       .then(() => wx.showToast({ title: '考试安排已保存' }))
       .catch(() => {})
+  },
+  loadCourses() {
+    request({ url: '/api/course-schedules', silent: true })
+      .then(courses => this.setData({ courses: (courses || []).map(item => this.normalizeCourse(item)) }))
+      .catch(() => {})
+  },
+  normalizeCourse(item) {
+    const weekday = Number(item.weekday) || 1
+    return Object.assign({}, item, {
+      weekday,
+      weekdayText: this.data.weekdayOptions[weekday - 1],
+      startTime: String(item.startTime || '').slice(0, 5),
+      endTime: String(item.endTime || '').slice(0, 5)
+    })
+  },
+  addCourse() {
+    this.setData({
+      courses: this.data.courses.concat({
+        courseName: '', weekday: 1, weekdayText: '周一',
+        startTime: '08:00', endTime: '09:40', location: ''
+      })
+    })
+  },
+  inputCourse(e) {
+    this.setData({ [`courses[${e.currentTarget.dataset.index}].${e.currentTarget.dataset.key}`]: e.detail.value })
+  },
+  pickCourseWeekday(e) {
+    const index = Number(e.currentTarget.dataset.index)
+    const optionIndex = Number(e.detail.value)
+    this.setData({
+      [`courses[${index}].weekday`]: optionIndex + 1,
+      [`courses[${index}].weekdayText`]: this.data.weekdayOptions[optionIndex]
+    })
+  },
+  pickCourseTime(e) {
+    const index = Number(e.currentTarget.dataset.index)
+    this.setData({ [`courses[${index}].${e.currentTarget.dataset.key}`]: e.detail.value })
+  },
+  removeCourse(e) {
+    const courses = this.data.courses.slice()
+    courses.splice(Number(e.currentTarget.dataset.index), 1)
+    this.setData({ courses })
+  },
+  saveCourses() {
+    const courses = this.data.courses
+    const incomplete = courses.some(item =>
+      !item.courseName || !item.weekday || !item.startTime || !item.endTime
+    )
+    if (incomplete) {
+      wx.showToast({ title: '请完整填写课程名称和时间', icon: 'none' })
+      return
+    }
+    if (courses.some(item => item.endTime <= item.startTime)) {
+      wx.showToast({ title: '课程结束时间须晚于开始时间', icon: 'none' })
+      return
+    }
+    request({ url: '/api/course-schedules', method: 'PUT', data: { courses } })
+      .then(() => wx.showToast({ title: '课程安排已保存' }))
+      .catch(() => {})
+  },
+  uploadScheduleImage() {
+    if (this.data.parsingSchedule) return
+    const handle = filePath => {
+      this.setData({ parsingSchedule: true })
+      wx.showLoading({ title: 'AI识别课表中' })
+      uploadFile({ url: '/api/course-schedules/parse-image', filePath })
+        .then(data => {
+          const parsed = (data.courses || []).map(item => this.normalizeCourse(item))
+          this.setData({ courses: parsed })
+          wx.showModal({
+            title: '识别完成',
+            content: `识别出 ${parsed.length} 个上课时段，请核对后点击“保存课程安排”。`,
+            showCancel: false
+          })
+        })
+        .catch(() => {})
+        .finally(() => {
+          this.setData({ parsingSchedule: false })
+          wx.hideLoading()
+        })
+    }
+    if (wx.chooseMedia) {
+      wx.chooseMedia({
+        count: 1,
+        mediaType: ['image'],
+        sourceType: ['album', 'camera'],
+        success: res => handle(res.tempFiles[0].tempFilePath)
+      })
+    } else {
+      wx.chooseImage({
+        count: 1,
+        sourceType: ['album', 'camera'],
+        success: res => handle(res.tempFilePaths[0])
+      })
+    }
   },
   inputReminderEmail(e) {
     this.setData({ reminderEmail: e.detail.value })

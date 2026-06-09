@@ -75,7 +75,9 @@
       <picker mode="selector" range="{{campusOptions}}" bindchange="pickCampus">
         <view class="profile-picker">所在校区：{{form.campus || '请选择'}}</view>
       </picker>
-      <input placeholder="所属系，如 计算机系" value="{{form.department}}" data-key="department" bindinput="input" />
+      <picker mode="selector" range="{{departmentOptions}}" bindchange="pickDepartment">
+        <view class="profile-picker">所属系：{{form.department || '请选择'}}</view>
+      </picker>
       <input placeholder="专业班级" value="{{form.majorClass}}" data-key="majorClass" bindinput="input" />
       <input placeholder="手机号" value="{{form.phone}}" data-key="phone" bindinput="input" />
       <view class="skill-grid">
@@ -84,6 +86,33 @@
       <textarea placeholder="可服务时间" value="{{form.availableTime}}" data-key="availableTime" bindinput="input"></textarea>
       <textarea placeholder="个人简介" value="{{form.bio}}" data-key="bio" bindinput="input"></textarea>
     </view>
+  </view>
+
+  <view class="section" wx:if="{{!isAdmin}}">
+    <view class="section-head">
+      <view class="section-title no-margin">课程安排</view>
+      <button class="mini-add" bindtap="addCourse">添加</button>
+    </view>
+    <view class="exam-tip">课程会按每周固定时间参与活动报名冲突检测。上传课表后请核对AI识别结果。</view>
+    <button class="schedule-upload" bindtap="uploadScheduleImage" loading="{{parsingSchedule}}">上传课表图片并AI识别</button>
+    <view class="exam-card" wx:for="{{courses}}" wx:key="index">
+      <input placeholder="课程名称" value="{{item.courseName}}" data-index="{{index}}" data-key="courseName" bindinput="inputCourse" />
+      <picker mode="selector" range="{{weekdayOptions}}" value="{{item.weekday - 1}}" data-index="{{index}}" bindchange="pickCourseWeekday">
+        <view class="course-picker">上课日期：{{item.weekdayText}}</view>
+      </picker>
+      <view class="course-time-row">
+        <picker mode="time" value="{{item.startTime}}" data-index="{{index}}" data-key="startTime" bindchange="pickCourseTime">
+          <view class="course-picker">{{item.startTime || '开始时间'}}</view>
+        </picker>
+        <picker mode="time" value="{{item.endTime}}" data-index="{{index}}" data-key="endTime" bindchange="pickCourseTime">
+          <view class="course-picker">{{item.endTime || '结束时间'}}</view>
+        </picker>
+      </view>
+      <input placeholder="上课地点（选填）" value="{{item.location}}" data-index="{{index}}" data-key="location" bindinput="inputCourse" />
+      <button class="exam-remove" data-index="{{index}}" bindtap="removeCourse">删除</button>
+    </view>
+    <view wx:if="{{courses.length === 0}}" class="empty-badge">暂未填写课程安排</view>
+    <button class="reminder-btn" bindtap="saveCourses">保存课程安排</button>
   </view>
 
   <view class="section" wx:if="{{!isAdmin}}">

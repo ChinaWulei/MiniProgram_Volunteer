@@ -114,7 +114,7 @@
             {{item.userText}}
             <text wx:if="{{item.priorityScore > 0}}" class="priority-badge">优先 {{item.priorityScore}}分</text>
           </view>
-          <view class="reg-status">{{item.status}}</view>
+          <view class="reg-status {{item.isWaitlisted ? 'waitlisted' : ''}}">{{item.displayStatus || item.status}}</view>
         </view>
         <view class="reg-meta">{{item.identityNo}} · {{item.college}} · {{item.department || '未填系别'}} · {{item.campus || '未填校区'}} · {{item.majorClass}}</view>
         <view wx:if="{{item.positionName}}" class="reg-meta">报名岗位：{{item.positionName}}</view>
@@ -137,7 +137,8 @@
           <button bindtap="chatVolunteer" data-userid="{{item.userId}}" data-name="{{item.userText}}">私聊</button>
           <button class="danger" bindtap="openCancel" data-id="{{item.id}}">取消</button>
         </view>
-        <view wx:if="{{item.status === '待审核'}}" class="reg-audit-actions">
+        <view wx:if="{{item.isWaitlisted}}" class="reg-waitlist-tip">候补中，出现空缺后系统自动递补</view>
+        <view wx:if="{{item.status === '待审核' && !item.isWaitlisted}}" class="reg-audit-actions">
           <button class="approve" bindtap="reviewRegistration" data-id="{{item.id}}" data-status="已通过">同意</button>
           <button class="reject" bindtap="reviewRegistration" data-id="{{item.id}}" data-status="已拒绝">拒绝</button>
         </view>

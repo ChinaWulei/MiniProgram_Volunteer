@@ -164,6 +164,22 @@ public class AdminController extends BaseController {
         ));
     }
 
+    @PostMapping("/activity-notifications/images")
+    public ApiResponse<Map<String, Object>> uploadActivityNoticeImage(
+            HttpServletRequest request,
+            @RequestParam("file") MultipartFile file,
+            @RequestParam(value = "originalName", required = false) String originalName) {
+        RuleFile uploaded = ruleFileService.uploadImage(file, currentUser(request), originalName);
+        return ApiResponse.ok(Map.of(
+                "id", uploaded.getId(),
+                "fileName", uploaded.getOriginalName(),
+                "fileType", uploaded.getFileType(),
+                "url", uploaded.getS3Url(),
+                "status", uploaded.getStatus(),
+                "isImage", true
+        ));
+    }
+
     @GetMapping("/activities/{id}/summary")
     public ApiResponse<Map<String, String>> activitySummary(HttpServletRequest request, @PathVariable Long id) {
         return ApiResponse.ok(Map.of("summary", activityService.summary(id, currentUser(request))));

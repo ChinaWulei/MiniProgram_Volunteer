@@ -150,6 +150,11 @@ Page({
   },
   goVolunteer(e) { wx.navigateTo({ url: `/pages/volunteer-detail/volunteer-detail?id=${e.currentTarget.dataset.id}` }) },
   review(e) {
+    const item = (this.data.stats.recentRegistrations || []).find(row => row.id === e.currentTarget.dataset.id)
+    if (item && item.isWaitlisted) {
+      wx.showToast({ title: '候补由系统自动递补', icon: 'none' })
+      return
+    }
     request({
       url: `/api/registrations/${e.currentTarget.dataset.id}/review`,
       method: 'PUT',

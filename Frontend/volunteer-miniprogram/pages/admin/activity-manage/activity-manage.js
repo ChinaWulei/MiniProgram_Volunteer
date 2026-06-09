@@ -203,6 +203,32 @@ Page({
       }
     })
   },
+  chooseNoticeImage() {
+    if ((this.data.noticeForm.attachments || []).length >= 5) {
+      wx.showToast({ title: '图片和文档合计最多5个', icon: 'none' })
+      return
+    }
+    wx.chooseImage({
+      count: 1,
+      success: res => {
+        const filePath = (res.tempFilePaths || [])[0]
+        if (!filePath) return
+        wx.showLoading({ title: '上传图片中' })
+        uploadFile({
+          url: '/api/admin/activity-notifications/images',
+          filePath,
+          name: 'file'
+        })
+          .then(data => {
+            const attachments = (this.data.noticeForm.attachments || []).concat([
+              Object.assign({}, data, { isImage: true })
+            ])
+            this.setData({ 'noticeForm.attachments': attachments })
+          })
+          .finally(() => wx.hideLoading())
+      }
+    })
+  },
   removeNoticeAttachment(e) {
     const attachments = (this.data.noticeForm.attachments || []).slice()
     attachments.splice(Number(e.currentTarget.dataset.index), 1)

@@ -20,7 +20,7 @@
         <view class="name">{{item.userText}}</view>
         <view class="meta">{{item.identityNo}} · {{item.college}} · {{item.department || '未填写所属系'}} · {{item.majorClass}}</view>
       </view>
-      <view class="status">{{item.status}}</view>
+      <view class="status {{item.isWaitlisted ? 'waitlisted' : ''}}">{{item.displayStatus}}</view>
     </view>
     <view class="activity-box" bindtap="goActivity" data-id="{{item.activity_id || item.activityId}}">
       <view class="activity-title">{{item.activityName}}</view>
@@ -48,8 +48,9 @@
       <view class="meta">{{item.aiEvaluationSummary}}</view>
     </view>
     <view class="actions">
-      <button wx:if="{{item.status === '待审核'}}" bindtap="review" data-id="{{item.id}}" data-status="已通过">通过</button>
-      <button wx:if="{{item.status === '待审核'}}" bindtap="review" data-id="{{item.id}}" data-status="已拒绝">拒绝</button>
+      <view wx:if="{{item.isWaitlisted}}" class="waitlist-tip">候补中，出现空缺后系统自动递补</view>
+      <button wx:if="{{item.status === '待审核' && !item.isWaitlisted}}" bindtap="review" data-id="{{item.id}}" data-status="已通过">通过</button>
+      <button wx:if="{{item.status === '待审核' && !item.isWaitlisted}}" bindtap="review" data-id="{{item.id}}" data-status="已拒绝">拒绝</button>
       <button bindtap="openCancel" data-id="{{item.id}}" class="danger">取消报名</button>
     </view>
   </view>

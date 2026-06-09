@@ -146,7 +146,12 @@ public class RegistrationServiceImpl implements RegistrationService {
         }
         List<Map<String, Object>> rows = registrationMapper.adminList(keyword, status, activityId, department);
         Map<Long, List<Map<String, Object>>> ruleCache = new HashMap<>();
-        rows.forEach(row -> enrichReviewInfo(row, ruleCache));
+        rows.forEach(row -> {
+            enrichReviewInfo(row, ruleCache);
+            boolean waitlisted = waitlisted(row);
+            row.put("isWaitlisted", waitlisted);
+            row.put("displayStatus", waitlisted ? "候补" : text(row.get("status")));
+        });
         rows.sort(Comparator
                 .comparingDouble((Map<String, Object> row) -> number(row.get("priorityScore"), 0)).reversed()
                 .thenComparing(Comparator.comparingDouble(
@@ -391,6 +396,16 @@ public class RegistrationServiceImpl implements RegistrationService {
         }
         Map<String, Object> reg = registrationMapper.findMap(id);
         String targetStatus = dto.getStatus();
+        if (("已通过".equals(targetStatus) || "已拒绝".equals(targetStatus))
+                && "待审核".equals(text(reg.get("status")))) {
+            Long activityId = ((Number) reg.get("activity_id")).longValue();
+            Activity activity = activityMapper.findByIdForUpdate(activityId)
+                    .orElseThrow(() -> new BizException("活动不存在"));
+            Long positionId = reg.get("position_id") instanceof Number number ? number.longValue() : null;
+            if (waitlisted(activity, positionId)) {
+                throw new BizException("该同学当前为候补状态，只能由系统在出现空缺时自动递补");
+            }
+        }
         if ("已通过".equals(targetStatus) && "待审核".equals(text(reg.get("status")))) {
             Long activityId = ((Number) reg.get("activity_id")).longValue();
             Activity activity = activityMapper.findByIdForUpdate(activityId)
@@ -428,6 +443,23 @@ public class RegistrationServiceImpl implements RegistrationService {
             volunteerMapper.addService(userId, hours);
             serviceRecordMapper.insert(userId, activityId, hours, "管理员确认完成");
         }
+    }
+
+    private boolean waitlisted(Map<String, Object> row) {
+        if (!"待审核".equals(text(row.get("status")))) return false;
+        boolean activityFull = number(row.get("approvedCount"), 0) >= number(row.get("recruitNumber"), 0);
+        boolean positionFull = row.get("position_id") != null
+                && number(row.get("positionApprovedCount"), 0) >= number(row.get("positionRecruitNumber"), 0);
+        return activityFull || positionFull;
+    }
+
+    private boolean waitlisted(Activity activity, Long positionId) {
+        if (registrationMapper.approvedCount(activity.getId()) >= activity.getRecruitNumber()) return true;
+        if (positionId == null) return false;
+        Map<String, Object> position = activityPositionMapper.find(positionId, activity.getId());
+        if (position == null) return false;
+        int recruitNumber = ((Number) position.get("recruit_number")).intValue();
+        return registrationMapper.approvedPositionCount(positionId) >= recruitNumber;
     }
 
     @Override

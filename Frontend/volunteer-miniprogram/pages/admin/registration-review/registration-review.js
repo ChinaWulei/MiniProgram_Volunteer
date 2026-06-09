@@ -9,7 +9,8 @@ function normalize(item) {
     userText: item.nickname || item.userName || '志愿者',
     avatarText: (item.nickname || item.userName || '志').substring(0, 1),
     timeText: `${formatTime(item.startTime)} 至 ${formatTime(item.endTime)}`,
-    createdText: formatTime(item.created_at || item.createdAt)
+    createdText: formatTime(item.created_at || item.createdAt),
+    displayStatus: item.displayStatus || item.status
   })
 }
 
@@ -73,6 +74,11 @@ Page({
       .finally(() => wx.hideLoading())
   },
   review(e) {
+    const item = this.data.list.find(row => row.id === e.currentTarget.dataset.id)
+    if (item && item.isWaitlisted) {
+      wx.showToast({ title: '候补由系统自动递补', icon: 'none' })
+      return
+    }
     request({
       url: `/api/registrations/${e.currentTarget.dataset.id}/review`,
       method: 'PUT',

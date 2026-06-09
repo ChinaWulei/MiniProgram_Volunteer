@@ -80,7 +80,9 @@ Page({
                       : '系统通知',
           title: item.title,
           summary: item.content,
-          attachments: item.attachments || [],
+          attachments: (item.attachments || []).map(file => Object.assign({}, file, {
+            isImage: ['jpg', 'jpeg', 'png', 'webp'].indexOf(String(file.fileType || '').toLowerCase()) >= 0
+          })),
           targetType: item.targetType,
           targetId: item.targetId,
           unread: !item.readAt,
@@ -143,5 +145,11 @@ Page({
       fail: () => wx.setClipboardData({ data: url }),
       complete: () => wx.hideLoading()
     })
+  },
+  previewAttachmentImage(e) {
+    const notice = this.data.notices.find(item => item.id === e.currentTarget.dataset.noticeid)
+    if (!notice) return
+    const urls = (notice.attachments || []).filter(item => item.isImage).map(item => item.url)
+    wx.previewImage({ current: e.currentTarget.dataset.url, urls })
   }
 })

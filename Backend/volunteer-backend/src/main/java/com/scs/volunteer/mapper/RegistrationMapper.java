@@ -162,8 +162,20 @@ public class RegistrationMapper {
 
     public List<Map<String, Object>> recent() {
         return jdbcTemplate.queryForList("""
-                select r.id,u.name as user_name,a.name as activity_name,r.status,r.created_at
-                from registration r join user u on r.user_id=u.id join activity a on r.activity_id=a.id
+                select r.id,u.name as user_name,a.name as activity_name,r.status,r.created_at,
+                       case when r.status='待审核' and (
+                           (select count(*) from registration approved
+                            where approved.activity_id=r.activity_id and approved.status in ('已通过','已完成')) >= a.recruit_number
+                           or
+                           (r.position_id is not null and
+                            (select count(*) from registration position_approved
+                             where position_approved.position_id=r.position_id
+                               and position_approved.status in ('已通过','已完成')) >= ap.recruit_number)
+                       ) then 1 else 0 end as isWaitlisted
+                from registration r
+                join user u on r.user_id=u.id
+                join activity a on r.activity_id=a.id
+                left join activity_position ap on ap.id=r.position_id
                 order by r.created_at desc limit 8
                 """);
     }
@@ -171,12 +183,18 @@ public class RegistrationMapper {
     public List<Map<String, Object>> adminList(String keyword, String status, Long activityId, String department) {
         String k = keyword == null || keyword.isBlank() ? null : keyword;
         return jdbcTemplate.queryForList("""
-                select r.id,r.activity_id,r.user_id,r.status,r.review_remark,r.created_at,
+                select r.id,r.activity_id,r.user_id,r.position_id,r.status,r.review_remark,r.created_at,
                        u.name as userName,u.nickname,u.identity_no as identityNo,u.avatar_url as avatarUrl,
                        p.college,p.campus,p.department,p.major_class as majorClass,p.skill_tags as skillTags,p.available_time as availableTime,
                        p.credit_score as creditScore,p.total_hours as totalHours,p.service_count as serviceCount,
                        a.name as activityName,a.category,a.location,a.start_time as startTime,a.end_time as endTime,
-                       a.skill_requirements as skillRequirements,ap.name as positionName,
+                       a.skill_requirements as skillRequirements,a.recruit_number as recruitNumber,
+                       (select count(*) from registration approved
+                        where approved.activity_id=r.activity_id and approved.status in ('已通过','已完成')) as approvedCount,
+                       ap.name as positionName,ap.recruit_number as positionRecruitNumber,
+                       (select count(*) from registration position_approved
+                        where position_approved.position_id=r.position_id
+                          and position_approved.status in ('已通过','已完成')) as positionApprovedCount,
                        r.transport_required as transportRequired,r.boarding_point as boardingPoint
                 from registration r
                 join user u on r.user_id=u.id

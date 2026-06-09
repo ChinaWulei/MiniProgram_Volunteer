@@ -54,8 +54,10 @@ button::after { border: 0; }
 .notice-panel input, .notice-panel textarea { width: 100%; margin-top: 14rpx; padding: 18rpx; border-radius: 16rpx; background: #f8fbfb; box-sizing: border-box; color: #172033; font-size: 25rpx; }
 .notice-panel textarea { min-height: 220rpx; line-height: 1.55; }
 .notice-scope { margin-top: 14rpx; padding: 18rpx; border-radius: 16rpx; color: #0f766e; background: #eefaf7; font-size: 24rpx; }
-.notice-upload-btn { height: 64rpx; line-height: 64rpx; margin: 14rpx 0 0; border-radius: 16rpx; color: #0f766e; background: #eefaf7; font-size: 24rpx; }
+.notice-upload-actions { display: flex; gap: 12rpx; margin-top: 14rpx; }
+.notice-upload-btn { flex: 1; height: 64rpx; line-height: 64rpx; margin: 0; border-radius: 16rpx; color: #0f766e; background: #eefaf7; font-size: 24rpx; }
 .notice-attachment { display: flex; align-items: center; gap: 12rpx; margin-top: 12rpx; padding: 14rpx 16rpx; border-radius: 14rpx; background: #f8fafc; }
+.notice-attachment-thumb { width: 64rpx; height: 64rpx; border-radius: 10rpx; background: #e5e7eb; }
 .notice-attachment-name { flex: 1; min-width: 0; color: #475467; font-size: 23rpx; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
 .notice-attachment button { width: 88rpx; height: 48rpx; line-height: 48rpx; margin: 0; padding: 0; color: #dc2626; background: #fee2e2; font-size: 21rpx; }
 .notice-actions { display: flex; gap: 14rpx; margin-top: 18rpx; }

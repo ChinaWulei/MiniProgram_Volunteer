@@ -20,15 +20,18 @@ public class RuleFileService {
     private final ChunkService chunkService;
     private final EmbeddingService embeddingService;
     private final VectorSearchService vectorSearchService;
+    private final S3StorageService s3StorageService;
 
     public RuleFileService(RuleFileMapper ruleFileMapper, S3Service s3Service, DocumentParseService documentParseService,
-                           ChunkService chunkService, EmbeddingService embeddingService, VectorSearchService vectorSearchService) {
+                           ChunkService chunkService, EmbeddingService embeddingService,
+                           VectorSearchService vectorSearchService, S3StorageService s3StorageService) {
         this.ruleFileMapper = ruleFileMapper;
         this.s3Service = s3Service;
         this.documentParseService = documentParseService;
         this.chunkService = chunkService;
         this.embeddingService = embeddingService;
         this.vectorSearchService = vectorSearchService;
+        this.s3StorageService = s3StorageService;
     }
 
     public RuleFile upload(MultipartFile file, CurrentUser user) {
@@ -72,6 +75,23 @@ public class RuleFileService {
 
     public List<RuleFile> list() {
         return ruleFileMapper.list();
+    }
+
+    public RuleFile uploadImage(MultipartFile file, CurrentUser user, String originalName) {
+        requireAdmin(user);
+        String displayName = displayName(originalName, file == null ? null : file.getOriginalFilename());
+        String url = s3StorageService.uploadActivityNewsImage(file);
+        RuleFile image = new RuleFile();
+        image.setOriginalName(displayName);
+        image.setFileType(extension(displayName));
+        image.setFileSize(file.getSize());
+        image.setS3Key(url);
+        image.setS3Url(url);
+        image.setStatus("READY");
+        image.setChunkCount(0);
+        image.setCreatedBy(user.getId());
+        image.setId(ruleFileMapper.insert(image));
+        return image;
     }
 
     public RuleFile detail(Long id) {

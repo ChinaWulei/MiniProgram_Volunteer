@@ -103,8 +103,20 @@ public class StatisticsMapper {
 
     private List<Map<String, Object>> recentRegistrations(LocalDateTime start, LocalDateTime end) {
         return jdbcTemplate.queryForList("""
-                select r.id,u.name as user_name,a.name as activity_name,r.status,r.created_at
-                from registration r join user u on r.user_id=u.id join activity a on r.activity_id=a.id
+                select r.id,u.name as user_name,a.name as activity_name,r.status,r.created_at,
+                       case when r.status='待审核' and (
+                           (select count(*) from registration approved
+                            where approved.activity_id=r.activity_id and approved.status in ('已通过','已完成')) >= a.recruit_number
+                           or
+                           (r.position_id is not null and
+                            (select count(*) from registration position_approved
+                             where position_approved.position_id=r.position_id
+                               and position_approved.status in ('已通过','已完成')) >= ap.recruit_number)
+                       ) then 1 else 0 end as isWaitlisted
+                from registration r
+                join user u on r.user_id=u.id
+                join activity a on r.activity_id=a.id
+                left join activity_position ap on ap.id=r.position_id
                 where (? is null or r.created_at >= ?)
                   and (? is null or r.created_at < ?)
                 order by r.created_at desc limit 8

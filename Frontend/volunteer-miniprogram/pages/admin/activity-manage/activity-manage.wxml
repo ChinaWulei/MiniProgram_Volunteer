@@ -101,8 +101,12 @@
     <picker mode="selector" range="{{noticeScopes}}" range-key="label" value="{{noticeScopeIndex}}" bindchange="pickNoticeScope">
       <view class="notice-scope">接收范围：{{noticeScopeLabel}}</view>
     </picker>
-    <button class="notice-upload-btn" bindtap="chooseNoticeAttachment">上传附件（PDF/DOCX/TXT）</button>
+    <view class="notice-upload-actions">
+      <button class="notice-upload-btn" bindtap="chooseNoticeImage">上传图片</button>
+      <button class="notice-upload-btn" bindtap="chooseNoticeAttachment">上传文档</button>
+    </view>
     <view class="notice-attachment" wx:for="{{noticeForm.attachments}}" wx:key="id">
+      <image wx:if="{{item.isImage}}" class="notice-attachment-thumb" src="{{item.url}}" mode="aspectFill"></image>
       <view class="notice-attachment-name">{{item.fileName}}</view>
       <button data-index="{{index}}" bindtap="removeNoticeAttachment">删除</button>
     </view>

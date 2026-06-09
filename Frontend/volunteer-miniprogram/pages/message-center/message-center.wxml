@@ -31,10 +31,13 @@
     <view class="notice-type">{{item.type}}</view>
     <view class="notice-title">{{item.title}}</view>
     <view class="notice-summary">{{item.summary}}</view>
-    <view class="notice-file" wx:for="{{item.attachments}}" wx:for-item="file" wx:key="ruleFileId"
-      catchtap="openAttachment" data-url="{{file.url}}">
-      附件：{{file.fileName}}
-    </view>
+    <block wx:for="{{item.attachments}}" wx:for-item="file" wx:key="ruleFileId">
+      <image wx:if="{{file.isImage}}" class="notice-image" src="{{file.url}}" mode="aspectFill"
+        catchtap="previewAttachmentImage" data-noticeid="{{item.id}}" data-url="{{file.url}}"></image>
+      <view wx:else class="notice-file" catchtap="openAttachment" data-url="{{file.url}}">
+        附件：{{file.fileName}}
+      </view>
+    </block>
     <view class="notice-time">{{item.time}}</view>
   </view>
 </view>

@@ -48,6 +48,7 @@ public class RuleFileMapper {
         return jdbcTemplate.query("""
                 select * from rule_file
                 where s3_key not like 'announcement-content/%'
+                  and file_type not in ('jpg','jpeg','png','webp')
                 order by created_at desc
                 """, new BeanPropertyRowMapper<>(RuleFile.class));
     }

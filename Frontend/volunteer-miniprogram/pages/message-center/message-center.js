@@ -71,6 +71,7 @@ Page({
       .then(list => {
         const notices = (list || []).map(item => ({
           id: item.id,
+          notificationType: item.type,
           type: item.type === 'REGISTRATION_REVIEW' ? '报名审核通知'
             : item.type === 'ACTIVITY_NEWS' ? '新闻发布通知'
               : item.type === 'ANNOUNCEMENT' ? '公告通知'
@@ -117,7 +118,9 @@ Page({
         .then(() => this.load())
         .catch(() => {})
     }
-    if (item.targetType === 'ACTIVITY_NEWS') {
+    if (item.notificationType === 'ACTIVITY_NOTICE') {
+      wx.navigateTo({ url: `/pages/activity-notice-detail/activity-notice-detail?id=${item.id}` })
+    } else if (item.targetType === 'ACTIVITY_NEWS') {
       wx.navigateTo({ url: `/pages/activity-news-detail/activity-news-detail?id=${item.targetId}` })
     } else if (item.targetType === 'ANNOUNCEMENT') {
       wx.navigateTo({ url: `/pages/announcement-detail/announcement-detail?id=${item.targetId}` })

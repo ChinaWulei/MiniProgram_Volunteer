@@ -9,6 +9,7 @@ import java.sql.PreparedStatement;
 import java.sql.Statement;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 @Repository
 public class NotificationMapper {
@@ -45,6 +46,19 @@ public class NotificationMapper {
             row.put("attachments", attachments(((Number) row.get("id")).longValue()));
         }
         return rows;
+    }
+
+    public Optional<Map<String, Object>> find(Long userId, Long id) {
+        List<Map<String, Object>> rows = jdbcTemplate.queryForList("""
+                select id,type,title,content,target_type as targetType,target_id as targetId,
+                       read_at as readAt,created_at as createdAt
+                from notification
+                where id=? and user_id=?
+                """, id, userId);
+        if (rows.isEmpty()) return Optional.empty();
+        Map<String, Object> row = rows.get(0);
+        row.put("attachments", attachments(id));
+        return Optional.of(row);
     }
 
     public void addAttachments(Long notificationId, List<Long> ruleFileIds) {

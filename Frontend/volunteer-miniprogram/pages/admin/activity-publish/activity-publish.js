@@ -1,6 +1,7 @@
 const { request, uploadFile } = require('../../../utils/request')
 
 const skillNames = ['摄影', '摄像', '文案', '讲解', '物资搬运', '秩序维护', '活动组织']
+const activityCategories = ['迎新服务', '赛事保障', '校园讲解', '社区服务', '校园服务']
 
 function compactSkills(options) {
   return options.filter(item => item.selected).map(item => item.name)

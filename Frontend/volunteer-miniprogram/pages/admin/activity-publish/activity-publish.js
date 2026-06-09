@@ -84,7 +84,9 @@ Page({
     aiLoadingText: 'AI正在生成活动内容与封面...',
     uploading: false,
     submitting: false,
-    positions: []
+    positions: [],
+    priorityRules: [],
+    priorityRuleTypes: ['历史活动', '系别', '校区', '技能', '最低信用分', '最低服务时长']
   },
   onLoad(options) {
     if (options.id) {
@@ -148,6 +150,12 @@ Page({
             requiresRehearsal: !!item.requiresRehearsal,
             rehearsalStartTime: item.rehearsalStartTime,
             rehearsalEndTime: item.rehearsalEndTime
+          })),
+          priorityRules: (activity.priorityRules || []).map(item => ({
+            id: item.id,
+            ruleType: item.ruleType || '历史活动',
+            ruleValue: item.ruleValue || '',
+            weight: Number(item.weight) || 10
           }))
         })
       })
@@ -215,6 +223,32 @@ Page({
     const positions = this.data.positions.slice()
     positions.splice(Number(e.currentTarget.dataset.index), 1)
     this.setData({ positions })
+  },
+  addPriorityRule() {
+    this.setData({
+      priorityRules: this.data.priorityRules.concat({
+        ruleType: '历史活动',
+        ruleValue: '',
+        weight: 20
+      })
+    })
+  },
+  pickPriorityRuleType(e) {
+    const index = Number(e.currentTarget.dataset.index)
+    this.setData({
+      [`priorityRules[${index}].ruleType`]: this.data.priorityRuleTypes[Number(e.detail.value)],
+      [`priorityRules[${index}].ruleValue`]: ''
+    })
+  },
+  inputPriorityRule(e) {
+    const key = e.currentTarget.dataset.key
+    const value = key === 'weight' ? Number(e.detail.value) : e.detail.value
+    this.setData({ [`priorityRules[${e.currentTarget.dataset.index}].${key}`]: value })
+  },
+  removePriorityRule(e) {
+    const priorityRules = this.data.priorityRules.slice()
+    priorityRules.splice(Number(e.currentTarget.dataset.index), 1)
+    this.setData({ priorityRules })
   },
   openAiGenerate() {
     this.setData({ aiPanelVisible: true })
@@ -415,8 +449,16 @@ Page({
     }
     const form = Object.assign({}, this.data.form, {
       requiredSkills: compactSkills(this.data.skillOptions),
-      positions: this.data.positions.filter(item => item.name && item.startTime && item.endTime && item.recruitNumber > 0)
+      positions: this.data.positions.filter(item => item.name && item.startTime && item.endTime && item.recruitNumber > 0),
+      priorityRules: this.data.priorityRules
     })
+    const invalidPriorityRule = form.priorityRules.find(item =>
+      !item.ruleType || !String(item.ruleValue || '').trim() || !item.weight || item.weight < 1 || item.weight > 100
+    )
+    if (invalidPriorityRule) {
+      wx.showToast({ title: '请完整填写优先条件和分值', icon: 'none' })
+      return
+    }
     if (!form.title || !form.activityTime || !form.location || !form.recruitCount || !form.serviceHours) {
       wx.showToast({ title: '请填写必填信息', icon: 'none' })
       return

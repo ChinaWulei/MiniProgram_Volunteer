@@ -176,6 +176,17 @@ public class DatabaseStartupCheck implements ApplicationRunner {
                         index idx_course_user_weekday(user_id, weekday, start_time, end_time)
                     )
                     """);
+            jdbcTemplate.execute("""
+                    create table if not exists activity_priority_rule (
+                        id bigint primary key auto_increment,
+                        activity_id bigint not null,
+                        rule_type varchar(30) not null,
+                        rule_value varchar(200) not null,
+                        weight int not null default 10,
+                        created_at datetime not null default current_timestamp,
+                        index idx_priority_rule_activity(activity_id)
+                    )
+                    """);
             log.info("Database connection check succeeded");
         } catch (Exception e) {
             log.error("Database connection check failed", e);

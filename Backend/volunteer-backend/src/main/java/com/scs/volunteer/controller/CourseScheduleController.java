@@ -55,15 +55,27 @@ public class CourseScheduleController extends BaseController {
         if (!aiModelClient.available()) throw new BizException("AI图片识别服务未配置");
         try {
             String answer = aiModelClient.chatWithImage("""
-                    请识别这张大学课表图片，将每个实际上课时段拆成一条记录。
-                    只输出JSON数组，不要markdown和解释。
-                    每项字段固定为：
-                    {"courseName":"课程名称","weekday":1,"startTime":"08:00","endTime":"09:40","location":"地点"}
+                    请判断图片是否为大学课程表，并识别其中的课程安排。
+                    只输出JSON对象，不要markdown和解释，格式固定为：
+                    {"isSchedule":true,"courses":[
+                      {"courseName":"课程名称","weekday":1,"startTime":"08:00","endTime":"09:40","location":"地点"}
+                    ]}
+                    如果图片不是课程表，必须返回：{"isSchedule":false,"courses":[]}
                     weekday取值1至7，分别表示周一至周日。
                     时间必须为24小时HH:mm格式。无法确定的课程不要编造；地点看不清可为空字符串。
                     如果同一课程一周有多个上课时段，输出多条记录。
+                    本校课表中的“A节”从晚上19:15开始；识别到A节时，startTime必须填写为"19:15"。
+                    A节结束时间应以图片中的节次或时间信息为准，无法确认结束时间时不要生成该条记录。
                     """, file.getBytes(), file.getContentType());
-            List<Map<String, Object>> courses = objectMapper.readValue(sanitizeJson(answer), new TypeReference<>() {});
+            Map<String, Object> result = objectMapper.readValue(sanitizeJson(answer), new TypeReference<>() {});
+            if (!Boolean.TRUE.equals(result.get("isSchedule"))) {
+                throw new BizException("上传的图片不是有效的课程表");
+            }
+            List<Map<String, Object>> courses = objectMapper.convertValue(
+                    result.getOrDefault("courses", List.of()), new TypeReference<>() {});
+            if (courses.isEmpty()) {
+                throw new BizException("未从课表中识别到有效课程，请上传更清晰的图片");
+            }
             return ApiResponse.ok(Map.of("courses", courses));
         } catch (BizException e) {
             throw e;
@@ -77,8 +89,8 @@ public class CourseScheduleController extends BaseController {
         if (text.startsWith("```")) {
             text = text.replaceFirst("^```(?:json)?\\s*", "").replaceFirst("\\s*```$", "");
         }
-        int start = text.indexOf('[');
-        int end = text.lastIndexOf(']');
+        int start = text.indexOf('{');
+        int end = text.lastIndexOf('}');
         return start >= 0 && end > start ? text.substring(start, end + 1) : text;
     }
 }

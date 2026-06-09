@@ -99,6 +99,25 @@
 
     <view class="position-head">
       <view>
+        <view class="field-title compact">优先录取条件</view>
+        <view class="field-hint">命中条件后增加优先分，仅影响审核排序，不自动录取</view>
+      </view>
+      <button class="position-add" bindtap="addPriorityRule">添加条件</button>
+    </view>
+    <view class="priority-rule-card" wx:for="{{priorityRules}}" wx:key="index">
+      <picker mode="selector" range="{{priorityRuleTypes}}" data-index="{{index}}" bindchange="pickPriorityRuleType">
+        <view class="priority-rule-picker">条件类型：{{item.ruleType}}</view>
+      </picker>
+      <input
+        placeholder="{{item.ruleType === '历史活动' ? '活动名称关键词，如 十五运手球赛' : item.ruleType === '最低信用分' ? '最低信用分，如 80' : item.ruleType === '最低服务时长' ? '最低累计小时，如 20' : '条件内容'}}"
+        value="{{item.ruleValue}}" data-index="{{index}}" data-key="ruleValue" bindinput="inputPriorityRule"
+      />
+      <input placeholder="优先分值（1-100）" type="number" value="{{item.weight}}" data-index="{{index}}" data-key="weight" bindinput="inputPriorityRule" />
+      <button class="position-remove" data-index="{{index}}" bindtap="removePriorityRule">删除条件</button>
+    </view>
+
+    <view class="position-head">
+      <view>
         <view class="field-title compact">岗位与场次</view>
         <view class="field-hint">适用于彩排、正式活动及不同岗位分时段招募</view>
       </view>

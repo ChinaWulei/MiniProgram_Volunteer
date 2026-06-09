@@ -21,6 +21,8 @@ Page({
     statuses: ['全部', '待审核', '已通过', '已拒绝'],
     department: '',
     departments: ['全部'],
+    priorityDepartment: '',
+    priorityDepartments: ['不设置'],
     showCancel: false,
     cancelItem: null,
     cancelReason: ''
@@ -47,16 +49,29 @@ Page({
     this.setData({ department: value === '全部' ? '' : value })
     this.load()
   },
+  pickPriorityDepartment(e) {
+    const value = this.data.priorityDepartments[Number(e.detail.value)]
+    this.setData({ priorityDepartment: value === '不设置' ? '' : value })
+    this.load()
+  },
   loadDepartments() {
     request({ url: '/api/registrations/admin/departments', silent: true })
-      .then(list => this.setData({ departments: ['全部'].concat(list || []) }))
+      .then(list => this.setData({
+        departments: ['全部'].concat(list || []),
+        priorityDepartments: ['不设置'].concat(list || [])
+      }))
       .catch(() => {})
   },
   load() {
     wx.showLoading({ title: '加载中' })
     request({
       url: '/api/registrations/admin',
-      data: { keyword: this.data.keyword, status: this.data.status, department: this.data.department }
+      data: {
+        keyword: this.data.keyword,
+        status: this.data.status,
+        department: this.data.department,
+        priorityDepartment: this.data.priorityDepartment
+      }
     })
       .then(list => this.setData({ list: (list || []).map(normalize) }))
       .catch(() => {})

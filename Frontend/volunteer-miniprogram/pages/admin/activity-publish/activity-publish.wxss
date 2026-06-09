@@ -25,6 +25,8 @@
 .position-head > view:first-child { flex: 1; min-width: 0; }
 .position-add { flex: 0 0 150rpx; width: 150rpx; height: 62rpx; line-height: 62rpx; margin: 0; padding: 0; border-radius: 12rpx; color: #0f766e; background: #eefaf7; font-size: 24rpx; }
 .position-card { margin-bottom: 18rpx; padding: 18rpx; border-radius: 14rpx; background: #f8fafc; border: 1rpx solid #e4e7ec; }
+.priority-rule-card { margin-bottom: 16rpx; padding: 18rpx; border-radius: 14rpx; background: #fff7ed; border: 1rpx solid #fed7aa; }
+.priority-rule-picker { height: 68rpx; line-height: 68rpx; margin-bottom: 14rpx; padding: 0 16rpx; border-radius: 12rpx; color: #b45309; background: #fff; font-size: 24rpx; }
 .position-card input { background: #fff; }
 .position-card .position-requirements { min-height: 110rpx; background: #fff; }
 .position-switch { display: flex; align-items: center; justify-content: space-between; min-height: 68rpx; color: #344054; font-size: 25rpx; }

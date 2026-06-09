@@ -98,6 +98,17 @@ public class RegistrationMapper {
                 """, userId);
     }
 
+    public boolean hasCompletedActivity(Long userId, String activityKeyword) {
+        Integer count = jdbcTemplate.queryForObject("""
+                select count(*)
+                from registration r
+                join activity a on a.id=r.activity_id
+                where r.user_id=? and r.status='已完成'
+                  and a.name like concat('%',?,'%')
+                """, Integer.class, userId, activityKeyword);
+        return count != null && count > 0;
+    }
+
     public Map<String, Object> monthlyStats(Long userId, java.time.LocalDateTime start, java.time.LocalDateTime end) {
         return jdbcTemplate.queryForMap("""
                 select
@@ -134,7 +145,8 @@ public class RegistrationMapper {
                 """);
     }
 
-    public List<Map<String, Object>> adminList(String keyword, String status, Long activityId, String department) {
+    public List<Map<String, Object>> adminList(String keyword, String status, Long activityId, String department,
+                                               String priorityDepartment) {
         String k = keyword == null || keyword.isBlank() ? null : keyword;
         return jdbcTemplate.queryForList("""
                 select r.id,r.activity_id,r.user_id,r.status,r.review_remark,r.created_at,
@@ -143,7 +155,8 @@ public class RegistrationMapper {
                        p.credit_score as creditScore,p.total_hours as totalHours,p.service_count as serviceCount,
                        a.name as activityName,a.category,a.location,a.start_time as startTime,a.end_time as endTime,
                        a.skill_requirements as skillRequirements,ap.name as positionName,
-                       r.transport_required as transportRequired,r.boarding_point as boardingPoint
+                       r.transport_required as transportRequired,r.boarding_point as boardingPoint,
+                       case when ? is not null and p.department=? then 1 else 0 end as priorityDepartmentMatch
                 from registration r
                 join user u on r.user_id=u.id
                 left join volunteer_profile p on p.user_id=u.id
@@ -155,13 +168,14 @@ public class RegistrationMapper {
                   and (? is null or u.name like concat('%',?,'%') or u.nickname like concat('%',?,'%')
                        or u.identity_no like concat('%',?,'%') or a.name like concat('%',?,'%')
                        or a.category like concat('%',?,'%') or a.location like concat('%',?,'%'))
-            order by r.created_at desc
-            """, n(status), n(status), activityId, activityId, n(department), n(department),
+            order by priorityDepartmentMatch desc,r.created_at desc
+            """, n(priorityDepartment), n(priorityDepartment),
+            n(status), n(status), activityId, activityId, n(department), n(department),
             k, k, k, k, k, k, k);
 }
 
     public List<Map<String, Object>> byActivity(Long activityId) {
-        return adminList(null, null, activityId, null);
+        return adminList(null, null, activityId, null, null);
     }
 
     public List<String> departments() {

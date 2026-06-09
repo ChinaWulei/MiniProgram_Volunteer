@@ -10,6 +10,12 @@
       </picker>
       <button class="search-btn" bindtap="load">筛选</button>
     </view>
+    <view class="priority-row">
+      <picker mode="selector" range="{{priorityDepartments}}" bindchange="pickPriorityDepartment">
+        <view class="filter-chip">优先系别：{{priorityDepartment || '不设置'}}</view>
+      </picker>
+      <view class="priority-tip">仅调整审核顺序，不会自动通过报名</view>
+    </view>
   </view>
 
   <view class="review-card" wx:for="{{list}}" wx:key="id">
@@ -17,7 +23,10 @@
       <image wx:if="{{item.avatarUrl}}" class="avatar" src="{{item.avatarUrl}}" mode="aspectFill"></image>
       <view wx:else class="avatar">{{item.avatarText}}</view>
       <view class="user-main">
-        <view class="name">{{item.userText}}</view>
+        <view class="name">
+          {{item.userText}}
+          <text wx:if="{{item.priorityDepartmentMatch}}" class="priority-badge">优先系别</text>
+        </view>
         <view class="meta">{{item.identityNo}} · {{item.college}} · {{item.department || '未填写所属系'}} · {{item.majorClass}}</view>
       </view>
       <view class="status">{{item.status}}</view>
@@ -34,6 +43,13 @@
         <view class="match-score">{{item.matchScore || 0}}</view>
       </view>
       <view class="meta">{{item.matchReason}}</view>
+    </view>
+    <view class="priority-match-box">
+      <view class="match-head">
+        <view class="match-title">活动优先条件</view>
+        <view class="priority-score">{{item.priorityScore || 0}}分</view>
+      </view>
+      <view class="meta">{{item.priorityReason}}</view>
     </view>
     <view class="ai-box">
       <view class="match-title">AI历史评价总结</view>

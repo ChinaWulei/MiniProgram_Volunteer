@@ -6,6 +6,7 @@ import com.scs.volunteer.dto.ActivityDTO;
 import com.scs.volunteer.entity.Activity;
 import com.scs.volunteer.mapper.ActivityMapper;
 import com.scs.volunteer.mapper.ActivityPositionMapper;
+import com.scs.volunteer.mapper.ActivityPriorityRuleMapper;
 import com.scs.volunteer.mapper.NotificationMapper;
 import com.scs.volunteer.mapper.RegistrationMapper;
 import com.scs.volunteer.mapper.VolunteerMapper;
@@ -15,6 +16,7 @@ import com.scs.volunteer.service.WechatMiniProgramService;
 import com.scs.volunteer.vo.ActivityDetailVO;
 import com.scs.volunteer.vo.VolunteerVO;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
@@ -26,17 +28,21 @@ public class ActivityServiceImpl implements ActivityService {
     private static final DateTimeFormatter FORM_FORMAT = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
     private final ActivityMapper activityMapper;
     private final ActivityPositionMapper activityPositionMapper;
+    private final ActivityPriorityRuleMapper activityPriorityRuleMapper;
     private final RegistrationMapper registrationMapper;
     private final VolunteerMapper volunteerMapper;
     private final ActivitySubscriptionService activitySubscriptionService;
     private final NotificationMapper notificationMapper;
     private final WechatMiniProgramService wechatMiniProgramService;
 
-    public ActivityServiceImpl(ActivityMapper activityMapper, ActivityPositionMapper activityPositionMapper, RegistrationMapper registrationMapper, VolunteerMapper volunteerMapper,
+    public ActivityServiceImpl(ActivityMapper activityMapper, ActivityPositionMapper activityPositionMapper,
+                               ActivityPriorityRuleMapper activityPriorityRuleMapper,
+                               RegistrationMapper registrationMapper, VolunteerMapper volunteerMapper,
                                ActivitySubscriptionService activitySubscriptionService, NotificationMapper notificationMapper,
                                WechatMiniProgramService wechatMiniProgramService) {
         this.activityMapper = activityMapper;
         this.activityPositionMapper = activityPositionMapper;
+        this.activityPriorityRuleMapper = activityPriorityRuleMapper;
         this.registrationMapper = registrationMapper;
         this.volunteerMapper = volunteerMapper;
         this.activitySubscriptionService = activitySubscriptionService;
@@ -101,10 +107,12 @@ public class ActivityServiceImpl implements ActivityService {
         vo.setCreatedBy(activity.getCreatedBy());
         vo.setSignupStatus(currentUser == null ? null : registrationMapper.findStatus(id, currentUser.getId()));
         vo.setPositions(activityPositionMapper.list(id));
+        vo.setPriorityRules(activityPriorityRuleMapper.list(id));
         return vo;
     }
 
     @Override
+    @Transactional
     public Long create(ActivityDTO dto, CurrentUser currentUser) {
         requireAdmin(currentUser);
         Activity a = toEntity(dto);
@@ -112,6 +120,9 @@ public class ActivityServiceImpl implements ActivityService {
         Long id = activityMapper.insert(a);
         if (dto.getPositions() != null) {
             activityPositionMapper.replace(id, dto.getPositions(), value -> parseDateTime(value, "岗位时间"));
+        }
+        if (dto.getPriorityRules() != null) {
+            activityPriorityRuleMapper.replace(id, dto.getPriorityRules());
         }
         a.setId(id);
         if (a.getPublishedAt() != null) {
@@ -121,6 +132,7 @@ public class ActivityServiceImpl implements ActivityService {
     }
 
     @Override
+    @Transactional
     public void update(Long id, ActivityDTO dto, CurrentUser currentUser) {
         requireAdmin(currentUser);
         detail(id);
@@ -128,11 +140,16 @@ public class ActivityServiceImpl implements ActivityService {
         if (dto.getPositions() != null) {
             activityPositionMapper.replace(id, dto.getPositions(), value -> parseDateTime(value, "岗位时间"));
         }
+        if (dto.getPriorityRules() != null) {
+            activityPriorityRuleMapper.replace(id, dto.getPriorityRules());
+        }
     }
 
     @Override
+    @Transactional
     public void delete(Long id, CurrentUser currentUser) {
         requireAdmin(currentUser);
+        activityPriorityRuleMapper.deleteByActivity(id);
         activityMapper.delete(id);
     }
 
@@ -238,6 +255,29 @@ public class ActivityServiceImpl implements ActivityService {
         if (count == null || count <= 0) throw new BizException("招募人数必须大于 0");
         if ((dto.getServiceHours() == null || dto.getServiceHours() <= 0) && blank(dto.getEndTime())) throw new BizException("服务时长必须大于 0");
         validatePositions(dto.getPositions());
+        validatePriorityRules(dto.getPriorityRules());
+    }
+
+    private void validatePriorityRules(List<com.scs.volunteer.dto.ActivityPriorityRuleDTO> rules) {
+        if (rules == null) return;
+        java.util.Set<String> supported = java.util.Set.of(
+                "历史活动", "系别", "校区", "技能", "最低信用分", "最低服务时长");
+        for (com.scs.volunteer.dto.ActivityPriorityRuleDTO rule : rules) {
+            if (rule == null || blank(rule.getRuleType()) || !supported.contains(rule.getRuleType())) {
+                throw new BizException("请选择正确的优先条件类型");
+            }
+            if (blank(rule.getRuleValue())) throw new BizException("请填写优先条件内容");
+            if (rule.getWeight() == null || rule.getWeight() < 1 || rule.getWeight() > 100) {
+                throw new BizException("优先分值应为1至100");
+            }
+            if ("最低信用分".equals(rule.getRuleType()) || "最低服务时长".equals(rule.getRuleType())) {
+                try {
+                    if (Double.parseDouble(rule.getRuleValue()) < 0) throw new NumberFormatException();
+                } catch (NumberFormatException e) {
+                    throw new BizException("信用分和服务时长条件必须填写有效数字");
+                }
+            }
+        }
     }
 
     private void validatePositions(List<com.scs.volunteer.dto.ActivityPositionDTO> positions) {

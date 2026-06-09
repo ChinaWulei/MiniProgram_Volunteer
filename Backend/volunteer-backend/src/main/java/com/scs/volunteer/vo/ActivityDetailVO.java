@@ -32,6 +32,7 @@ public class ActivityDetailVO {
     private Long createdBy;
     private String signupStatus;
     private java.util.List<java.util.Map<String, Object>> positions;
+    private java.util.List<java.util.Map<String, Object>> priorityRules;
 
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
@@ -91,4 +92,6 @@ public class ActivityDetailVO {
     public void setSignupStatus(String signupStatus) { this.signupStatus = signupStatus; }
     public java.util.List<java.util.Map<String, Object>> getPositions() { return positions; }
     public void setPositions(java.util.List<java.util.Map<String, Object>> positions) { this.positions = positions; }
+    public java.util.List<java.util.Map<String, Object>> getPriorityRules() { return priorityRules; }
+    public void setPriorityRules(java.util.List<java.util.Map<String, Object>> priorityRules) { this.priorityRules = priorityRules; }
 }

@@ -7,6 +7,7 @@ import com.scs.volunteer.dto.ReviewDTO;
 import com.scs.volunteer.entity.Activity;
 import com.scs.volunteer.mapper.ActivityMapper;
 import com.scs.volunteer.mapper.ActivityPositionMapper;
+import com.scs.volunteer.mapper.ActivityPriorityRuleMapper;
 import com.scs.volunteer.mapper.ExamScheduleMapper;
 import com.scs.volunteer.mapper.CourseScheduleMapper;
 import com.scs.volunteer.mapper.CreditMapper;
@@ -24,6 +25,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.HashSet;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.HashMap;
 import java.util.stream.Collectors;
 
 @Service
@@ -31,6 +35,7 @@ public class RegistrationServiceImpl implements RegistrationService {
     private final RegistrationMapper registrationMapper;
     private final ActivityMapper activityMapper;
     private final ActivityPositionMapper activityPositionMapper;
+    private final ActivityPriorityRuleMapper activityPriorityRuleMapper;
     private final ExamScheduleMapper examScheduleMapper;
     private final CourseScheduleMapper courseScheduleMapper;
     private final VolunteerMapper volunteerMapper;
@@ -39,13 +44,16 @@ public class RegistrationServiceImpl implements RegistrationService {
     private final CreditMapper creditMapper;
     private final EvaluationMapper evaluationMapper;
 
-    public RegistrationServiceImpl(RegistrationMapper registrationMapper, ActivityMapper activityMapper, ActivityPositionMapper activityPositionMapper,
+    public RegistrationServiceImpl(RegistrationMapper registrationMapper, ActivityMapper activityMapper,
+                                   ActivityPositionMapper activityPositionMapper,
+                                   ActivityPriorityRuleMapper activityPriorityRuleMapper,
                                    ExamScheduleMapper examScheduleMapper, CourseScheduleMapper courseScheduleMapper,
                                    VolunteerMapper volunteerMapper, ServiceRecordMapper serviceRecordMapper,
                                    NotificationMapper notificationMapper, CreditMapper creditMapper, EvaluationMapper evaluationMapper) {
         this.registrationMapper = registrationMapper;
         this.activityMapper = activityMapper;
         this.activityPositionMapper = activityPositionMapper;
+        this.activityPriorityRuleMapper = activityPriorityRuleMapper;
         this.examScheduleMapper = examScheduleMapper;
         this.courseScheduleMapper = courseScheduleMapper;
         this.volunteerMapper = volunteerMapper;
@@ -114,13 +122,21 @@ public class RegistrationServiceImpl implements RegistrationService {
     }
 
     @Override
-    public List<Map<String, Object>> adminList(String keyword, String status, Long activityId, String department, CurrentUser currentUser) {
+    public List<Map<String, Object>> adminList(String keyword, String status, Long activityId, String department,
+                                               String priorityDepartment, CurrentUser currentUser) {
         if (currentUser == null || !"ADMIN".equals(currentUser.getRole())) {
             throw new BizException("仅管理员可查看报名列表");
         }
-        return registrationMapper.adminList(keyword, status, activityId, department).stream()
-                .map(this::enrichReviewInfo)
-                .toList();
+        List<Map<String, Object>> rows = registrationMapper.adminList(
+                keyword, status, activityId, department, priorityDepartment);
+        Map<Long, List<Map<String, Object>>> ruleCache = new HashMap<>();
+        rows.forEach(row -> enrichReviewInfo(row, ruleCache));
+        rows.sort(Comparator
+                .comparingDouble((Map<String, Object> row) -> number(row.get("priorityDepartmentMatch"), 0)).reversed()
+                .thenComparing(Comparator.comparingDouble(
+                        (Map<String, Object> row) -> number(row.get("priorityScore"), 0)).reversed())
+                .thenComparing(row -> text(row.get("created_at")), Comparator.reverseOrder()));
+        return rows;
     }
 
     @Override
@@ -131,11 +147,63 @@ public class RegistrationServiceImpl implements RegistrationService {
         return registrationMapper.departments();
     }
 
-    private Map<String, Object> enrichReviewInfo(Map<String, Object> row) {
+    private Map<String, Object> enrichReviewInfo(Map<String, Object> row,
+                                                 Map<Long, List<Map<String, Object>>> ruleCache) {
         row.put("matchScore", matchScore(row));
         row.put("matchReason", matchReason(row));
+        applyPriorityRules(row, ruleCache);
         row.put("aiEvaluationSummary", evaluationSummary(((Number) row.get("user_id")).longValue()));
         return row;
+    }
+
+    private void applyPriorityRules(Map<String, Object> row,
+                                    Map<Long, List<Map<String, Object>>> ruleCache) {
+        Long activityId = ((Number) row.get("activity_id")).longValue();
+        Long userId = ((Number) row.get("user_id")).longValue();
+        List<Map<String, Object>> rules = ruleCache.computeIfAbsent(
+                activityId, activityPriorityRuleMapper::list);
+        List<String> reasons = new ArrayList<>();
+        int score = 0;
+        for (Map<String, Object> rule : rules) {
+            String type = text(rule.get("ruleType"));
+            String value = text(rule.get("ruleValue"));
+            int weight = (int) number(rule.get("weight"), 0);
+            if (priorityRuleMatches(type, value, row, userId)) {
+                score += weight;
+                reasons.add(priorityRuleLabel(type, value) + " +" + weight);
+            }
+        }
+        row.put("priorityScore", score);
+        row.put("priorityReason", reasons.isEmpty() ? "未命中活动优先条件" : String.join("；", reasons));
+    }
+
+    private boolean priorityRuleMatches(String type, String value, Map<String, Object> row, Long userId) {
+        return switch (type) {
+            case "历史活动" -> registrationMapper.hasCompletedActivity(userId, value);
+            case "系别" -> value.equals(text(row.get("department")));
+            case "校区" -> value.equals(text(row.get("campus")));
+            case "技能" -> split(text(row.get("skillTags"))).contains(value);
+            case "最低信用分" -> number(row.get("creditScore"), 0) >= parseNumber(value);
+            case "最低服务时长" -> number(row.get("totalHours"), 0) >= parseNumber(value);
+            default -> false;
+        };
+    }
+
+    private String priorityRuleLabel(String type, String value) {
+        return switch (type) {
+            case "历史活动" -> "参加过《" + value + "》";
+            case "最低信用分" -> "信用分达到" + value;
+            case "最低服务时长" -> "服务时长达到" + value + "小时";
+            default -> type + "：" + value;
+        };
+    }
+
+    private double parseNumber(String value) {
+        try {
+            return Double.parseDouble(value);
+        } catch (Exception e) {
+            return Double.MAX_VALUE;
+        }
     }
 
     private double matchScore(Map<String, Object> row) {

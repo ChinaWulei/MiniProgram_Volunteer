@@ -2,6 +2,7 @@ package com.scs.volunteer.dto;
 
 public class ActivityDTO {
     private java.util.List<ActivityPositionDTO> positions;
+    private java.util.List<ActivityPriorityRuleDTO> priorityRules;
     private String name;
     private String title;
     private String coverImageUrl;
@@ -89,4 +90,6 @@ public class ActivityDTO {
     public void setStatus(String status) { this.status = status; }
     public java.util.List<ActivityPositionDTO> getPositions() { return positions; }
     public void setPositions(java.util.List<ActivityPositionDTO> positions) { this.positions = positions; }
+    public java.util.List<ActivityPriorityRuleDTO> getPriorityRules() { return priorityRules; }
+    public void setPriorityRules(java.util.List<ActivityPriorityRuleDTO> priorityRules) { this.priorityRules = priorityRules; }
 }

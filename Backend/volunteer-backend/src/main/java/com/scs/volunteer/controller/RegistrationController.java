@@ -46,10 +46,15 @@ public class RegistrationController extends BaseController {
     }
 
     @GetMapping("/admin/activities/{activityId}/approved-export")
-    public void exportApproved(@PathVariable Long activityId, HttpServletRequest request,
+    public void exportApproved(@PathVariable Long activityId,
+                               @RequestParam(defaultValue = "APPROVED") String scope,
+                               HttpServletRequest request,
                                HttpServletResponse response) throws java.io.IOException {
-        byte[] content = registrationService.exportApproved(activityId, currentUser(request));
-        String filename = URLEncoder.encode("活动录取志愿者名单-" + activityId + ".xlsx", StandardCharsets.UTF_8)
+        boolean exportAll = "ALL".equalsIgnoreCase(scope);
+        byte[] content = registrationService.exportRegistrations(activityId, scope, currentUser(request));
+        String filename = URLEncoder.encode(
+                        (exportAll ? "活动全部报名名单-" : "活动录取志愿者名单-") + activityId + ".xlsx",
+                        StandardCharsets.UTF_8)
                 .replace("+", "%20");
         response.setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
         response.setHeader("Content-Disposition", "attachment; filename*=UTF-8''" + filename);

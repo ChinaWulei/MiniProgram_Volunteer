@@ -116,6 +116,31 @@ Page({
       })
       .catch(() => {})
   },
+  exportRegistrations(e) {
+    const scope = e.currentTarget.dataset.scope === 'ALL' ? 'ALL' : 'APPROVED'
+    const app = getApp()
+    const baseUrl = (app.globalData.baseUrl || '').replace(/\/+$/, '')
+    const token = app.globalData.token || wx.getStorageSync('token')
+    wx.showLoading({ title: '生成名单中' })
+    wx.downloadFile({
+      url: `${baseUrl}/api/registrations/admin/activities/${this.data.id}/approved-export?scope=${scope}`,
+      header: { Authorization: token || '' },
+      success: res => {
+        if (res.statusCode !== 200) {
+          wx.showToast({ title: '名单导出失败', icon: 'none' })
+          return
+        }
+        wx.openDocument({
+          filePath: res.tempFilePath,
+          fileType: 'xlsx',
+          showMenu: true,
+          fail: () => wx.showToast({ title: '无法打开名单文件', icon: 'none' })
+        })
+      },
+      fail: () => wx.showToast({ title: '名单下载失败', icon: 'none' }),
+      complete: () => wx.hideLoading()
+    })
+  },
   loadProfile() {
     request({ url: '/api/user/profile', silent: true })
       .then(profile => this.setData({ profile }))

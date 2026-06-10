@@ -169,16 +169,17 @@ public class RegistrationServiceImpl implements RegistrationService {
     }
 
     @Override
-    public byte[] exportApproved(Long activityId, CurrentUser currentUser) {
+    public byte[] exportRegistrations(Long activityId, String scope, CurrentUser currentUser) {
         if (currentUser == null || !"ADMIN".equals(currentUser.getRole())) {
-            throw new BizException("仅管理员可导出录取名单");
+            throw new BizException("仅管理员可导出报名名单");
         }
+        boolean exportAll = "ALL".equalsIgnoreCase(scope);
         Activity activity = activityMapper.findById(activityId)
                 .orElseThrow(() -> new BizException("活动不存在"));
-        List<Map<String, Object>> rows = registrationMapper.approvedExportList(activityId);
+        List<Map<String, Object>> rows = registrationMapper.exportList(activityId, exportAll);
         try (XSSFWorkbook workbook = new XSSFWorkbook();
              ByteArrayOutputStream output = new ByteArrayOutputStream()) {
-            Sheet sheet = workbook.createSheet("录取名单");
+            Sheet sheet = workbook.createSheet(exportAll ? "全部报名名单" : "录取名单");
             String[] headers = {
                     "序号", "活动名称", "姓名", "学号", "手机号", "学院", "校区", "系别",
                     "班级", "岗位", "技能", "信用分", "累计服务时长", "需要交通", "上车点", "报名状态", "报名时间"
@@ -227,7 +228,7 @@ public class RegistrationServiceImpl implements RegistrationService {
             workbook.write(output);
             return output.toByteArray();
         } catch (Exception e) {
-            throw new BizException("录取名单生成失败");
+            throw new BizException("报名名单生成失败");
         }
     }
 

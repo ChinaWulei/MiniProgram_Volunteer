@@ -104,6 +104,10 @@
 
   <view wx:if="{{isAdmin}}" class="detail-section">
     <view class="section-title">报名人员</view>
+    <view class="export-actions">
+      <button bindtap="exportRegistrations" data-scope="APPROVED">导出已录取名单</button>
+      <button class="all" bindtap="exportRegistrations" data-scope="ALL">导出全部报名</button>
+    </view>
     <view class="priority-sort-tip">已按本活动优先条件分从高到低排序，分数相同时按报名时间排序。</view>
     <view class="reg-card" wx:for="{{registrations}}" wx:key="id">
       <image wx:if="{{item.avatarUrl}}" class="reg-avatar" src="{{item.avatarUrl}}" mode="aspectFill"></image>

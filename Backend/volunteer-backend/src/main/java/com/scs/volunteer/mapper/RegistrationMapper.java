@@ -227,8 +227,9 @@ public class RegistrationMapper {
         return adminList(null, null, activityId, null);
     }
 
-    public List<Map<String, Object>> approvedExportList(Long activityId) {
-        return jdbcTemplate.queryForList("""
+    public List<Map<String, Object>> exportList(Long activityId, boolean exportAll) {
+        String statusSql = exportAll ? "" : " and r.status in ('已通过','已完成')";
+        String sql = """
                 select u.name as userName,u.identity_no as identityNo,u.phone,
                        p.college,p.campus,p.department,p.major_class as majorClass,
                        p.skill_tags as skillTags,p.credit_score as creditScore,
@@ -239,9 +240,11 @@ public class RegistrationMapper {
                 join user u on u.id=r.user_id
                 left join volunteer_profile p on p.user_id=u.id
                 left join activity_position ap on ap.id=r.position_id
-                where r.activity_id=? and r.status in ('已通过','已完成')
+                where r.activity_id=?
+                %s
                 order by coalesce(ap.sort_order,999),r.created_at
-                """, activityId);
+                """.formatted(statusSql);
+        return jdbcTemplate.queryForList(sql, activityId);
     }
 
     public List<String> departments() {

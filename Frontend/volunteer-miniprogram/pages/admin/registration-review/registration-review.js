@@ -16,12 +16,20 @@ function normalize(item) {
 
 Page({
   data: {
+    allList: [],
     list: [],
     keyword: '',
     status: '',
     statuses: ['全部', '待审核', '已通过', '已拒绝'],
     department: '',
     departments: ['全部', '数学系', '计算机系'],
+    activityId: '',
+    activityIndex: 0,
+    activityName: '全部活动',
+    activityOptions: [{ id: '', name: '全部活动' }],
+    positionId: '',
+    positionIndex: 0,
+    positionTabs: [{ id: '', name: '全部岗位' }],
     showCancel: false,
     cancelItem: null,
     cancelReason: ''
@@ -33,6 +41,7 @@ Page({
   },
   onShow() {
     this.loadDepartments()
+    this.loadActivities()
     this.load()
   },
   input(e) {
@@ -48,6 +57,31 @@ Page({
     this.setData({ department: value === '全部' ? '' : value })
     this.load()
   },
+  pickActivity(e) {
+    const activityIndex = Number(e.detail.value)
+    const activity = this.data.activityOptions[activityIndex] || this.data.activityOptions[0]
+    const activityId = activity.id || ''
+    this.setData({
+      activityIndex,
+      activityId,
+      activityName: activity.name,
+      positionId: '',
+      positionIndex: 0,
+      positionTabs: [{ id: '', name: '全部岗位' }]
+    })
+    if (activityId) this.loadPositions(activityId)
+    this.load()
+  },
+  pickPosition(e) {
+    const positionIndex = Number(e.currentTarget.dataset.index)
+    const position = this.data.positionTabs[positionIndex]
+    if (!position) return
+    this.setData({
+      positionIndex,
+      positionId: position.id || ''
+    })
+    this.applyPositionFilter()
+  },
   loadDepartments() {
     request({ url: '/api/registrations/admin/departments', silent: true })
       .then(list => {
@@ -59,6 +93,42 @@ Page({
       })
       .catch(() => {})
   },
+  loadActivities() {
+    request({ url: '/api/activities', silent: true })
+      .then(list => {
+        const activityOptions = [{ id: '', name: '全部活动' }].concat(
+          (list || []).map(item => ({
+            id: item.id,
+            name: item.name || item.title || `活动${item.id}`
+          }))
+        )
+        const activityIndex = Math.max(
+          0,
+          activityOptions.findIndex(item => String(item.id) === String(this.data.activityId))
+        )
+        this.setData({
+          activityOptions,
+          activityIndex,
+          activityName: activityOptions[activityIndex].name
+        })
+      })
+      .catch(() => {})
+  },
+  loadPositions(activityId) {
+    request({ url: `/api/activities/${activityId}`, silent: true })
+      .then(activity => {
+        if (String(this.data.activityId) !== String(activityId)) return
+        const positionTabs = [{ id: '', name: '全部岗位' }].concat(
+          (activity.positions || []).map(item => ({
+            id: item.id,
+            name: item.name || `岗位${item.id}`
+          }))
+        )
+        this.setData({ positionTabs, positionId: '', positionIndex: 0 })
+        this.applyPositionFilter()
+      })
+      .catch(() => {})
+  },
   load() {
     wx.showLoading({ title: '加载中' })
     request({
@@ -66,12 +136,25 @@ Page({
       data: {
         keyword: this.data.keyword,
         status: this.data.status,
-        department: this.data.department
+        department: this.data.department,
+        activityId: this.data.activityId
       }
     })
-      .then(list => this.setData({ list: (list || []).map(normalize) }))
+      .then(list => {
+        this.setData({ allList: (list || []).map(normalize) })
+        this.applyPositionFilter()
+      })
       .catch(() => {})
       .finally(() => wx.hideLoading())
+  },
+  applyPositionFilter() {
+    const positionId = this.data.positionId
+    const list = positionId
+      ? this.data.allList.filter(item =>
+        String(item.position_id || item.positionId || '') === String(positionId)
+      )
+      : this.data.allList
+    this.setData({ list })
   },
   review(e) {
     const item = this.data.list.find(row => row.id === e.currentTarget.dataset.id)

@@ -1,6 +1,9 @@
 <view class="review-page">
   <view class="filter-card">
     <input placeholder="搜索报名人、学号、活动名称、地点" value="{{keyword}}" bindinput="input" confirm-type="search" bindconfirm="load" />
+    <picker class="activity-picker" mode="selector" range="{{activityOptions}}" range-key="name" value="{{activityIndex}}" bindchange="pickActivity">
+      <view class="filter-chip activity-chip">活动：{{activityName}}</view>
+    </picker>
     <view class="filter-row">
       <picker mode="selector" range="{{statuses}}" bindchange="pickStatus">
         <view class="filter-chip">状态：{{status || '全部'}}</view>
@@ -11,6 +14,18 @@
       <button class="search-btn" bindtap="load">筛选</button>
     </view>
   </view>
+
+  <scroll-view wx:if="{{activityId && positionTabs.length > 2}}" class="position-tabs" scroll-x enhanced show-scrollbar="{{false}}">
+    <view class="position-tabs-inner">
+      <view
+        class="position-tab {{positionIndex === index ? 'active' : ''}}"
+        wx:for="{{positionTabs}}"
+        wx:key="id"
+        data-index="{{index}}"
+        bindtap="pickPosition"
+      >{{item.name}}</view>
+    </view>
+  </scroll-view>
 
   <view class="review-card" wx:for="{{list}}" wx:key="id">
     <view class="user-row" bindtap="goVolunteer" data-id="{{item.user_id || item.userId}}">
@@ -25,6 +40,7 @@
     <view class="activity-box" bindtap="goActivity" data-id="{{item.activity_id || item.activityId}}">
       <view class="activity-title">{{item.activityName}}</view>
       <view class="meta">{{item.category}} · {{item.location}}</view>
+      <view class="meta" wx:if="{{item.positionName}}">报名岗位：{{item.positionName}}</view>
       <view class="meta">{{item.timeText}}</view>
       <view class="meta">报名时间：{{item.createdText}}</view>
       <button class="export-btn" catchtap="exportApproved" data-id="{{item.activity_id || item.activityId}}">导出本活动录取名单</button>

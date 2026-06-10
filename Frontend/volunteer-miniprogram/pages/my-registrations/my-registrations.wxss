@@ -2,6 +2,15 @@
   position: relative;
   padding-right: 48rpx;
 }
+.registration-card .title {
+  flex: 1;
+  min-width: 0;
+}
+.registration-card .tag {
+  flex: 0 0 auto;
+  white-space: nowrap;
+  word-break: keep-all;
+}
 .registration-card::after {
   content: '';
   position: absolute;
